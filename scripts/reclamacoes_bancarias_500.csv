@@ -1,0 +1,501 @@
+id,data_reclamacao,canal,texto_reclamacao,produto,status
+REC-2026-00001,2026-01-27,Ouvidoria,"App acessível pra deficiente visual. Como cego, agradeço a preocupação com a acessibilidade.",,Aberta
+REC-2026-00002,2025-06-27,SAC,Recebo correspondências em endereço antigo apesar de ter atualizado o endereço 3 vezes. Carta importante voltou.,,Resolvida
+REC-2026-00003,2025-07-29,Redes Sociais,"Apareceu na fatura uma compra de R$ 3.700,00 numa cidade que eu nunca pisei. Cartão estava comigo. Como?",Cartão de Crédito,Em análise
+REC-2026-00004,2025-07-08,Ouvidoria,"Cobrança de 'serviço de proteção financeira' que eu nunca contratei. R$ 38,90 por mês há 2 anos.",,Resolvida
+REC-2026-00005,2025-08-17,SAC,Título de capitalização presente de aniversário do banco. Resgate só após 5 anos com perda de 50% do valor. Que presente.,Capitalização,Em análise
+REC-2026-00006,2025-11-03,SAC,PIX feito há 6 horas para minha mãe ainda não caiu. Disseram que é 'instantâneo'. Que tipo de instante é esse?,PIX,Aberta
+REC-2026-00007,2026-03-13,Banco Central,vc viu meu post novo?,,Em análise
+REC-2026-00008,2026-04-13,SAC,Banco patrocinando cultura. Vi a exposição patrocinada por vocês e foi linda.,,Em análise
+REC-2026-00009,2026-01-17,Redes Sociais,"Solicitei portabilidade de salário, banco antigo segurou o processo por 4 meses. Lei diz 5 dias úteis.",,Aberta
+REC-2026-00010,2026-03-29,Redes Sociais,"Linha de crédito de R$ 3.700,00 aprovada e cancelada no mesmo dia sem explicação. Já organizei pagamentos com base nela.",Empréstimo,Aberta
+REC-2026-00011,2026-04-14,SAC,"Gerente do banco bloqueou meu WhatsApp porque eu estava reclamando demais. Sou cliente, não amigo dele.",,Resolvida
+REC-2026-00012,2025-07-21,Redes Sociais,"Promessa de cartão sem anuidade vitalícia na contratação. Hoje, 18 meses depois, começaram a cobrar. Tenho gravação da ligação.",Cartão de Crédito,Aberta
+REC-2026-00013,2025-09-17,SAC,Tarifa de manutenção mais cara que rendimento.,Conta Corrente,Aberta
+REC-2026-00014,2025-10-01,SAC,Compra estornada pelo lojista há 45 dias e até agora nada na minha fatura. O dinheiro está retido por vocês.,Cartão de Crédito,Aberta
+REC-2026-00015,2025-06-02,Ouvidoria,"Previdência privada com taxa de carregamento de 4% e taxa de administração 3,5% ao ano. Estão é me empobrecendo.",Previdência,Resolvida
+REC-2026-00016,2026-01-27,SAC,Vou levar isso pro programa de TV de defesa do consumidor. Quero ver vocês explicando isso na frente das câmeras.,,Aberta
+REC-2026-00017,2025-10-23,Banco Central,Venda de ações executada com cotação de 1 dia depois. Mercado caiu 4% nesse meio tempo.,Ações,Em análise
+REC-2026-00018,2025-09-28,Redes Sociais,"Promessa de cashback de R$ 5.890,00 por gasto mínimo. Cumpri o gasto, cashback nunca veio.",Cartão de Crédito,Resolvida
+REC-2026-00019,2026-04-17,Ouvidoria,"Fui à agência abrir uma conta corrente, perdi a manhã toda e me disseram no fim que precisava agendar pelo aplicativo. Por que ninguém avisou na entrada?",Conta Corrente,Resolvida
+REC-2026-00020,2025-09-10,Ouvidoria,Não esquece da reunião de família domingo na casa da vovó.,,Em análise
+REC-2026-00021,2025-08-16,Redes Sociais,Pacote de relacionamento Premium prometia atendimento prioritário. Espero 40 minutos no telefone igual aos outros.,,Resolvida
+REC-2026-00022,2025-07-07,SAC,Sua corrida foi cancelada. R$ 15 estornados em até 24h.,,Resolvida
+REC-2026-00023,2026-04-01,Banco Central,Saque negado no caixa eletrônico mas o valor foi debitado da minha conta. R$ 800 sumiram literalmente.,Conta Corrente,Em análise
+REC-2026-00024,2025-10-26,Ouvidoria,"CET do empréstimo prometido era 3,9% e na assinatura tinha 7,2%. Letras miúdas no contrato.",Empréstimo,Em análise
+REC-2026-00025,2025-11-03,Banco Central,"O novo aplicativo está fantástico! Bem mais rápido que o anterior, parabéns à equipe de TI.",,Resolvida
+REC-2026-00026,2026-02-12,Ouvidoria,Título de capitalização presente de aniversário do banco. Resgate só após 5 anos com perda de 50% do valor. Que presente.,Capitalização,Em análise
+REC-2026-00027,2026-04-03,SAC,"Cartão de débito clonado em R$ 1.200,00. Banco diz que não cobre porque eu ativei o cartão fora do aplicativo.",Cartão de Débito,Em análise
+REC-2026-00028,2025-11-13,Ouvidoria,Antecipação de fatura saiu mais cara que o juros do crédito rotativo. Como assim?,Cartão de Crédito,Aberta
+REC-2026-00029,2025-09-26,Redes Sociais,"Banco enviou cartão de aniversário... pra meu pai. Que faleceu há 4 anos. Cliente desde 1971, trataram com respeito até o fim.",,Resolvida
+REC-2026-00030,2026-03-22,Ouvidoria,"Boa tarde, qual o horário do almoço da agência?",,Aberta
+REC-2026-00031,2025-10-16,Ouvidoria,Vocês vão se arrepender de mexer comigo. Tenho recursos pra brigar até o STF se for preciso.,,Resolvida
+REC-2026-00032,2025-08-29,Ouvidoria,Conta encerrada por baixa movimentação SEM AVISO. Tinha R$ 3.400 de saldo que sumiram. Cadê meu dinheiro?,Conta Corrente,Resolvida
+REC-2026-00033,2025-10-21,SAC,Recebi um e-mail dizendo 'caro Sr João' sendo que sou Joana. Personalização péssima.,,Em análise
+REC-2026-00034,2026-04-22,Redes Sociais,A função cashback nunca creditou um centavo apesar de gastar R$ 4 mil por mês. Onde está meu retorno prometido?,Cartão de Crédito,Resolvida
+REC-2026-00035,2026-01-27,SAC,"Investimento de R$ 1.200,00 resgatado com perda de R$ 25,00 de IOF que não foi alertado na hora.",Investimento,Aberta
+REC-2026-00036,2025-07-24,Redes Sociais,PIX é uma maravilha. Banco já melhorou muito desde os tempos do DOC.,,Aberta
+REC-2026-00037,2026-02-09,SAC,Reembolso de fraude foi feito em 3 dias úteis. Bem mais rápido que esperava.,,Resolvida
+REC-2026-00038,2026-03-09,SAC,"Promessa de cashback de R$ 12.700,00 por gasto mínimo. Cumpri o gasto, cashback nunca veio.",Cartão de Crédito,Aberta
+REC-2026-00039,2025-10-08,SAC,"Cartão de débito clonado em R$ 8.300,00. Banco diz que não cobre porque eu ativei o cartão fora do aplicativo.",Cartão de Débito,Resolvida
+REC-2026-00040,2025-12-24,Redes Sociais,"Tive minha conta clonada, transferência de R$ 9 mil saiu via PIX pra desconhecido e o banco diz que a culpa é minha. Onde está a segurança?",Conta Corrente,Resolvida
+REC-2026-00041,2025-06-01,Banco Central,Gerente do banco dorme em reunião comigo. Literalmente. Filmei.,,Em análise
+REC-2026-00042,2025-12-29,SAC,"Reconhecimento facial do app não funciona com meus óculos. Tenho que tirar a foto sem óculos, depois não enxergo a tela.",,Em análise
+REC-2026-00043,2026-04-15,Banco Central,"Olá tudo bem, sou da Igreja Esperança e gostaria de convidar...",,Em análise
+REC-2026-00044,2025-06-27,SAC,Mensagens automáticas do banco vêm em português mal traduzido do inglês. 'Você foi creditado!' parece tradução de IA barata.,,Em análise
+REC-2026-00045,2025-10-26,Ouvidoria,Atendimento horrível na agência tal.,,Resolvida
+REC-2026-00046,2025-08-02,SAC,"Desconto não autorizado de R$ 5.890,00 na minha conta corrente. Pediram pra esperar 30 dias úteis pra análise. É demais.",Conta Corrente,Em análise
+REC-2026-00047,2025-10-01,Banco Central,"Saque negado mas o valor de R$ 2.450,00 foi descontado. Demorou 12 dias pra estornar.",Conta Corrente,Aberta
+REC-2026-00048,2025-06-08,Ouvidoria,Vocês fazem dedetização?,,Aberta
+REC-2026-00049,2025-07-29,Ouvidoria,"Apareceu na fatura uma compra de R$ 12.700,00 numa cidade que eu nunca pisei. Cartão estava comigo. Como?",Cartão de Crédito,Aberta
+REC-2026-00050,2025-08-18,Ouvidoria,Solicitei segunda via do cartão por defeito no chip e foi cobrada uma taxa de R$ 32. Defeito do produto deveria ser de graça.,Cartão de Crédito,Resolvida
+REC-2026-00051,2026-02-16,Banco Central,Aprovação do empréstimo em 4 minutos pelo app. Nem precisei sair de casa. Vida moderna.,,Em análise
+REC-2026-00052,2026-02-03,Redes Sociais,Conta bloqueada sem motivo.,Conta Corrente,Aberta
+REC-2026-00053,2026-03-10,SAC,Atendente passou minha ligação 6 vezes. Cada um pedia que eu repetisse a história desde o início.,,Aberta
+REC-2026-00054,2026-04-03,Ouvidoria,Cartão virtual gerado no app não funciona em NENHUMA loja online. Pra que serve então?,Cartão de Crédito,Resolvida
+REC-2026-00055,2025-07-06,SAC,"Assistência 24h cobrada todo mês, precisei usar uma vez, não atenderam, telefone caiu duas vezes. Serviço inexistente.",Assistência,Resolvida
+REC-2026-00056,2025-12-30,SAC,Boleto pago e Serasa negativou meu nome.,,Resolvida
+REC-2026-00057,2025-10-15,Redes Sociais,Cobrança de 'taxa de sucesso' de operação de câmbio que eu não autorizei. R$ 178 sumiram.,,Aberta
+REC-2026-00058,2025-10-31,Redes Sociais,"Cobrança em agência de R$ 25 pra atualizar foto do cadastro. Foto MINHA, no cadastro DELES.",,Em análise
+REC-2026-00059,2026-02-06,Redes Sociais,Sempre que ligo no SAC sou bem atendido. Equipe brasileira faz toda a diferença.,,Em análise
+REC-2026-00060,2026-02-03,SAC,"Vou denunciar vocês na SUSEP, no Banco Central, no Procon e na Polícia Federal. Tudo de uma vez.",,Em análise
+REC-2026-00061,2026-03-06,SAC,Cheque devolvido por insuficiência de fundos sendo que eu tinha R$ 8 mil na conta. Saiu nome no Serasa por causa disso.,Conta Corrente,Resolvida
+REC-2026-00062,2025-09-05,Redes Sociais,"Tarifa de envio de boleto por correio R$ 8 cada um. Em 2026, ainda mandam por correio?",,Aberta
+REC-2026-00063,2025-12-14,SAC,"Desconto não autorizado de R$ 5.890,00 na minha conta corrente. Pediram pra esperar 30 dias úteis pra análise. É demais.",Conta Corrente,Resolvida
+REC-2026-00064,2025-06-23,SAC,"Multa por não usar o cheque especial. Sim, MULTA por NÃO usar. O quê?",,Em análise
+REC-2026-00065,2025-12-13,SAC,Anuidade cobrada mesmo após eu ter feito o gasto mínimo do cartão Premium. Atendimento diz que não cumpri a regra mas o app mostra que cumpri.,Cartão de Crédito,Resolvida
+REC-2026-00066,2025-08-17,Ouvidoria,Cheque devolvido por insuficiência de fundos sendo que eu tinha R$ 8 mil na conta. Saiu nome no Serasa por causa disso.,Conta Corrente,Aberta
+REC-2026-00067,2026-02-13,Redes Sociais,"Mudei de estado, conta continua atrelada à agência antiga, todo serviço presencial é uma novela.",Conta Corrente,Aberta
+REC-2026-00068,2025-07-22,Redes Sociais,"Empréstimo pessoal pra negativados com taxa de 14% ao MÊS. Isso é agiotagem, não banco.",Empréstimo,Em análise
+REC-2026-00069,2026-02-25,Redes Sociais,"Bloqueio preventivo de R$ 18.500,00 no meu cartão durante viagem internacional. Fiquei sem comer numa cidade estrangeira.",Cartão de Crédito,Aberta
+REC-2026-00070,2025-08-13,Ouvidoria,"Cobrança indevida de R$ 5.890,00 na minha fatura referente a serviço que nunca contratei. Já abri 3 protocolos e nada.",,Resolvida
+REC-2026-00071,2025-08-19,SAC,Gerente entrou em contato no meu aniversário. Detalhe simples mas importante.,,Resolvida
+REC-2026-00072,2025-10-14,SAC,"Cliente VIP há 15 anos. Filho meu solicitou conta, foi negado por baixa renda. Tratamento desigual sem motivo.",,Resolvida
+REC-2026-00073,2025-07-12,Redes Sociais,"Promessa de cashback de R$ 5.890,00 por gasto mínimo. Cumpri o gasto, cashback nunca veio.",Cartão de Crédito,Resolvida
+REC-2026-00074,2026-03-01,SAC,CDB com promessa de 110% do CDI rendendo apenas 87% no extrato. Conferi todos os meses.,CDB,Aberta
+REC-2026-00075,2026-02-05,Redes Sociais,Encaminhei a mensagem certa? Era pra minha tia.,,Aberta
+REC-2026-00076,2025-07-06,SAC,kkkkk eu adoro mandar mensagem aleatória,,Resolvida
+REC-2026-00077,2025-10-26,Redes Sociais,Tarifa de manutenção de cofre alugado dobrou de valor sem aviso. R$ 280 pra R$ 560.,,Resolvida
+REC-2026-00078,2026-01-09,Redes Sociais,"Cobrança de 'serviço de proteção financeira' que eu nunca contratei. R$ 38,90 por mês há 2 anos.",,Resolvida
+REC-2026-00079,2025-07-22,Ouvidoria,Banco patrocinando cultura. Vi a exposição patrocinada por vocês e foi linda.,,Resolvida
+REC-2026-00080,2025-06-15,SAC,"Gerente da agência Jardins prometeu estorno de R$ 8.300,00, foram 4 meses, nada. Já não retorna minhas ligações.",,Resolvida
+REC-2026-00081,2025-10-29,SAC,Cheque que eu assinei foi adulterado e o banco compensou sem verificar. Perdi R$ 4.700 e a culpa é minha?,Conta Corrente,Em análise
+REC-2026-00082,2025-10-04,Ouvidoria,"Boleto pago em dia, banco demorou 3 dias pra reconhecer pagamento, nome foi pro Serasa. Limpeza demorou 2 meses.",,Em análise
+REC-2026-00083,2025-09-01,SAC,Comprovante de PIX não chega no email cadastrado. Tive que abrir reclamação no Banco Central.,PIX,Aberta
+REC-2026-00084,2025-12-13,Ouvidoria,"PIX agendado nunca foi executado, perdi prazo de aluguel e fui multado em R$ 500. Quem paga?",PIX,Aberta
+REC-2026-00085,2026-03-26,SAC,PIX devolvido pelo banco do destinatário e o dinheiro não voltou pra minha conta. Sumiu no meio do caminho.,PIX,Em análise
+REC-2026-00086,2025-10-09,Ouvidoria,Banco me cobrou IOF por uma operação que não aconteceu. Provei com extrato e nada de estorno.,,Resolvida
+REC-2026-00087,2026-01-25,Redes Sociais,"PIX por QR Code lido no app abriu valor de R$ 4.000, eu paguei R$ 40. Banco cobrou os R$ 4.000 mesmo assim.",PIX,Resolvida
+REC-2026-00088,2025-08-20,SAC,Taxa de TED de R$ 22 pra transferir entre contas do MESMO banco. Mas fica calado se for pra outro.,Transferência,Resolvida
+REC-2026-00089,2026-03-28,SAC,Pacote de tarifas mudou pra um mais caro automaticamente após mudança de pacote. Não autorizei isso.,Conta Corrente,Resolvida
+REC-2026-00090,2025-10-07,Ouvidoria,"Apareceu na fatura uma compra de R$ 8.300,00 numa cidade que eu nunca pisei. Cartão estava comigo. Como?",Cartão de Crédito,Aberta
+REC-2026-00091,2025-12-14,Redes Sociais,"Recebi salário, no mesmo dia debitaram tarifa de TED, manutenção de conta, cesta de serviços e seguro. Sobrou metade.",Conta Corrente,Aberta
+REC-2026-00092,2025-12-13,Ouvidoria,Renegociação de dívida saiu MAIS cara que a dívida original. Como uma renegociação aumenta o valor?,Empréstimo,Em análise
+REC-2026-00093,2025-10-30,SAC,"PIX por QR Code lido no app abriu valor de R$ 4.000, eu paguei R$ 40. Banco cobrou os R$ 4.000 mesmo assim.",PIX,Resolvida
+REC-2026-00094,2025-12-20,SAC,"Bloqueio preventivo de R$ 2.450,00 no meu cartão durante viagem internacional. Fiquei sem comer numa cidade estrangeira.",Cartão de Crédito,Em análise
+REC-2026-00095,2025-06-26,Redes Sociais,"Bom dia, alguém sabe que horas joga o Flamengo hoje?",,Resolvida
+REC-2026-00096,2025-10-25,Banco Central,oi,,Aberta
+REC-2026-00097,2025-11-28,SAC,"Fui contratar empréstimo consignado, acabei saindo com cartão de crédito consignado sem entender. Mil vezes pior.",Empréstimo,Aberta
+REC-2026-00098,2025-10-07,Banco Central,Cobrança de seguro que não contratei.,Seguro,Resolvida
+REC-2026-00099,2025-08-10,Ouvidoria,"Atendente perguntou se eu queria contratar plano de saúde, seguro de vida, capitalização e crédito numa mesma ligação. Era pra eu pagar boleto.",,Resolvida
+REC-2026-00100,2025-06-21,SAC,"Boa tarde, quero confirmar minha consulta com o Dr. Ricardo às 14h amanhã.",,Em análise
+REC-2026-00101,2026-03-24,SAC,"Gerente da agência Jardins prometeu estorno de R$ 8.300,00, foram 4 meses, nada. Já não retorna minhas ligações.",,Aberta
+REC-2026-00102,2025-10-30,SAC,"Tarifa de envio de boleto por correio R$ 8 cada um. Em 2026, ainda mandam por correio?",,Em análise
+REC-2026-00103,2025-09-11,SAC,"Bloqueio preventivo de R$ 2.450,00 no meu cartão durante viagem internacional. Fiquei sem comer numa cidade estrangeira.",Cartão de Crédito,Em análise
+REC-2026-00104,2025-12-05,Ouvidoria,Vocês vendem produtos da Apple? Tô interessado num iPhone.,,Resolvida
+REC-2026-00105,2025-08-24,SAC,"Empréstimo de R$ 18.500,00 aprovado verbalmente, contrato veio com taxa diferente da combinada. Recusei e ainda assim cobraram tarifa de cancelamento.",Empréstimo,Resolvida
+REC-2026-00106,2026-02-02,Redes Sociais,"Score de crédito caiu sem motivo aparente. Pago tudo em dia, nenhuma negativa.",,Aberta
+REC-2026-00107,2025-11-21,Redes Sociais,"Token caiu, app travou, fiquei sem fazer transferência urgente. Aluguel atrasou.",,Em análise
+REC-2026-00108,2025-07-09,SAC,"Cobrança indevida de R$ 18.500,00 na minha fatura referente a serviço que nunca contratei. Já abri 3 protocolos e nada.",,Resolvida
+REC-2026-00109,2025-12-21,Redes Sociais,"Desconto não autorizado de R$ 1.200,00 na minha conta corrente. Pediram pra esperar 30 dias úteis pra análise. É demais.",Conta Corrente,Resolvida
+REC-2026-00110,2025-12-05,SAC,"Empréstimo aprovado, dinheiro caiu na conta, mês seguinte pediram pra devolver tudo porque 'aprovação foi um erro'. Já gastei.",Empréstimo,Em análise
+REC-2026-00111,2025-10-14,Ouvidoria,"Pediram pra eu atualizar meus dados, atualizei, mês seguinte pediram de novo. Estou em loop.",,Em análise
+REC-2026-00112,2025-10-13,Ouvidoria,Caixa eletrônico cuspiu uma nota de R$ 200 picotada. Banco diz que é responsabilidade da Casa da Moeda. Foi a MÁQUINA de vocês!,,Resolvida
+REC-2026-00113,2025-12-08,SAC,Anuidade cobrada após cancelamento do cartão.,Cartão de Crédito,Aberta
+REC-2026-00114,2025-06-13,Ouvidoria,"Quero registrar elogio à Cláudia, atendente do telemarketing. Profissional excelente.",,Resolvida
+REC-2026-00115,2025-11-15,Redes Sociais,"Token caiu, app travou, fiquei sem fazer transferência urgente. Aluguel atrasou.",,Aberta
+REC-2026-00116,2025-07-03,Ouvidoria,Cheque que eu assinei foi adulterado e o banco compensou sem verificar. Perdi R$ 4.700 e a culpa é minha?,Conta Corrente,Em análise
+REC-2026-00117,2025-11-02,Ouvidoria,Imposto de renda na fonte cobrado em fundo isento. Já mandei comprovantes 3 vezes.,Investimento,Aberta
+REC-2026-00118,2025-06-24,Redes Sociais,"Tarifa de R$ 18.500,00 chamada genericamente de 'serviços' sem detalhamento. O que é isso?",,Aberta
+REC-2026-00119,2026-02-08,SAC,"Cliente VIP há 15 anos. Filho meu solicitou conta, foi negado por baixa renda. Tratamento desigual sem motivo.",,Aberta
+REC-2026-00120,2026-03-03,SAC,Quero saber a previsão do tempo pra amanhã em Florianópolis.,,Em análise
+REC-2026-00121,2026-03-04,Ouvidoria,"Gerente da agência Higienópolis prometeu estorno de R$ 12.700,00, foram 4 meses, nada. Já não retorna minhas ligações.",,Resolvida
+REC-2026-00122,2025-08-19,Redes Sociais,Não vou parar até o presidente do banco saber dessa história. Vou cobrar pessoalmente.,,Resolvida
+REC-2026-00123,2026-02-06,Ouvidoria,"Serviço de SMS sobre movimentações cobra R$ 4,90/mês. Recebo notificação pelo app de graça. Pra que pagar?",,Resolvida
+REC-2026-00124,2025-10-22,SAC,"Amor, não esquece de buscar o pão. E o leite também. Beijos.",,Em análise
+REC-2026-00125,2026-01-14,Ouvidoria,Site do banco fora do ar das 22h às 6h por causa de manutenção. Trabalho nesse horário.,,Aberta
+REC-2026-00126,2025-12-03,SAC,Minha aposentadoria caiu antes do prazo. Quero agradecer pela agilidade.,,Resolvida
+REC-2026-00127,2026-03-06,Redes Sociais,Cartão clonado e banco não reembolsa.,Cartão de Crédito,Em análise
+REC-2026-00128,2025-07-02,SAC,Cobrança recorrente que cancelei já.,,Aberta
+REC-2026-00129,2025-08-02,Redes Sociais,Não consigo cancelar serviço de SMS.,,Resolvida
+REC-2026-00130,2025-07-17,Banco Central,"Gerente da agência Santana prometeu estorno de R$ 3.700,00, foram 4 meses, nada. Já não retorna minhas ligações.",,Em análise
+REC-2026-00131,2026-04-02,Redes Sociais,LCI vendida como 'isenta de IR' com IOF que comeu o ganho. Onde está a isenção prometida?,LCI,Aberta
+REC-2026-00132,2025-11-18,SAC,Oi tudo bem? rs como vc tá?,,Aberta
+REC-2026-00133,2026-03-17,SAC,"Cobrança de seguro residencial de R$ 47,00 mensal sem que eu tenha autorizado. Já são 14 meses descontando.",Seguro,Resolvida
+REC-2026-00134,2026-03-11,SAC,"Se em 48h nada resolver, contrato advogado especialista. Já tenho os contatos.",,Aberta
+REC-2026-00135,2025-09-28,SAC,Cobrança de R$ 12 pra cada saque acima de 4 por mês. Isso desestimula o uso do meu próprio dinheiro.,Conta Corrente,Aberta
+REC-2026-00136,2026-04-02,SAC,"Dia de pagamento do FGTS, sistema do banco fora do ar. Tive que ir 3 vezes na agência Tatuapé.",,Resolvida
+REC-2026-00137,2025-08-14,Redes Sociais,"Linha de crédito de R$ 12.700,00 aprovada e cancelada no mesmo dia sem explicação. Já organizei pagamentos com base nela.",Empréstimo,Em análise
+REC-2026-00138,2025-08-29,SAC,Cobrança duplicada na fatura.,Cartão de Crédito,Resolvida
+REC-2026-00139,2025-08-07,SAC,"Atendente me chamou de 'meu querido' o tempo todo. Quero respeito profissional, não intimidade.",,Resolvida
+REC-2026-00140,2025-09-30,Ouvidoria,"Solicitei adiamento de fatura de R$ 2.450,00 por dificuldade financeira. Atendente debochou: 'aprende a controlar dinheiro'.",Cartão de Crédito,Aberta
+REC-2026-00141,2025-10-14,SAC,Atendente da Ouvidoria me ouviu com paciência e resolveu uma reclamação antiga. Recomendo demais.,,Resolvida
+REC-2026-00142,2026-02-25,SAC,"Fui à agência abrir uma conta corrente, perdi a manhã toda e me disseram no fim que precisava agendar pelo aplicativo. Por que ninguém avisou na entrada?",Conta Corrente,Aberta
+REC-2026-00143,2026-01-16,Banco Central,Anuidade cobrada após cancelamento do cartão.,Cartão de Crédito,Em análise
+REC-2026-00144,2025-07-26,Ouvidoria,"Transferência de R$ 3.700,00 pra conta errada por erro do app. Banco diz que culpa é minha. Não foi minha digitação, foi sugestão automática.",Transferência,Aberta
+REC-2026-00145,2026-04-11,SAC,Saque negado no caixa eletrônico mas o valor foi debitado da minha conta. R$ 800 sumiram literalmente.,Conta Corrente,Resolvida
+REC-2026-00146,2026-02-22,SAC,Cabeça de boi na entrada da agência (em referência ao cofre) parece simbólico do tratamento que recebo.,,Em análise
+REC-2026-00147,2025-06-16,SAC,Compra estornada pelo lojista há 45 dias e até agora nada na minha fatura. O dinheiro está retido por vocês.,Cartão de Crédito,Em análise
+REC-2026-00148,2025-12-23,Ouvidoria,"Doutor, estou com dor no joelho desde ontem. Posso passar antes?",,Aberta
+REC-2026-00149,2026-01-14,SAC,Cobrança de tarifa de cadastro de R$ 350 num empréstimo de R$ 2 mil. Quase 18% só pra abrir o processo.,Empréstimo,Aberta
+REC-2026-00150,2026-04-08,SAC,Tem alguma promoção de consórcio de lancha?,,Aberta
+REC-2026-00151,2026-04-16,Ouvidoria,"Empréstimo de R$ 18.500,00 aprovado verbalmente, contrato veio com taxa diferente da combinada. Recusei e ainda assim cobraram tarifa de cancelamento.",Empréstimo,Em análise
+REC-2026-00152,2025-11-14,SAC,"Assistência 24h cobrada todo mês, precisei usar uma vez, não atenderam, telefone caiu duas vezes. Serviço inexistente.",Assistência,Em análise
+REC-2026-00153,2025-10-29,Ouvidoria,"Reconhecimento facial do app não funciona com meus óculos. Tenho que tirar a foto sem óculos, depois não enxergo a tela.",,Em análise
+REC-2026-00154,2025-07-21,Banco Central,Tarifa de manutenção mais cara que rendimento.,Conta Corrente,Aberta
+REC-2026-00155,2026-03-10,Banco Central,O programa de pontos do cartão me rendeu uma viagem inteira pra Europa. Estou super satisfeito.,,Aberta
+REC-2026-00156,2026-01-18,Redes Sociais,"Investimento de R$ 12.700,00 resgatado com perda de R$ 89,90 de IOF que não foi alertado na hora.",Investimento,Em análise
+REC-2026-00157,2026-01-19,SAC,"Score de crédito caiu sem motivo aparente. Pago tudo em dia, nenhuma negativa.",,Resolvida
+REC-2026-00158,2025-11-08,Ouvidoria,Reservei mesa pra 4 pessoas às 20h no nome João. Confirma por favor.,,Resolvida
+REC-2026-00159,2025-12-09,Redes Sociais,"Apareceu uma compra de R$ 1.847,90 numa loja de eletrônicos em Manaus. Eu moro em Curitiba e o cartão estava no meu bolso. Como isso é possível?",Cartão de Crédito,Resolvida
+REC-2026-00160,2026-01-29,SAC,"Apareceu na fatura uma compra de R$ 12.700,00 numa cidade que eu nunca pisei. Cartão estava comigo. Como?",Cartão de Crédito,Resolvida
+REC-2026-00161,2025-07-18,Ouvidoria,"Pacote Premium custa R$ 38,50 mensais e não recebo nenhum benefício além do nome bonito.",,Resolvida
+REC-2026-00162,2025-12-08,Redes Sociais,"Parcelamento de fatura com taxa de juros de 14,5% ao mês. Isso é prática agiotagem disfarçada de banco.",Cartão de Crédito,Em análise
+REC-2026-00163,2026-03-28,Redes Sociais,"Tô fazendo um TCC sobre bancos digitais, podem responder umas perguntas?",,Em análise
+REC-2026-00164,2025-08-02,Ouvidoria,"Multa por não usar o cheque especial. Sim, MULTA por NÃO usar. O quê?",,Resolvida
+REC-2026-00165,2026-01-03,Redes Sociais,Quero parabenizar a atendente Camila da agência centro. Resolveu meu problema em 5 minutos com sorriso e paciência.,,Resolvida
+REC-2026-00166,2025-10-26,Ouvidoria,Fim de semana inteiro sem acesso à conta porque vocês estavam 'em manutenção'. Tive que pedir dinheiro emprestado.,Conta Corrente,Em análise
+REC-2026-00167,2026-03-23,Ouvidoria,Recebi PIX de pessoa desconhecida e dois dias depois ela me processou alegando golpe. Banco lavou as mãos.,PIX,Aberta
+REC-2026-00168,2026-02-02,SAC,"Quero registrar elogio à Cláudia, atendente do telemarketing. Profissional excelente.",,Aberta
+REC-2026-00169,2026-03-12,SAC,"Investimento de R$ 12.700,00 resgatado com perda de R$ 89,90 de IOF que não foi alertado na hora.",Investimento,Resolvida
+REC-2026-00170,2026-03-21,SAC,Cartão recusado em farmácia mesmo com saldo de R$ 6.000 disponíveis. Tive que deixar os remédios da minha mãe.,Cartão de Crédito,Em análise
+REC-2026-00171,2026-03-15,Redes Sociais,Meu cartão foi bloqueado por suspeita de fraude justamente quando eu estava no caixa pagando o jantar. Passei vergonha enorme.,Cartão de Crédito,Resolvida
+REC-2026-00172,2026-04-11,Banco Central,"Notificação no celular dizendo 'você foi pré-aprovado'. Tentei aceitar, sistema diz que sou negativado. Como é?",,Em análise
+REC-2026-00173,2026-04-08,Redes Sociais,"Música de espera do telefone do banco é 'Nessun Dorma'. Adequada, porque ninguém dorme esperando atendimento.",,Resolvida
+REC-2026-00174,2025-10-15,SAC,Recebo correspondências em endereço antigo apesar de ter atualizado o endereço 3 vezes. Carta importante voltou.,,Aberta
+REC-2026-00175,2025-11-06,Redes Sociais,Compra de seguro residencial empurrada de uma seguradora terceirizada que não cobre nem chuva forte. Vendida como completa.,Seguro,Em análise
+REC-2026-00176,2025-09-01,Redes Sociais,Senha do app não funciona mais.,,Em análise
+REC-2026-00177,2025-12-23,SAC,"Profe, vou faltar amanhã na aula porque estou doente.",,Resolvida
+REC-2026-00178,2025-06-16,SAC,"Pacote Premium custa R$ 38,50 mensais e não recebo nenhum benefício além do nome bonito.",,Em análise
+REC-2026-00179,2025-12-10,Ouvidoria,"Apareceu na fatura uma compra de R$ 12.700,00 numa cidade que eu nunca pisei. Cartão estava comigo. Como?",Cartão de Crédito,Aberta
+REC-2026-00180,2025-12-07,SAC,"Apareceu na fatura uma compra de R$ 5.890,00 numa cidade que eu nunca pisei. Cartão estava comigo. Como?",Cartão de Crédito,Aberta
+REC-2026-00181,2026-03-18,Ouvidoria,O programa de pontos do cartão me rendeu uma viagem inteira pra Europa. Estou super satisfeito.,,Resolvida
+REC-2026-00182,2025-08-19,SAC,teste 123 alguem ai?,,Em análise
+REC-2026-00183,2025-07-12,SAC,"Treinamento dos atendentes melhorou muito. Antes era horrível, hoje é satisfatório.",,Resolvida
+REC-2026-00184,2026-02-04,Ouvidoria,Banco abre no domingo? Quero saber só por curiosidade.,,Em análise
+REC-2026-00185,2025-09-19,Banco Central,Cobrança de tarifa de extrato impresso na agência. R$ 6 pra ver meu próprio dinheiro?,,Aberta
+REC-2026-00186,2026-01-07,SAC,"Mãe, o ônibus tá atrasado, vou chegar tarde no jantar.",,Resolvida
+REC-2026-00187,2026-03-31,Ouvidoria,Olá! Estou vendendo cosméticos naturais. Posso indicar a vocês?,,Resolvida
+REC-2026-00188,2025-06-24,SAC,"Solicitei adiamento de fatura de R$ 2.450,00 por dificuldade financeira. Atendente debochou: 'aprende a controlar dinheiro'.",Cartão de Crédito,Resolvida
+REC-2026-00189,2025-06-29,SAC,Conta poupança rendendo menos que aplicação automática. Banco poderia avisar isso.,Poupança,Aberta
+REC-2026-00190,2025-09-17,Banco Central,"Débito automático da conta de luz pago duas vezes no mesmo mês. A energia agradeceu, eu não.",Conta Corrente,Resolvida
+REC-2026-00191,2025-10-27,SAC,"Cobrança de IOF absurda numa compra internacional de US$ 50. Vocês cobraram quase 30%, isso é roubo.",Cartão de Crédito,Aberta
+REC-2026-00192,2026-01-07,SAC,Pix não cai há horas.,PIX,Em análise
+REC-2026-00193,2025-09-26,Ouvidoria,"App acessível pra deficiente visual. Como cego, agradeço a preocupação com a acessibilidade.",,Resolvida
+REC-2026-00194,2025-11-29,SAC,"Chave PIX cadastrada em duas contas, conflito de propriedade, fiquei sem usar PIX por 11 dias.",PIX,Resolvida
+REC-2026-00195,2025-06-22,Ouvidoria,"Se meu nome não for tirado do Serasa hoje, eu vou pessoalmente na agência fazer um escândalo.",,Em análise
+REC-2026-00196,2025-07-10,Redes Sociais,Estorno prometido nunca chegou.,,Em análise
+REC-2026-00197,2026-03-21,Ouvidoria,Estou impressionado com a rapidez do atendimento via chat. Em menos de 3 minutos meu problema foi resolvido.,,Em análise
+REC-2026-00198,2025-10-27,SAC,A bandeira do meu cartão mudou sem aviso e agora não funciona em metade dos lugares que eu usava. Não fui consultado sobre essa mudança.,Cartão de Crédito,Aberta
+REC-2026-00199,2025-11-14,SAC,Aplicativo do banco trava toda vez que tento acessar fatura do cartão. Já reinstalei 3 vezes.,,Resolvida
+REC-2026-00200,2026-01-22,Redes Sociais,Aprovação do empréstimo em 4 minutos pelo app. Nem precisei sair de casa. Vida moderna.,,Resolvida
+REC-2026-00201,2025-07-16,Ouvidoria,O aplicativo aprovou minha compra de R$ 2 mil mas o estabelecimento disse que foi negada. Acabei pagando duas vezes pra não passar vergonha.,Cartão de Crédito,Aberta
+REC-2026-00202,2026-01-10,Ouvidoria,"Agora não, estou ocupado.",,Em análise
+REC-2026-00203,2025-12-20,Redes Sociais,"Gerente da agência Aclimação prometeu estorno de R$ 3.700,00, foram 4 meses, nada. Já não retorna minhas ligações.",,Resolvida
+REC-2026-00204,2025-09-22,SAC,"Linha de crédito de R$ 12.700,00 aprovada e cancelada no mesmo dia sem explicação. Já organizei pagamentos com base nela.",Empréstimo,Aberta
+REC-2026-00205,2026-02-17,Ouvidoria,"Tarifa de R$ 4,90 por cada PIX a partir do quinto no mês. Conta digital deveria ser sem taxa.",PIX,Em análise
+REC-2026-00206,2025-09-08,Redes Sociais,"Boleto pago em dia, banco demorou 3 dias pra reconhecer pagamento, nome foi pro Serasa. Limpeza demorou 2 meses.",,Aberta
+REC-2026-00207,2025-08-15,SAC,"Dia de pagamento do FGTS, sistema do banco fora do ar. Tive que ir 3 vezes na agência Moema.",,Aberta
+REC-2026-00208,2025-09-10,SAC,Taxa de TED de R$ 22 pra transferir entre contas do MESMO banco. Mas fica calado se for pra outro.,Transferência,Aberta
+REC-2026-00209,2025-07-09,SAC,"URA infinita: aperte 1, depois 3, depois 7, depois 2... 14 minutos pra falar com humano que não resolveu nada.",,Resolvida
+REC-2026-00210,2026-02-08,Ouvidoria,"Seguro de cartão protegido vendido junto com a anuidade. Não cobre roubo, não cobre clonagem, não cobre nada. Pra que existe?",Seguro,Em análise
+REC-2026-00211,2026-03-24,Ouvidoria,Sempre que ligo no SAC sou bem atendido. Equipe brasileira faz toda a diferença.,,Resolvida
+REC-2026-00212,2026-03-17,Ouvidoria,PIX feito há 6 horas para minha mãe ainda não caiu. Disseram que é 'instantâneo'. Que tipo de instante é esse?,PIX,Resolvida
+REC-2026-00213,2025-11-13,Redes Sociais,Cobrança recorrente de uma plataforma de streaming que cancelei em 2024. Disputo todo mês e todo mês ela volta.,Cartão de Crédito,Em análise
+REC-2026-00214,2025-08-17,Ouvidoria,"Serviço de SMS sobre movimentações cobra R$ 4,90/mês. Recebo notificação pelo app de graça. Pra que pagar?",,Em análise
+REC-2026-00215,2026-04-20,SAC,"Estou guardando todos os e-mails e documentos. Quando eu processar, vão ver do que sou capaz.",,Aberta
+REC-2026-00216,2025-06-29,SAC,"Chave PIX cadastrada em duas contas, conflito de propriedade, fiquei sem usar PIX por 11 dias.",PIX,Aberta
+REC-2026-00217,2026-01-23,Ouvidoria,"Transferência de R$ 12.700,00 pra conta errada por erro do app. Banco diz que culpa é minha. Não foi minha digitação, foi sugestão automática.",Transferência,Aberta
+REC-2026-00218,2025-10-25,SAC,Cobrança chamada 'tarifa de adesão a serviços' de R$ 75 que ninguém sabe explicar o que é.,,Resolvida
+REC-2026-00219,2025-07-17,Ouvidoria,"Estou com saudades, quando vou te ver?",,Em análise
+REC-2026-00220,2026-01-23,Ouvidoria,Conta poupança rendendo menos que aplicação automática. Banco poderia avisar isso.,Poupança,Resolvida
+REC-2026-00221,2025-06-22,Ouvidoria,"Doutor, esqueci de marcar retorno. Tem horário semana que vem?",,Resolvida
+REC-2026-00222,2025-09-05,SAC,Transferência internacional via SWIFT cobrou R$ 290 de tarifa pra mandar US$ 200. 1/3 do valor em taxa.,Transferência,Em análise
+REC-2026-00223,2025-08-17,Redes Sociais,"CET do empréstimo prometido era 3,9% e na assinatura tinha 7,2%. Letras miúdas no contrato.",Empréstimo,Em análise
+REC-2026-00224,2025-11-23,Redes Sociais,Liquidei meu empréstimo no mês passado e ainda recebo cobrança das parcelas. Já mostrei o comprovante 5 vezes.,Empréstimo,Aberta
+REC-2026-00225,2025-08-28,SAC,Transferência DOC ainda existe e leva 1 dia útil pra cair. PIX é instantâneo de graça. Por que ainda oferecer DOC?,Transferência,Resolvida
+REC-2026-00226,2026-01-11,Ouvidoria,"Apareceu na fatura uma compra de R$ 3.700,00 numa cidade que eu nunca pisei. Cartão estava comigo. Como?",Cartão de Crédito,Em análise
+REC-2026-00227,2025-12-04,SAC,Solicitei o cancelamento do cartão extra da minha esposa há 3 meses e continua chegando fatura com anuidade. Vocês são surdos?,Cartão de Crédito,Aberta
+REC-2026-00228,2025-12-27,Banco Central,Atendimento em LIBRAS na agência foi maravilhoso. Inclusão de verdade!,,Resolvida
+REC-2026-00229,2025-06-27,Banco Central,Meu cartão foi bloqueado por suspeita de fraude justamente quando eu estava no caixa pagando o jantar. Passei vergonha enorme.,Cartão de Crédito,Em análise
+REC-2026-00230,2025-07-04,SAC,"Consórcio de carro vendido na agência, contemplei no primeiro mês, valor liberado é R$ 12 mil menor que o do consórcio. Sumiu na taxa de administração.",Consórcio,Em análise
+REC-2026-00231,2025-12-15,SAC,"Fui assediado por 14 ligações em uma semana oferecendo empréstimo. Pedi pra parar, continuou. Onde está a LGPD?",Empréstimo,Resolvida
+REC-2026-00232,2026-04-05,Redes Sociais,"Promessa de cartão sem anuidade vitalícia na contratação. Hoje, 18 meses depois, começaram a cobrar. Tenho gravação da ligação.",Cartão de Crédito,Aberta
+REC-2026-00233,2026-03-26,Banco Central,Renegociação de dívida saiu MAIS cara que a dívida original. Como uma renegociação aumenta o valor?,Empréstimo,Resolvida
+REC-2026-00234,2025-11-06,Redes Sociais,Cachorro mordeu o cartão da máquina ao tentar comer (cheirinho de carne). Banco se recusa a emitir nova via porque 'não houve fraude'.,,Resolvida
+REC-2026-00235,2025-12-18,SAC,"Débito automático da conta de luz pago duas vezes no mesmo mês. A energia agradeceu, eu não.",Conta Corrente,Resolvida
+REC-2026-00236,2025-07-14,SAC,Agendamento online da agência funciona perfeito. Cheguei e fui atendido na hora.,,Em análise
+REC-2026-00237,2025-11-16,Redes Sociais,"Fui à agência Tatuapé resolver problema com cobrança de R$ 3.700,00 e ninguém soube me explicar. Voltei pra casa sem solução.",,Resolvida
+REC-2026-00238,2026-02-25,SAC,Posso chamar uma pizza pra entregar na agência?,,Resolvida
+REC-2026-00239,2026-02-16,SAC,"Limite de cheque especial reduzido sem aviso, conta entrou no negativo e cobraram juros de 12,7% ao mês. Isso é assalto formalizado.",Conta Corrente,Em análise
+REC-2026-00240,2025-09-01,Redes Sociais,Saque não saiu mas debitou.,Conta Corrente,Aberta
+REC-2026-00241,2026-02-04,SAC,Imposto de renda na fonte cobrado em fundo isento. Já mandei comprovantes 3 vezes.,Investimento,Resolvida
+REC-2026-00242,2025-08-19,SAC,Empréstimo consignado descontado em folha mesmo após quitação antecipada. Estou pagando duas vezes.,Empréstimo,Resolvida
+REC-2026-00243,2025-07-22,Ouvidoria,Cartão clonado e banco não reembolsa.,Cartão de Crédito,Em análise
+REC-2026-00244,2026-02-25,SAC,Aplicação resgatada antes do prazo perdeu 80% do rendimento. Não foi explicado isso na contratação.,Investimento,Aberta
+REC-2026-00245,2026-04-13,SAC,Tarifas competitivas no segmento jovem. Bom pra estudantes universitários.,,Em análise
+REC-2026-00246,2025-08-23,SAC,Compra de seguro residencial empurrada de uma seguradora terceirizada que não cobre nem chuva forte. Vendida como completa.,Seguro,Resolvida
+REC-2026-00247,2026-04-16,Redes Sociais,"Empréstimo pessoal pra negativados com taxa de 14% ao MÊS. Isso é agiotagem, não banco.",Empréstimo,Aberta
+REC-2026-00248,2026-01-11,SAC,Gerente entrou em contato no meu aniversário. Detalhe simples mas importante.,,Em análise
+REC-2026-00249,2025-09-30,Redes Sociais,"Limite de PIX noturno reduziu pra R$ 100. Sou empresária, recebo até de madrugada de cliente.",PIX,Em análise
+REC-2026-00250,2026-01-16,SAC,Mensagem da escola: aviso de reunião de pais dia 15 às 19h30.,,Aberta
+REC-2026-00251,2026-01-27,Redes Sociais,Tarifa de manutenção de conta de R$ 67 cobrada mesmo eu sendo cliente correntista há 22 anos. Onde está a fidelidade?,Conta Corrente,Aberta
+REC-2026-00252,2026-03-20,Redes Sociais,"Cobrança de IOF absurda numa compra internacional de US$ 50. Vocês cobraram quase 30%, isso é roubo.",Cartão de Crédito,Em análise
+REC-2026-00253,2025-10-23,Banco Central,"Bloqueio preventivo de R$ 3.700,00 no meu cartão durante viagem internacional. Fiquei sem comer numa cidade estrangeira.",Cartão de Crédito,Em análise
+REC-2026-00254,2026-01-01,Redes Sociais,"Cobrança em agência de R$ 25 pra atualizar foto do cadastro. Foto MINHA, no cadastro DELES.",,Resolvida
+REC-2026-00255,2026-04-06,SAC,Conta poupança rendendo menos que aplicação automática. Banco poderia avisar isso.,Poupança,Aberta
+REC-2026-00256,2026-04-25,Ouvidoria,"Galera, lembrando do treino amanhã às 6h, não atrasem.",,Em análise
+REC-2026-00257,2025-07-23,Banco Central,Conta poupança rendendo menos que aplicação automática. Banco poderia avisar isso.,Poupança,Em análise
+REC-2026-00258,2025-08-03,SAC,Seguro prestamista obrigatório no empréstimo de R$ 5 mil custou R$ 870 a mais. Não foi explicado na hora.,Empréstimo,Resolvida
+REC-2026-00259,2025-10-18,Ouvidoria,"Bloqueio preventivo de R$ 2.450,00 no meu cartão durante viagem internacional. Fiquei sem comer numa cidade estrangeira.",Cartão de Crédito,Em análise
+REC-2026-00260,2026-01-10,SAC,Funcionário da agência atendeu falando alto sobre meus saldos onde outros clientes ouviram. Privacidade?,,Resolvida
+REC-2026-00261,2026-01-17,Redes Sociais,Capitalização vendida como 'investimento garantido'. Resgate menor que o aplicado depois de 2 anos. Onde está o garantido?,Capitalização,Resolvida
+REC-2026-00262,2025-12-30,SAC,"Apareceu na fatura uma compra de R$ 12.700,00 numa cidade que eu nunca pisei. Cartão estava comigo. Como?",Cartão de Crédito,Em análise
+REC-2026-00263,2025-09-29,SAC,"Gerente da agência Jardins prometeu estorno de R$ 8.300,00, foram 4 meses, nada. Já não retorna minhas ligações.",,Aberta
+REC-2026-00264,2025-09-23,SAC,"A agência fechou e me transferiram pra uma a 14 km da minha casa sem perguntar. Sou idosa, não dirijo.",Conta Corrente,Resolvida
+REC-2026-00265,2025-11-19,Banco Central,Senha do app não funciona mais.,,Aberta
+REC-2026-00266,2025-10-25,Redes Sociais,"Empréstimo de R$ 12.700,00 aprovado verbalmente, contrato veio com taxa diferente da combinada. Recusei e ainda assim cobraram tarifa de cancelamento.",Empréstimo,Em análise
+REC-2026-00267,2025-08-11,Banco Central,"Compra parcelada em 10x vinha sem juros e na fatura tem juros de 4,9% ao mês. Onde está o sem juros prometido?",Cartão de Crédito,Em análise
+REC-2026-00268,2026-04-12,SAC,"Solicitei adiamento de fatura de R$ 3.700,00 por dificuldade financeira. Atendente debochou: 'aprende a controlar dinheiro'.",Cartão de Crédito,Aberta
+REC-2026-00269,2025-10-10,SAC,"Transferência de R$ 3.700,00 pra conta errada por erro do app. Banco diz que culpa é minha. Não foi minha digitação, foi sugestão automática.",Transferência,Aberta
+REC-2026-00270,2026-04-08,Ouvidoria,"Cartão de débito clonado em R$ 8.300,00. Banco diz que não cobre porque eu ativei o cartão fora do aplicativo.",Cartão de Débito,Aberta
+REC-2026-00271,2025-10-26,SAC,Tive que ir pessoalmente na agência pra tirar 2ª via de cartão porque o app não permite. Aplicativo serve pra quê?,,Aberta
+REC-2026-00272,2025-10-01,Ouvidoria,"Fui à agência Aclimação resolver problema com cobrança de R$ 18.500,00 e ninguém soube me explicar. Voltei pra casa sem solução.",,Resolvida
+REC-2026-00273,2026-01-21,SAC,"Desconto não autorizado de R$ 1.200,00 na minha conta corrente. Pediram pra esperar 30 dias úteis pra análise. É demais.",Conta Corrente,Resolvida
+REC-2026-00274,2026-02-11,Ouvidoria,Empréstimo aprovado mas dinheiro não caiu.,Empréstimo,Aberta
+REC-2026-00275,2026-02-19,Ouvidoria,"Solicitei adiamento de fatura de R$ 3.700,00 por dificuldade financeira. Atendente debochou: 'aprende a controlar dinheiro'.",Cartão de Crédito,Resolvida
+REC-2026-00276,2025-10-28,Ouvidoria,Cartão de débito virtual pra compras online é uma ideia genial. Mais segurança pra todos.,,Em análise
+REC-2026-00277,2025-10-02,Ouvidoria,Aplicativo mostra saldo de R$ 12.000 e o caixa diz que tenho R$ 6.000. Qual é o meu saldo de verdade?,Conta Corrente,Aberta
+REC-2026-00278,2025-07-14,Ouvidoria,"Previdência privada com taxa de carregamento de 4% e taxa de administração 3,5% ao ano. Estão é me empobrecendo.",Previdência,Em análise
+REC-2026-00279,2026-02-25,Ouvidoria,Fui cobrado duas vezes na fatura do cartão pela mesma compra no supermercado e ninguém resolve. Já liguei 4 vezes no SAC e cada atendente me passa pra outro. Quero o estorno IMEDIATO.,Cartão de Crédito,Resolvida
+REC-2026-00280,2026-02-15,Ouvidoria,Não consigo cancelar serviço de SMS.,,Em análise
+REC-2026-00281,2026-01-27,SAC,A função investimentos automáticos é incrível. Já economizei R$ 3 mil em 6 meses sem perceber.,,Em análise
+REC-2026-00282,2025-12-09,SAC,"Mãe, manda dinheiro pra eu pagar o aluguel. Tô apertado.",,Aberta
+REC-2026-00283,2025-07-05,SAC,Cachorro mordeu o cartão da máquina ao tentar comer (cheirinho de carne). Banco se recusa a emitir nova via porque 'não houve fraude'.,,Resolvida
+REC-2026-00284,2026-04-18,SAC,Reembolso de fraude foi feito em 3 dias úteis. Bem mais rápido que esperava.,,Em análise
+REC-2026-00285,2025-11-18,SAC,"Plano funerário oferecido pelo gerente do banco. Quando minha mãe faleceu, descobri que cobertura era apenas básica. Tive que pagar a diferença.",Plano Funerário,Em análise
+REC-2026-00286,2025-11-21,Redes Sociais,Cobrança de seguro que não contratei.,Seguro,Aberta
+REC-2026-00287,2026-01-24,Redes Sociais,Sou cliente há 30 anos e nunca tive problema. Atendimento sempre cordial e eficiente.,,Em análise
+REC-2026-00288,2025-09-02,Redes Sociais,Lançamento na fatura como 'COMPRAS DIVERSAS' sem identificar o estabelecimento. Como posso conferir se isso é meu ou não?,Cartão de Crédito,Aberta
+REC-2026-00289,2026-01-21,SAC,"Fiz a marmita do almoço, deixei na geladeira. É a azul.",,Aberta
+REC-2026-00290,2025-09-11,Redes Sociais,Cobrança de 'taxa de sucesso' de operação de câmbio que eu não autorizei. R$ 178 sumiram.,,Aberta
+REC-2026-00291,2025-11-06,Ouvidoria,Como faço pra denunciar meu vizinho que faz barulho?,,Resolvida
+REC-2026-00292,2026-03-06,Ouvidoria,Taxa de avaliação de imóvel pra financiamento custou R$ 1.450 e o financiamento foi negado depois. Cadê o estorno?,,Aberta
+REC-2026-00293,2025-09-06,SAC,"Gerente da agência Santana prometeu estorno de R$ 3.700,00, foram 4 meses, nada. Já não retorna minhas ligações.",,Resolvida
+REC-2026-00294,2025-06-25,Redes Sociais,"Limite de cheque especial reduzido sem aviso, conta entrou no negativo e cobraram juros de 12,7% ao mês. Isso é assalto formalizado.",Conta Corrente,Aberta
+REC-2026-00295,2025-08-03,Banco Central,"Senhor, sua encomenda chegou e está aguardando retirada nos correios da Vila Madalena.",,Em análise
+REC-2026-00296,2025-12-22,Banco Central,"Tarifa de R$ 18.500,00 chamada genericamente de 'serviços' sem detalhamento. O que é isso?",,Resolvida
+REC-2026-00297,2025-12-15,SAC,"Tarifa de R$ 4,90 por cada PIX a partir do quinto no mês. Conta digital deveria ser sem taxa.",PIX,Aberta
+REC-2026-00298,2026-02-10,SAC,Recebi PIX de pessoa desconhecida e dois dias depois ela me processou alegando golpe. Banco lavou as mãos.,PIX,Resolvida
+REC-2026-00299,2025-10-15,Redes Sociais,"Linha de crédito de R$ 3.700,00 aprovada e cancelada no mesmo dia sem explicação. Já organizei pagamentos com base nela.",Empréstimo,Resolvida
+REC-2026-00300,2025-07-11,Ouvidoria,"Profe, vou faltar amanhã na aula porque estou doente.",,Resolvida
+REC-2026-00301,2025-09-01,Ouvidoria,Seguro de vida cobrado mensalmente sem que eu tenha assinado contrato. Telemarketing ligou e eu disse 'vou pensar'.,Seguro,Aberta
+REC-2026-00302,2025-07-11,SAC,"Fundo de investimento com taxa de administração de 3,5% ao ano. Rendeu menos que a poupança.",Fundo de Investimento,Aberta
+REC-2026-00303,2026-01-15,Ouvidoria,"Gerente da agência Higienópolis prometeu estorno de R$ 12.700,00, foram 4 meses, nada. Já não retorna minhas ligações.",,Em análise
+REC-2026-00304,2026-01-14,SAC,Cobrança recorrente de uma plataforma de streaming que cancelei em 2024. Disputo todo mês e todo mês ela volta.,Cartão de Crédito,Aberta
+REC-2026-00305,2025-11-28,Ouvidoria,alguém comprou ovo pra páscoa esse ano?,,Em análise
+REC-2026-00306,2026-04-24,Redes Sociais,Empréstimo sob consignação intermediado por correspondente bancário com taxa 60% mais alta que diretamente no banco.,Empréstimo,Resolvida
+REC-2026-00307,2025-07-09,Banco Central,teste,,Em análise
+REC-2026-00308,2026-02-18,Redes Sociais,"Atendente me chamou de 'meu querido' o tempo todo. Quero respeito profissional, não intimidade.",,Resolvida
+REC-2026-00309,2025-06-16,SAC,"Pedi aumento de limite, foi negado, e dois dias depois chega proposta de cartão Black com limite de R$ 30 mil. Que palhaçada é essa?",Cartão de Crédito,Em análise
+REC-2026-00310,2026-01-11,SAC,"PIX agendado nunca foi executado, perdi prazo de aluguel e fui multado em R$ 500. Quem paga?",PIX,Aberta
+REC-2026-00311,2025-12-05,SAC,Anuidade cobrada mesmo após eu ter feito o gasto mínimo do cartão Premium. Atendimento diz que não cumpri a regra mas o app mostra que cumpri.,Cartão de Crédito,Resolvida
+REC-2026-00312,2025-06-17,Ouvidoria,Refinanciamento aumentou minha parcela em 40%. Onde está a vantagem prometida?,Empréstimo,Resolvida
+REC-2026-00313,2025-12-07,SAC,O aplicativo aprovou minha compra de R$ 2 mil mas o estabelecimento disse que foi negada. Acabei pagando duas vezes pra não passar vergonha.,Cartão de Crédito,Resolvida
+REC-2026-00314,2026-03-21,SAC,Cobrança de tarifa de cadastro de R$ 350 num empréstimo de R$ 2 mil. Quase 18% só pra abrir o processo.,Empréstimo,Em análise
+REC-2026-00315,2025-11-08,Ouvidoria,"Apareceu na fatura uma compra de R$ 8.300,00 numa cidade que eu nunca pisei. Cartão estava comigo. Como?",Cartão de Crédito,Aberta
+REC-2026-00316,2025-07-29,SAC,"Tive minha conta clonada, transferência de R$ 9 mil saiu via PIX pra desconhecido e o banco diz que a culpa é minha. Onde está a segurança?",Conta Corrente,Aberta
+REC-2026-00317,2026-02-21,SAC,"Notificação no celular dizendo 'você foi pré-aprovado'. Tentei aceitar, sistema diz que sou negativado. Como é?",,Em análise
+REC-2026-00318,2025-10-13,Banco Central,Boleto pago e Serasa negativou meu nome.,,Resolvida
+REC-2026-00319,2025-09-18,Redes Sociais,"Próximo passo é boletim de ocorrência. Estelionato é crime, sabiam?",,Aberta
+REC-2026-00320,2026-02-07,SAC,Se acontecer mais uma cobrança indevida eu vou na imprensa. Tenho contato com jornalista.,,Aberta
+REC-2026-00321,2025-07-08,Ouvidoria,"Fatura veio com saldo devedor zero, paguei o boleto referente, e mês seguinte chegou cobrança de juros por atraso. Como pode juros sobre zero?",Cartão de Crédito,Resolvida
+REC-2026-00322,2026-01-14,Redes Sociais,PIX agendado não foi feito.,PIX,Resolvida
+REC-2026-00323,2025-11-11,Banco Central,"Solicitei adiamento de fatura de R$ 3.700,00 por dificuldade financeira. Atendente debochou: 'aprende a controlar dinheiro'.",Cartão de Crédito,Resolvida
+REC-2026-00324,2026-03-09,Ouvidoria,Plano de saúde indicado pelo gerente. Operadora suspensa pela ANS um mês depois. Perdi R$ 2.800 de mensalidades.,Plano de Saúde,Resolvida
+REC-2026-00325,2025-08-20,Banco Central,Limite de cartão reduzido sem aviso.,Cartão de Crédito,Resolvida
+REC-2026-00326,2026-04-23,SAC,Chamei suporte por causa de transação suspeita. Atendente desligou na minha cara após 22 minutos.,,Em análise
+REC-2026-00327,2025-09-23,SAC,"Olá, sou da imobiliária. O imóvel da rua tal ainda está disponível?",,Aberta
+REC-2026-00328,2025-08-11,SAC,"Criança de 9 anos conseguiu fazer login na minha conta porque sabia minha senha que era 12345. Culpa minha, mas vocês deveriam exigir senha forte!",,Em análise
+REC-2026-00329,2025-12-02,Ouvidoria,Recebi um e-mail dizendo 'caro Sr João' sendo que sou Joana. Personalização péssima.,,Em análise
+REC-2026-00330,2026-03-10,SAC,"Investimento de R$ 18.500,00 resgatado com perda de R$ 25,00 de IOF que não foi alertado na hora.",Investimento,Resolvida
+REC-2026-00331,2025-07-04,SAC,"Pacote Premium custa R$ 38,50 mensais e não recebo nenhum benefício além do nome bonito.",,Resolvida
+REC-2026-00332,2026-02-01,Ouvidoria,Atendente passou minha ligação 6 vezes. Cada um pedia que eu repetisse a história desde o início.,,Resolvida
+REC-2026-00333,2026-03-22,SAC,Tarifa de manutenção de conta de R$ 67 cobrada mesmo eu sendo cliente correntista há 22 anos. Onde está a fidelidade?,Conta Corrente,Resolvida
+REC-2026-00334,2026-04-25,SAC,Quero parabenizar a atendente Camila da agência centro. Resolveu meu problema em 5 minutos com sorriso e paciência.,,Em análise
+REC-2026-00335,2026-02-20,SAC,"Fui à agência Bela Vista resolver problema com cobrança de R$ 3.700,00 e ninguém soube me explicar. Voltei pra casa sem solução.",,Resolvida
+REC-2026-00336,2026-03-10,Ouvidoria,"Fui à agência Bela Vista resolver problema com cobrança de R$ 3.700,00 e ninguém soube me explicar. Voltei pra casa sem solução.",,Aberta
+REC-2026-00337,2025-08-06,Ouvidoria,"Cobrança indevida de R$ 2.450,00 na minha fatura referente a serviço que nunca contratei. Já abri 3 protocolos e nada.",,Resolvida
+REC-2026-00338,2025-06-29,Redes Sociais,"Fui contratar empréstimo consignado, acabei saindo com cartão de crédito consignado sem entender. Mil vezes pior.",Empréstimo,Em análise
+REC-2026-00339,2025-11-03,SAC,Ouvidoria respondeu que 'a reclamação está fora do escopo'. Reclamei de uma tarifa indevida. Como isso está fora do escopo?,,Aberta
+REC-2026-00340,2025-09-24,SAC,"Recebi salário, no mesmo dia debitaram tarifa de TED, manutenção de conta, cesta de serviços e seguro. Sobrou metade.",Conta Corrente,Resolvida
+REC-2026-00341,2025-10-24,Redes Sociais,Sou cliente há 30 anos e nunca tive problema. Atendimento sempre cordial e eficiente.,,Aberta
+REC-2026-00342,2026-04-22,Redes Sociais,"Transferência de R$ 12.700,00 pra conta errada por erro do app. Banco diz que culpa é minha. Não foi minha digitação, foi sugestão automática.",Transferência,Aberta
+REC-2026-00343,2026-04-17,SAC,Fui muito bem atendido na agência mesmo sem ter horário marcado. Parabéns à equipe.,,Em análise
+REC-2026-00344,2026-02-13,Ouvidoria,"Boa noite, gostaria de cancelar minha assinatura da revista.",,Em análise
+REC-2026-00345,2026-03-25,SAC,Cartão chegou ATIVADO na minha caixa de correio aberta. Já tinha duas compras antes mesmo de eu receber.,Cartão de Crédito,Resolvida
+REC-2026-00346,2026-04-06,SAC,"Cartão de débito clonado em R$ 1.200,00. Banco diz que não cobre porque eu ativei o cartão fora do aplicativo.",Cartão de Débito,Resolvida
+REC-2026-00347,2025-06-22,Redes Sociais,Atendimento em LIBRAS na agência foi maravilhoso. Inclusão de verdade!,,Aberta
+REC-2026-00348,2025-06-24,Redes Sociais,"Solicitei portabilidade de salário, banco antigo segurou o processo por 4 meses. Lei diz 5 dias úteis.",,Resolvida
+REC-2026-00349,2025-10-14,Banco Central,Carteirinha do banco veio com nome errado: 'Maria de Fátima' virou 'Maria de Fátiba'. Erro de digitação não é meu problema.,,Resolvida
+REC-2026-00350,2025-12-31,Ouvidoria,Fiz simulação de empréstimo de R$ 10 mil em 24x e o contrato chegou com 36 parcelas. Cadê os 24 meses simulados?,Empréstimo,Aberta
+REC-2026-00351,2026-04-18,Ouvidoria,"Pacote Premium custa R$ 38,50 mensais e não recebo nenhum benefício além do nome bonito.",,Em análise
+REC-2026-00352,2025-11-02,Ouvidoria,Cobrança de R$ 12 pra cada saque acima de 4 por mês. Isso desestimula o uso do meu próprio dinheiro.,Conta Corrente,Resolvida
+REC-2026-00353,2025-12-25,SAC,Comprovante de PIX não chega no email cadastrado. Tive que abrir reclamação no Banco Central.,PIX,Aberta
+REC-2026-00354,2025-07-01,SAC,"Bloqueio preventivo de R$ 3.700,00 no meu cartão durante viagem internacional. Fiquei sem comer numa cidade estrangeira.",Cartão de Crédito,Em análise
+REC-2026-00355,2026-01-24,SAC,"Dia de pagamento do FGTS, sistema do banco fora do ar. Tive que ir 3 vezes na agência Barra Funda.",,Em análise
+REC-2026-00356,2025-11-08,Redes Sociais,PIX é uma maravilha. Banco já melhorou muito desde os tempos do DOC.,,Aberta
+REC-2026-00357,2025-11-24,Redes Sociais,Tesouro Direto retirado da conta e nunca apareceu na carteira. R$ 5 mil sumidos por 4 dias.,Tesouro Direto,Aberta
+REC-2026-00358,2025-12-07,Ouvidoria,"Tô vendo se isso aqui funciona, escrevi qualquer coisa pra ver",,Aberta
+REC-2026-00359,2025-10-02,Ouvidoria,Tenho 14 amigos correntistas desse banco e todos vão fechar conta junto comigo. Esperem só.,,Aberta
+REC-2026-00360,2025-10-05,SAC,Conta poupança rendendo menos que aplicação automática. Banco poderia avisar isso.,Poupança,Aberta
+REC-2026-00361,2025-12-14,Redes Sociais,"Tentei resolver questão de R$ 2.450,00 de tarifa pelo aplicativo, virou loop infinito de telas. Frustrante.",,Em análise
+REC-2026-00362,2025-08-21,Redes Sociais,LCI vendida como 'isenta de IR' com IOF que comeu o ganho. Onde está a isenção prometida?,LCI,Resolvida
+REC-2026-00363,2025-11-08,SAC,Empréstimo do FGTS aprovado mas o dinheiro nunca caiu. Já são 28 dias.,Empréstimo,Aberta
+REC-2026-00364,2026-02-19,Ouvidoria,Limite reduzido durante viagem.,Cartão de Crédito,Resolvida
+REC-2026-00365,2026-02-10,SAC,"Fui ao caixa eletrônico, a máquina engoliu meu cartão e a agência diz que precisa esperar 10 dias úteis pra emitir outro. Como vou viver sem cartão por 2 semanas?",Cartão de Crédito,Resolvida
+REC-2026-00366,2026-02-14,Ouvidoria,Já procurei advogado e a próxima parada é o Procon e o Banco Central. Vocês não fazem ideia do que vem aí.,,Aberta
+REC-2026-00367,2026-03-26,SAC,Pediram pra eu provar que sou eu mesma com 12 documentos. Incluindo certidão de nascimento. Eu tenho 67 anos.,,Aberta
+REC-2026-00368,2026-02-09,Ouvidoria,Seguro prestamista obrigatório no empréstimo de R$ 5 mil custou R$ 870 a mais. Não foi explicado na hora.,Empréstimo,Resolvida
+REC-2026-00369,2026-01-27,SAC,"Desconto não autorizado de R$ 12.700,00 na minha conta corrente. Pediram pra esperar 30 dias úteis pra análise. É demais.",Conta Corrente,Aberta
+REC-2026-00370,2025-07-26,Ouvidoria,Confirmando consulta veterinária da Bisteca amanhã às 10h.,,Resolvida
+REC-2026-00371,2025-12-05,Banco Central,Cabeça de boi na entrada da agência (em referência ao cofre) parece simbólico do tratamento que recebo.,,Em análise
+REC-2026-00372,2025-12-23,SAC,Seguro de vida cobrado mensalmente sem que eu tenha assinado contrato. Telemarketing ligou e eu disse 'vou pensar'.,Seguro,Em análise
+REC-2026-00373,2025-12-03,Ouvidoria,"Boa noite, quero agendar manutenção do ar condicionado.",,Aberta
+REC-2026-00374,2026-02-14,Ouvidoria,"Cartão de débito clonado em R$ 1.200,00. Banco diz que não cobre porque eu ativei o cartão fora do aplicativo.",Cartão de Débito,Em análise
+REC-2026-00375,2026-04-16,Banco Central,Cartão de débito virtual pra compras online é uma ideia genial. Mais segurança pra todos.,,Aberta
+REC-2026-00376,2025-07-20,SAC,"Chave aleatória do PIX vazou em golpe, mudei a chave, golpistas continuam tentando contato. Banco não me protege.",PIX,Resolvida
+REC-2026-00377,2025-11-21,Ouvidoria,Preciso da receita do bolo de cenoura da minha vó. Alguém aí sabe?,,Em análise
+REC-2026-00378,2025-08-13,SAC,Vou abrir uma ação coletiva. Já estou em contato com outros clientes prejudicados.,,Em análise
+REC-2026-00379,2026-02-12,SAC,Estou gravando todas as ligações e vou usar como prova. Vocês deveriam estar preocupados.,,Aberta
+REC-2026-00380,2025-11-18,Redes Sociais,Mensagens automáticas do banco vêm em português mal traduzido do inglês. 'Você foi creditado!' parece tradução de IA barata.,,Em análise
+REC-2026-00381,2025-08-16,Ouvidoria,Pacote de serviços que eu pedi pra cancelar há 6 meses continua sendo debitado todo mês. Vão me devolver tudo com correção.,Conta Corrente,Em análise
+REC-2026-00382,2025-11-15,Redes Sociais,Preciso da receita do bolo de cenoura da minha vó. Alguém aí sabe?,,Aberta
+REC-2026-00383,2025-12-19,Redes Sociais,Atendente da Ouvidoria me ouviu com paciência e resolveu uma reclamação antiga. Recomendo demais.,,Resolvida
+REC-2026-00384,2025-11-01,Ouvidoria,Aplicativo mostra saldo de R$ 12.000 e o caixa diz que tenho R$ 6.000. Qual é o meu saldo de verdade?,Conta Corrente,Em análise
+REC-2026-00385,2026-02-16,Ouvidoria,Empréstimo sob consignação intermediado por correspondente bancário com taxa 60% mais alta que diretamente no banco.,Empréstimo,Resolvida
+REC-2026-00386,2025-11-01,Ouvidoria,Pacote de tarifas mudou pra um mais caro automaticamente após mudança de pacote. Não autorizei isso.,Conta Corrente,Aberta
+REC-2026-00387,2025-11-17,Banco Central,Tive que ir pessoalmente na agência pra tirar 2ª via de cartão porque o app não permite. Aplicativo serve pra quê?,,Resolvida
+REC-2026-00388,2026-03-26,SAC,Fim de semana inteiro sem acesso à conta porque vocês estavam 'em manutenção'. Tive que pedir dinheiro emprestado.,Conta Corrente,Resolvida
+REC-2026-00389,2026-04-19,SAC,"O novo aplicativo está fantástico! Bem mais rápido que o anterior, parabéns à equipe de TI.",,Em análise
+REC-2026-00390,2026-03-24,Ouvidoria,"Dia de pagamento do FGTS, sistema do banco fora do ar. Tive que ir 3 vezes na agência Vila Mariana.",,Resolvida
+REC-2026-00391,2026-03-26,Ouvidoria,"Bloqueio preventivo de R$ 18.500,00 no meu cartão durante viagem internacional. Fiquei sem comer numa cidade estrangeira.",Cartão de Crédito,Em análise
+REC-2026-00392,2026-04-14,Banco Central,PIX devolvido pelo banco do destinatário e o dinheiro não voltou pra minha conta. Sumiu no meio do caminho.,PIX,Em análise
+REC-2026-00393,2025-10-03,SAC,"Criança de 9 anos conseguiu fazer login na minha conta porque sabia minha senha que era 12345. Culpa minha, mas vocês deveriam exigir senha forte!",,Resolvida
+REC-2026-00394,2025-07-27,SAC,Taxa de avaliação de imóvel pra financiamento custou R$ 1.450 e o financiamento foi negado depois. Cadê o estorno?,,Em análise
+REC-2026-00395,2026-01-01,SAC,Cobraram seguro proteção do cartão que eu recusei na hora da venda. A gravação da minha ligação prova que eu disse NÃO.,Cartão de Crédito,Resolvida
+REC-2026-00396,2025-12-28,Ouvidoria,"Vou viajar amanhã, alguém pode dar uma olhada nas plantas?",,Em análise
+REC-2026-00397,2026-01-28,Redes Sociais,Pix não cai há horas.,PIX,Resolvida
+REC-2026-00398,2025-07-02,Banco Central,Atendimento por chat me deixa esperando 45 minutos pra dizer 'precisa ir na agência'. Pra que existe o chat então?,,Em análise
+REC-2026-00399,2026-03-15,SAC,"Apareceu na fatura uma compra de R$ 5.890,00 numa cidade que eu nunca pisei. Cartão estava comigo. Como?",Cartão de Crédito,Resolvida
+REC-2026-00400,2026-02-25,SAC,Liberação do empréstimo demorou 23 dias úteis e a oferta era 'liberação imediata'. Perdi a oportunidade de negócio.,Empréstimo,Resolvida
+REC-2026-00401,2026-01-22,Redes Sociais,O gerente João da agência Tatuapé é um exemplo de profissionalismo. Resolveu uma situação complicada com calma.,,Aberta
+REC-2026-00402,2025-11-29,Banco Central,"Cobrança de seguro residencial de R$ 25,00 mensal sem que eu tenha autorizado. Já são 14 meses descontando.",Seguro,Resolvida
+REC-2026-00403,2025-10-14,Ouvidoria,Anuidade de cartão Black de R$ 1.190 cobrada apesar de eu ter cancelado o cartão antes do vencimento.,Cartão de Crédito,Aberta
+REC-2026-00404,2025-10-05,SAC,Funcionário da agência atendeu falando alto sobre meus saldos onde outros clientes ouviram. Privacidade?,,Aberta
+REC-2026-00405,2025-10-31,Banco Central,Pode mandar a localização?,,Resolvida
+REC-2026-00406,2026-02-06,SAC,"Pedi um Uber pra rua das Flores 234, é o cinza?",,Aberta
+REC-2026-00407,2025-10-19,SAC,"Dia de pagamento do FGTS, sistema do banco fora do ar. Tive que ir 3 vezes na agência Vila Mariana.",,Em análise
+REC-2026-00408,2026-03-06,SAC,"A agência fechou e me transferiram pra uma a 14 km da minha casa sem perguntar. Sou idosa, não dirijo.",Conta Corrente,Resolvida
+REC-2026-00409,2025-11-24,Redes Sociais,Esse banco tem estacionamento? E pra cachorro pode entrar?,,Resolvida
+REC-2026-00410,2025-10-27,SAC,Aplicativo do banco trava toda vez que tento acessar fatura do cartão. Já reinstalei 3 vezes.,,Resolvida
+REC-2026-00411,2025-07-11,SAC,"Promessa do gerente de R$ 500 de bônus por indicação de amigo. Amigo abriu conta, bônus nunca chegou. Já são 5 meses.",,Em análise
+REC-2026-00412,2025-10-10,Banco Central,Cobrança recorrente que cancelei já.,,Aberta
+REC-2026-00413,2026-03-03,SAC,Limite reduzido sem aviso de R$ 8.000 pra R$ 1.500 no meio de uma viagem internacional. Tive que voltar antes do tempo. Inaceitável.,Cartão de Crédito,Em análise
+REC-2026-00414,2025-10-18,SAC,Limite de cartão reduzido sem aviso.,Cartão de Crédito,Em análise
+REC-2026-00415,2026-03-28,SAC,Plano de saúde indicado pelo gerente. Operadora suspensa pela ANS um mês depois. Perdi R$ 2.800 de mensalidades.,Plano de Saúde,Aberta
+REC-2026-00416,2026-02-27,SAC,teste 123 alguem ai?,,Aberta
+REC-2026-00417,2025-07-22,Ouvidoria,"Gerente da agência Jardins prometeu estorno de R$ 8.300,00, foram 4 meses, nada. Já não retorna minhas ligações.",,Resolvida
+REC-2026-00418,2025-07-22,Banco Central,"Fatura veio com saldo devedor zero, paguei o boleto referente, e mês seguinte chegou cobrança de juros por atraso. Como pode juros sobre zero?",Cartão de Crédito,Aberta
+REC-2026-00419,2026-03-09,Redes Sociais,"Aqui é a Marina, será que essa é a área de atendimento mesmo?",,Aberta
+REC-2026-00420,2026-01-30,Ouvidoria,Esse banco tem estacionamento? E pra cachorro pode entrar?,,Aberta
+REC-2026-00421,2025-10-26,SAC,Linha de crédito pra pequeno empresário foi essencial pra meu negócio sobreviver. Gratidão.,,Em análise
+REC-2026-00422,2025-07-16,Banco Central,Cobrança duplicada na fatura.,Cartão de Crédito,Aberta
+REC-2026-00423,2025-06-20,Redes Sociais,"Bloqueio preventivo de R$ 2.450,00 no meu cartão durante viagem internacional. Fiquei sem comer numa cidade estrangeira.",Cartão de Crédito,Aberta
+REC-2026-00424,2025-08-30,Redes Sociais,"Apareceu na fatura uma compra de R$ 12.700,00 numa cidade que eu nunca pisei. Cartão estava comigo. Como?",Cartão de Crédito,Aberta
+REC-2026-00425,2025-12-21,Banco Central,"Empréstimo com garantia de imóvel, casa avaliada em R$ 450 mil, me ofereceram apenas R$ 80 mil de crédito. Avaliação é palhaçada.",Empréstimo,Aberta
+REC-2026-00426,2025-10-27,Redes Sociais,"Compra parcelada em 10x vinha sem juros e na fatura tem juros de 4,9% ao mês. Onde está o sem juros prometido?",Cartão de Crédito,Aberta
+REC-2026-00427,2026-03-18,Ouvidoria,Conta bloqueada sem motivo.,Conta Corrente,Resolvida
+REC-2026-00428,2025-11-19,SAC,Oi tudo bem? rs como vc tá?,,Resolvida
+REC-2026-00429,2026-03-06,Ouvidoria,Cartão clonado pela TERCEIRA vez este ano. O que vocês estão fazendo com a segurança?,Cartão de Crédito,Resolvida
+REC-2026-00430,2025-08-08,Redes Sociais,Pacote de serviços que eu pedi pra cancelar há 6 meses continua sendo debitado todo mês. Vão me devolver tudo com correção.,Conta Corrente,Em análise
+REC-2026-00431,2025-09-07,Redes Sociais,Se não resolverem isso até amanhã eu vou processar o banco e exigir reparação por danos morais.,,Aberta
+REC-2026-00432,2026-01-21,Ouvidoria,"Bom dia, alguém sabe que horas joga o Flamengo hoje?",,Resolvida
+REC-2026-00433,2025-06-08,Banco Central,Solicitei extrato dos últimos 5 anos pro imposto de renda e cobraram R$ 45 por ano. R$ 225 pra ver meu próprio histórico?,Conta Corrente,Resolvida
+REC-2026-00434,2026-03-18,Banco Central,"Banco abriu nova versão do app, perdi acesso aos meus investimentos por 8 dias. Mercado oscilou e eu sem agir.",,Aberta
+REC-2026-00435,2026-04-09,Redes Sociais,"Banco enviou cartão de aniversário... pra meu pai. Que faleceu há 4 anos. Cliente desde 1971, trataram com respeito até o fim.",,Resolvida
+REC-2026-00436,2026-01-05,Ouvidoria,Agendamento online da agência funciona perfeito. Cheguei e fui atendido na hora.,,Aberta
+REC-2026-00437,2025-07-19,SAC,Pacote de relacionamento Premium prometia atendimento prioritário. Espero 40 minutos no telefone igual aos outros.,,Aberta
+REC-2026-00438,2025-11-13,Redes Sociais,"Chave aleatória do PIX vazou em golpe, mudei a chave, golpistas continuam tentando contato. Banco não me protege.",PIX,Aberta
+REC-2026-00439,2025-12-14,SAC,"Música de espera do telefone do banco é 'Nessun Dorma'. Adequada, porque ninguém dorme esperando atendimento.",,Resolvida
+REC-2026-00440,2025-11-16,SAC,"Achei um cachorro perdido perto da agência, alguém perdeu?",,Resolvida
+REC-2026-00441,2025-06-06,SAC,"Consórcio de carro vendido na agência, contemplei no primeiro mês, valor liberado é R$ 12 mil menor que o do consórcio. Sumiu na taxa de administração.",Consórcio,Em análise
+REC-2026-00442,2025-09-29,SAC,Tarifa de R$ 35 cada vez que eu altero a senha do cartão. Como assim?,,Aberta
+REC-2026-00443,2025-11-05,SAC,Tarifa de R$ 89 chamada 'serviço de proteção premium' que eu NUNCA contratei. Quero o estorno dos últimos 12 meses.,Cartão de Crédito,Resolvida
+REC-2026-00444,2025-11-07,Banco Central,Fui cobrado duas vezes na fatura do cartão pela mesma compra no supermercado e ninguém resolve. Já liguei 4 vezes no SAC e cada atendente me passa pra outro. Quero o estorno IMEDIATO.,Cartão de Crédito,Em análise
+REC-2026-00445,2025-10-30,SAC,"A reforma da agência Pinheiros ficou linda. Ambiente acolhedor, parabéns.",,Aberta
+REC-2026-00446,2025-08-08,Ouvidoria,Capitalização vendida como 'investimento garantido'. Resgate menor que o aplicado depois de 2 anos. Onde está o garantido?,Capitalização,Em análise
+REC-2026-00447,2026-04-07,SAC,"Dia de pagamento do FGTS, sistema do banco fora do ar. Tive que ir 3 vezes na agência Tatuapé.",,Resolvida
+REC-2026-00448,2026-01-28,Banco Central,"Faltou pagar a faxineira, vou passar o pix dela?",,Resolvida
+REC-2026-00449,2025-09-20,Banco Central,"Pedi um Uber pra rua das Flores 234, é o cinza?",,Resolvida
+REC-2026-00450,2026-04-02,Redes Sociais,Minha aposentadoria caiu antes do prazo. Quero agradecer pela agilidade.,,Aberta
+REC-2026-00451,2026-01-15,Ouvidoria,"Pedido confirmado: 1 pizza calabresa, 1 refrigerante 2L. Entrega em 40min.",,Em análise
+REC-2026-00452,2026-03-16,SAC,PIX agendado não foi feito.,PIX,Resolvida
+REC-2026-00453,2026-02-14,SAC,A função investimentos automáticos é incrível. Já economizei R$ 3 mil em 6 meses sem perceber.,,Em análise
+REC-2026-00454,2025-08-24,SAC,Plano odontológico cobrado na minha conta há 8 meses. Eu nunca contratei NENHUM plano odontológico.,Plano Odontológico,Em análise
+REC-2026-00455,2025-07-30,Banco Central,Estou impressionado com a rapidez do atendimento via chat. Em menos de 3 minutos meu problema foi resolvido.,,Resolvida
+REC-2026-00456,2026-02-06,SAC,Banco vazou meus dados pessoais e agora recebo ligações de golpistas usando informações que só vocês tinham.,,Em análise
+REC-2026-00457,2025-06-29,Ouvidoria,"A reforma da agência Pinheiros ficou linda. Ambiente acolhedor, parabéns.",,Em análise
+REC-2026-00458,2026-01-20,Ouvidoria,Conta poupança rendendo menos que aplicação automática. Banco poderia avisar isso.,Poupança,Em análise
+REC-2026-00459,2025-11-05,Banco Central,Cobrança chamada 'tarifa de adesão a serviços' de R$ 75 que ninguém sabe explicar o que é.,,Em análise
+REC-2026-00460,2025-06-02,Banco Central,Pontos do programa de fidelidade desapareceram. Tinha 47 mil pontos no mês passado e hoje só tem 12 mil. Cadê meus pontos?,Cartão de Crédito,Em análise
+REC-2026-00461,2025-06-24,Ouvidoria,Tô a caminho,,Resolvida
+REC-2026-00462,2026-03-05,Redes Sociais,"Meu gerente foi promovido e a nova gerente é uma pedra. Faço reuniões com uma cadeira vazia, ninguém me liga.",,Resolvida
+REC-2026-00463,2025-07-06,Redes Sociais,"Treinamento dos atendentes melhorou muito. Antes era horrível, hoje é satisfatório.",,Em análise
+REC-2026-00464,2025-10-25,Ouvidoria,Educação financeira oferecida pelo banco me ajudou muito a sair das dívidas. Obrigado!,,Resolvida
+REC-2026-00465,2026-04-25,Redes Sociais,Atendimento por chat me deixa esperando 45 minutos pra dizer 'precisa ir na agência'. Pra que existe o chat então?,,Em análise
+REC-2026-00466,2026-01-02,SAC,Tem alguma vaga pra estagiário? Sou universitário do 5º período.,,Resolvida
+REC-2026-00467,2026-01-16,Redes Sociais,"Cobrança indevida de R$ 18.500,00 na minha fatura referente a serviço que nunca contratei. Já abri 3 protocolos e nada.",,Resolvida
+REC-2026-00468,2025-12-10,SAC,Transferência internacional via SWIFT cobrou R$ 290 de tarifa pra mandar US$ 200. 1/3 do valor em taxa.,Transferência,Resolvida
+REC-2026-00469,2026-03-04,SAC,Educação financeira oferecida pelo banco me ajudou muito a sair das dívidas. Obrigado!,,Resolvida
+REC-2026-00470,2025-07-31,SAC,"Meu gerente foi promovido e a nova gerente é uma pedra. Faço reuniões com uma cadeira vazia, ninguém me liga.",,Em análise
+REC-2026-00471,2026-02-26,SAC,Aplicativo travado há 3 dias.,,Resolvida
+REC-2026-00472,2025-06-02,Banco Central,?????,,Resolvida
+REC-2026-00473,2026-01-24,Banco Central,Cheguei,,Em análise
+REC-2026-00474,2026-02-28,SAC,"Promessa do gerente de R$ 500 de bônus por indicação de amigo. Amigo abriu conta, bônus nunca chegou. Já são 5 meses.",,Aberta
+REC-2026-00475,2026-01-22,SAC,O gerente João da agência Tatuapé é um exemplo de profissionalismo. Resolveu uma situação complicada com calma.,,Aberta
+REC-2026-00476,2025-07-28,SAC,PIX pra chave errada por causa do auto-completar do app. Banco diz que não pode reverter. R$ 2.300 perdidos.,PIX,Resolvida
+REC-2026-00477,2026-04-11,Banco Central,"Bloqueio preventivo de R$ 12.700,00 no meu cartão durante viagem internacional. Fiquei sem comer numa cidade estrangeira.",Cartão de Crédito,Resolvida
+REC-2026-00478,2025-06-09,SAC,Cartão clonado pela TERCEIRA vez este ano. O que vocês estão fazendo com a segurança?,Cartão de Crédito,Aberta
+REC-2026-00479,2026-04-01,SAC,Atendimento horrível na agência tal.,,Em análise
+REC-2026-00480,2025-06-25,SAC,Empréstimo aprovado mas dinheiro não caiu.,Empréstimo,Aberta
+REC-2026-00481,2026-01-11,SAC,"Bloqueio preventivo de R$ 2.450,00 no meu cartão durante viagem internacional. Fiquei sem comer numa cidade estrangeira.",Cartão de Crédito,Aberta
+REC-2026-00482,2025-06-29,SAC,Tarifa indevida no extrato. Quero estorno.,,Resolvida
+REC-2026-00483,2025-09-28,Redes Sociais,Vou expor essa palhaçada toda nas redes sociais com nomes de funcionários e tudo. Aguardem viralizar.,,Resolvida
+REC-2026-00484,2025-11-11,Ouvidoria,Solicitei o cancelamento do cartão extra da minha esposa há 3 meses e continua chegando fatura com anuidade. Vocês são surdos?,Cartão de Crédito,Resolvida
+REC-2026-00485,2025-11-12,SAC,"Caí na piscina com o celular, vai dar pra recuperar minha conta?",,Resolvida
+REC-2026-00486,2026-02-22,SAC,Fui muito bem atendido na agência mesmo sem ter horário marcado. Parabéns à equipe.,,Aberta
+REC-2026-00487,2025-07-02,Ouvidoria,"Olá, recebi seu currículo e gostaria de marcar uma entrevista.",,Em análise
+REC-2026-00488,2025-08-29,Ouvidoria,"Amor, não esquece de buscar o pão. E o leite também. Beijos.",,Em análise
+REC-2026-00489,2026-02-09,SAC,"Transferência DOC ainda existe nesse banco e custa R$ 18,50. Em 2026? Pra onde fui mandar dinheiro, época das cavernas?",Conta Corrente,Aberta
+REC-2026-00490,2025-12-13,Banco Central,"Ações compradas via home broker com taxa de corretagem absurda. R$ 19,90 por ordem em 2026?",Ações,Aberta
+REC-2026-00491,2025-12-31,Ouvidoria,"Solicitei adiamento de fatura de R$ 3.700,00 por dificuldade financeira. Atendente debochou: 'aprende a controlar dinheiro'.",Cartão de Crédito,Aberta
+REC-2026-00492,2025-09-03,Banco Central,CDB com promessa de 110% do CDI rendendo apenas 87% no extrato. Conferi todos os meses.,CDB,Em análise
+REC-2026-00493,2025-09-24,SAC,"Fui à agência Tatuapé resolver problema com cobrança de R$ 2.450,00 e ninguém soube me explicar. Voltei pra casa sem solução.",,Resolvida
+REC-2026-00494,2026-01-24,Redes Sociais,Cobrança de tarifa de extrato impresso na agência. R$ 6 pra ver meu próprio dinheiro?,,Em análise
+REC-2026-00495,2025-12-31,Ouvidoria,Tarifa de R$ 89 chamada 'serviço de proteção premium' que eu NUNCA contratei. Quero o estorno dos últimos 12 meses.,Cartão de Crédito,Aberta
+REC-2026-00496,2025-10-03,SAC,"Apareceu na fatura uma compra de R$ 5.890,00 numa cidade que eu nunca pisei. Cartão estava comigo. Como?",Cartão de Crédito,Aberta
+REC-2026-00497,2025-07-11,Redes Sociais,Banco fechou minha conta por 'incompatibilidade de movimentação' depois que recebi minha herança. Tratado como criminoso.,Conta Corrente,Resolvida
+REC-2026-00498,2025-07-18,Ouvidoria,"Procurando emprego, vocês contratam? Mando currículo?",,Resolvida
+REC-2026-00499,2025-06-27,SAC,Tarifa de manutenção de cofre alugado dobrou de valor sem aviso. R$ 280 pra R$ 560.,,Resolvida
+REC-2026-00500,2026-04-05,SAC,"Bloqueio preventivo de R$ 12.700,00 no meu cartão durante viagem internacional. Fiquei sem comer numa cidade estrangeira.",Cartão de Crédito,Aberta
