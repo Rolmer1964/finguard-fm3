@@ -1,0 +1,16 @@
+id,data_reclamacao,canal,texto_reclamacao,produto,status
+REC-2026-00001,2026-01-27,Ouvidoria,"App acessível pra deficiente visual. Como cego, agradeço a preocupação com a acessibilidade.",,Aberta
+REC-2026-00002,2025-06-27,SAC,Recebo correspondências em endereço antigo apesar de ter atualizado o endereço 3 vezes. Carta importante voltou.,,Resolvida
+REC-2026-00003,2025-07-29,Redes Sociais,"Apareceu na fatura uma compra de R$ 3.700,00 numa cidade que eu nunca pisei. Cartão estava comigo. Como?",Cartão de Crédito,Em análise
+REC-2026-00004,2025-07-08,Ouvidoria,"Cobrança de 'serviço de proteção financeira' que eu nunca contratei. R$ 38,90 por mês há 2 anos.",,Resolvida
+REC-2026-00005,2025-08-17,SAC,Título de capitalização presente de aniversário do banco. Resgate só após 5 anos com perda de 50% do valor. Que presente.,Capitalização,Em análise
+REC-2026-00006,2025-11-03,SAC,PIX feito há 6 horas para minha mãe ainda não caiu. Disseram que é 'instantâneo'. Que tipo de instante é esse?,PIX,Aberta
+REC-2026-00007,2026-03-13,Banco Central,vc viu meu post novo?,,Em análise
+REC-2026-00008,2026-04-13,SAC,Banco patrocinando cultura. Vi a exposição patrocinada por vocês e foi linda.,,Em análise
+REC-2026-00009,2026-01-17,Redes Sociais,"Solicitei portabilidade de salário, banco antigo segurou o processo por 4 meses. Lei diz 5 dias úteis.",,Aberta
+REC-2026-00010,2026-03-29,Redes Sociais,"Linha de crédito de R$ 3.700,00 aprovada e cancelada no mesmo dia sem explicação. Já organizei pagamentos com base nela.",Empréstimo,Aberta
+REC-2026-00011,2026-04-14,SAC,"Gerente do banco bloqueou meu WhatsApp porque eu estava reclamando demais. Sou cliente, não amigo dele.",,Resolvida
+REC-2026-00012,2025-07-21,Redes Sociais,"Promessa de cartão sem anuidade vitalícia na contratação. Hoje, 18 meses depois, começaram a cobrar. Tenho gravação da ligação.",Cartão de Crédito,Aberta
+REC-2026-00013,2025-09-17,SAC,Tarifa de manutenção mais cara que rendimento.,Conta Corrente,Aberta
+REC-2026-00014,2025-10-01,SAC,Compra estornada pelo lojista há 45 dias e até agora nada na minha fatura. O dinheiro está retido por vocês.,Cartão de Crédito,Aberta
+REC-2026-00015,2025-06-02,Ouvidoria,"Previdência privada com taxa de carregamento de 4% e taxa de administração 3,5% ao ano. Estão é me empobrecendo.",Previdência,Resolvida
