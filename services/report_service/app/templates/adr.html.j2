@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>FinGuard — ADR (Architectural Decision Record)</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 32px auto; max-width: 980px; color: #1f2937; line-height: 1.55; }
+  nav { position: sticky; top: 0; background: white; border-bottom: 1px solid #e5e7eb; padding: 8px 0; margin-bottom: 16px; }
+  nav a { margin-right: 16px; color: #2563eb; text-decoration: none; font-size: 14px; }
+  h1 { margin-bottom: 4px; }
+  .meta { color: #6b7280; margin-bottom: 24px; }
+  section { margin-bottom: 36px; }
+  h2 { border-bottom: 2px solid #2563eb; padding-bottom: 4px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { padding: 8px; border: 1px solid #e5e7eb; text-align: left; vertical-align: top; font-size: 14px; }
+  th { background: #f3f4f6; }
+  code { background: #f3f4f6; padding: 1px 6px; border-radius: 4px; font-size: 13px; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .ok { background: #d1fae5; color: #065f46; }
+  .warn { background: #fef3c7; color: #92400e; }
+</style>
+</head>
+<body>
+<nav>
+  <a href="#contexto">Contexto</a>
+  <a href="#alternativas">Alternativas</a>
+  <a href="#decisao">Decisão</a>
+  <a href="#consequencias">Consequências</a>
+  <a href="#custos">Custos</a>
+  <a href="#seguranca">Segurança</a>
+</nav>
+
+<h1>ADR — FinGuard</h1>
+<div class="meta">Versão gerada em {{ generated_at }}</div>
+
+<section id="contexto">
+<h2>1. Contexto</h2>
+<p>Instituições financeiras processam milhares de reclamações por canais como SAC, Ouvidoria, Banco Central, Procon e redes sociais. O texto chega não-padronizado, com erros, palavras impróprias e diferentes níveis de urgência. A triagem manual é lenta, inconsistente e propensa a erros nos picos de volume.</p>
+<p>O <strong>FinGuard</strong> automatiza esse fluxo: recebe a reclamação em texto livre, classifica, avalia risco/conformidade contra a política interna e emite um relatório gerencial com escalações.</p>
+</section>
+
+<section id="alternativas">
+<h2>2. Alternativas consideradas</h2>
+<table>
+  <thead><tr><th>Opção</th><th>Prós</th><th>Contras</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>A. Monolito FastAPI com LangGraph embutido</strong></td>
+      <td>Simples, baixa latência interna, deploy único.</td>
+      <td>Acoplamento; difícil escalar partes (LLM x persistência) independentemente.</td>
+    </tr>
+    <tr>
+      <td><strong>B. Microsserviços reais (escolhida)</strong></td>
+      <td>Responsabilidades isoladas (auth, persistência, orquestração, relatórios). Permite escalar o orquestrador (caro) sem afetar auth (barato). Cada serviço dono do seu schema.</td>
+      <td>Mais containers, mais latência inter-serviço, mais complexidade de operação.</td>
+    </tr>
+    <tr>
+      <td><strong>C. Serverless (Lambda + Step Functions)</strong></td>
+      <td>Escala sob demanda, sem manutenção de infra.</td>
+      <td>Cold starts; orquestração de LangGraph em Step Functions vira boilerplate; dependência de cloud lock-in.</td>
+    </tr>
+  </tbody>
+</table>
+</section>
+
+<section id="decisao">
+<h2>3. Decisão</h2>
+<p>Adotada a <strong>opção B</strong>: microsserviços reais coordenados por um API Gateway FastAPI atrás de JWT. Cada serviço (<code>auth</code>, <code>complaints</code>, <code>orchestrator</code>, <code>reports</code>) tem o próprio schema no PostgreSQL e seu próprio ciclo de release. O grafo LangGraph fica isolado no <code>agent_orchestrator</code>, podendo escalar verticalmente conforme custo/latência de Bedrock.</p>
+<p>O Gateway é a única fronteira pública e propaga <code>X-User-Id</code> aos serviços internos via rede privada do compose.</p>
+</section>
+
+<section id="consequencias">
+<h2>4. Consequências (trade-offs)</h2>
+<ul>
+  <li><strong>Positivo:</strong> isolamento real de responsabilidade; possibilidade de escalar/ trocar tecnologia em um serviço sem afetar os demais; ciclo de release independente.</li>
+  <li><strong>Positivo:</strong> auditoria mais clara: cada serviço gera seus próprios logs estruturados (entrada, saída e tempo por agente).</li>
+  <li><strong>Negativo:</strong> overhead operacional (5 containers de Python + Postgres + frontend); rede do compose introduz pequena latência adicional.</li>
+  <li><strong>Negativo:</strong> autenticação service-to-service confia na rede privada do compose. Em produção, usar mTLS ou JWTs internos.</li>
+</ul>
+</section>
+
+<section id="custos">
+<h2>5. Análise de custos (Bedrock)</h2>
+<p>Combinação estratégica de modelos para minimizar gasto sem sacrificar qualidade:</p>
+<table>
+  <thead><tr><th>Etapa</th><th>Modelo</th><th>Justificativa</th></tr></thead>
+  <tbody>
+    <tr><td>Triagem (categoria, produto, sentimento, urgência, resumo)</td><td><code>{{ models.triage }}</code></td><td>Classificação simples, alta volumetria. Haiku oferece boa acurácia a fração do custo de Sonnet.</td></tr>
+    <tr><td>Análise de risco/conformidade</td><td><code>{{ models.risk }}</code></td><td>Requer raciocínio sobre política interna e detecção sutil de fraude/LGPD. Sonnet justifica o custo extra.</td></tr>
+    <tr><td>Consolidação de relatório</td><td><code>{{ models.report }}</code> (montagem determinística sem LLM extra)</td><td>Economia direta: a consolidação é JSON puro, não precisa de chamada adicional.</td></tr>
+  </tbody>
+</table>
+<p>Resultado esperado: ~80% das chamadas no modelo barato, ~20% no modelo caro, sem comprometer a qualidade da etapa crítica de risco.</p>
+{% if d and d.total %}
+<p><strong>Volume processado até agora:</strong> {{ d.total }} reclamações ({{ d.blocked }} bloqueadas pelo guardrail).</p>
+{% endif %}
+</section>
+
+<section id="seguranca">
+<h2>6. Recomendações de segurança</h2>
+<ul>
+  <li><strong>Guardrail de entrada (Bedrock):</strong> bloqueia prompt injection, jailbreak, exfiltração e mensagens fora do escopo. Resposta de bloqueio educada em PT-BR sem expor internals.</li>
+  <li><strong>Guardrail de saída:</strong> redaction de PII (CPF, conta, cartão) por regex antes da persistência; tom profissional garantido pelos prompts.</li>
+  <li><strong>JWT:</strong> HS256 com segredo gerado por <code>openssl rand -hex 32</code>, expiração de 24h. Em produção, mover para RS256 com rotação de chaves.</li>
+  <li><strong>Senhas:</strong> bcrypt com cost padrão (passlib).</li>
+  <li><strong>Rede:</strong> apenas o gateway expõe porta para o host. Postgres e demais serviços ficam na rede privada do compose.</li>
+  <li><strong>Scan automatizado:</strong> Bandit, Semgrep, pip-audit, npm audit e Trivy rodam via <code>make security-scan</code> e geram relatório versionado.</li>
+  <li><strong>Sem dados reais de cliente:</strong> dataset é exclusivamente sintético, conforme nota de compromisso do desafio.</li>
+</ul>
+</section>
+</body>
+</html>

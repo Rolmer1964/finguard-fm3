@@ -1,0 +1,39 @@
+# Env
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+.vite/
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Data / outputs
+data/reports/*.html
+data/synthetic_complaints.csv
+
+# Security scan
+infra/security/report-*.md
+infra/security/raw/
+
+# Postgres volume
+postgres-data/

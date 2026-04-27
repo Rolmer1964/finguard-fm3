@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>FinGuard — Relatório Gerencial</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 24px; color: #1f2937; background: #f9fafb; }
+  h1 { margin-bottom: 4px; }
+  .meta { color: #6b7280; margin-bottom: 24px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+  .card { background: white; padding: 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .kpi { display: flex; gap: 16px; margin-bottom: 24px; }
+  .kpi .card { flex: 1; text-align: center; }
+  .kpi .v { font-size: 32px; font-weight: 700; }
+  .kpi .l { color: #6b7280; font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: top; font-size: 13px; }
+  th { background: #f3f4f6; }
+  .pill { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .pill.crit { background: #fee2e2; color: #991b1b; }
+  .pill.alta { background: #fed7aa; color: #9a3412; }
+  .pill.media { background: #fef3c7; color: #92400e; }
+  .pill.baixa { background: #d1fae5; color: #065f46; }
+  ul.recs li { margin: 6px 0; }
+</style>
+</head>
+<body>
+<h1>FinGuard — Relatório Gerencial</h1>
+<div class="meta">Gerado em {{ generated_at }}</div>
+
+<div class="kpi">
+  <div class="card"><div class="v">{{ d.total }}</div><div class="l">Total de reclamações</div></div>
+  <div class="card"><div class="v">{{ d.critical|length }}</div><div class="l">Críticas (urgência ou risco)</div></div>
+  <div class="card"><div class="v">{{ d.blocked }}</div><div class="l">Bloqueadas (guardrail)</div></div>
+</div>
+
+<div class="grid">
+  <div class="card"><h3>Por categoria</h3><canvas id="chCategoria"></canvas></div>
+  <div class="card"><h3>Por produto</h3><canvas id="chProduto"></canvas></div>
+  <div class="card"><h3>Por urgência</h3><canvas id="chUrgencia"></canvas></div>
+  <div class="card"><h3>Por nível de risco</h3><canvas id="chRisco"></canvas></div>
+</div>
+
+<div class="card" style="margin-top:24px">
+  <h3>Recomendações</h3>
+  <ul class="recs">
+    {% for r in d.recommendations %}<li>{{ r }}</li>{% endfor %}
+  </ul>
+</div>
+
+<div class="card" style="margin-top:24px">
+  <h3>Reclamações críticas</h3>
+  {% if d.critical %}
+  <table>
+    <thead><tr><th>ID</th><th>Categoria</th><th>Produto</th><th>Urgência</th><th>Risco</th><th>Resumo</th><th>Justificativa</th></tr></thead>
+    <tbody>
+    {% for c in d.critical %}
+      <tr>
+        <td>{{ c.id[:8] }}</td>
+        <td>{{ c.category or '-' }}</td>
+        <td>{{ c.product or '-' }}</td>
+        <td><span class="pill crit">{{ c.urgency or '-' }}</span></td>
+        <td><span class="pill crit">{{ c.risk_level or '-' }}</span></td>
+        <td>{{ c.summary or '-' }}</td>
+        <td>{{ c.risk_justification or '-' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p>Nenhuma reclamação crítica no período.</p>{% endif %}
+</div>
+
+<script>
+function bar(id, data, color) {
+  const labels = Object.keys(data);
+  const values = Object.values(data);
+  new Chart(document.getElementById(id), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: values, backgroundColor: color }] },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
+}
+bar('chCategoria', {{ d.by_category|tojson }}, '#3b82f6');
+bar('chProduto',   {{ d.by_product|tojson }},  '#10b981');
+bar('chUrgencia',  {{ d.by_urgency|tojson }},  '#f59e0b');
+bar('chRisco',     {{ d.by_risk|tojson }},     '#ef4444');
+</script>
+</body>
+</html>

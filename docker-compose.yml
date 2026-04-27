@@ -1,0 +1,93 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: finguard_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [finguard_net]
+
+  auth_service:
+    build: ./services/auth_service
+    container_name: finguard_auth
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [finguard_net]
+    restart: unless-stopped
+
+  complaint_service:
+    build: ./services/complaint_service
+    container_name: finguard_complaints
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [finguard_net]
+    restart: unless-stopped
+
+  agent_orchestrator:
+    build: ./services/agent_orchestrator
+    container_name: finguard_orchestrator
+    env_file: .env
+    volumes:
+      - ./data:/app/data:ro
+    networks: [finguard_net]
+    restart: unless-stopped
+
+  report_service:
+    build: ./services/report_service
+    container_name: finguard_reports
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./data/reports:/app/reports
+      - ./docs:/app/docs
+    networks: [finguard_net]
+    restart: unless-stopped
+
+  gateway:
+    build: ./services/gateway
+    container_name: finguard_gateway
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - auth_service
+      - complaint_service
+      - agent_orchestrator
+      - report_service
+    networks: [finguard_net]
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    container_name: finguard_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - gateway
+    networks: [finguard_net]
+    restart: unless-stopped
+
+networks:
+  finguard_net:
+    driver: bridge
+
+volumes:
+  postgres-data:
