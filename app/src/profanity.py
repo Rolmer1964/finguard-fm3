@@ -45,24 +45,11 @@ PALAVROES = [
     r"\bf[\*\.@#]+d[ao]\b",
     r"\bfdp[\*\.@#]+\b",
 
-    # ---------- Acusações / linguagem agressiva ----------
-    # (não são palavrões, mas sinalizam revolta — pondere separadamente)
-    r"\bpalhaçad[ao]s?\b", r"\bpalhaç[ao]s?\b",
-    r"\babsurd[ao]s?\b", r"\bridícul[ao]s?\b",
-    r"\bvergonh[ao]s[ao]s?\b", r"\bvergonhas?\b",
-    r"\broub[ao]s?\b", r"\bladr[ãa]o\b", r"\bladr[õo]es\b",
-    r"\bassalt[ao]s?\b", r"\bgolp[ie]\b", r"\bgolpistas?\b",
-    r"\bquadrilhas?\b", r"\bbandid[ao]s?\b",
-    r"\bdescas[ao]\b", r"\benganaç[ãa]o\b", r"\bestelionato\b",
-    r"\bagiotas?\b", r"\bagiotagem\b",
-    r"\bdroga\b",  # mantido do original — fraco, considere remover
-
-    # ---------- Ameaças explícitas ----------
-    r"\bvou\s+process(ar|o)\b",
-    r"\bdanos?\s+morais\b",
-    r"\bproces(s)ar\b",
-    r"\bbanco\s+central\b",   # contexto: ameaça de denúncia
-    r"\bprocon\b",
+    # NOTA: termos informativos como "Banco Central", "Procon", "processar",
+    # "danos morais", "roubo", "ladrão", "golpe", "estelionato", etc. NÃO são
+    # mascarados — são sinais úteis para o leitor humano e para a classificação.
+    # Se algum dia for preciso ofuscá-los (ex.: relatórios públicos), crie uma
+    # lista separada de "escalation_terms" com função própria.
 ]
 _RE = re.compile("|".join(PALAVROES), re.IGNORECASE)
 
