@@ -192,11 +192,16 @@ def clear_traces() -> int:
     return n
 
 
+def inject_trace(entry: dict) -> None:
+    """Insere entrada de trace diretamente no store (recomposição de log a partir de relatório)."""
+    _traces.appendleft(entry)
+
+
 # ── Ponto de entrada público ──────────────────────────────────────────────────
 
-def analyze(text: str, product_hint: str | None = None) -> dict:
+def analyze(text: str, product_hint: str | None = None, record_id: str | None = None) -> dict:
     """Executa o grafo completo e devolve payload final + estado intermediário + timings."""
-    trace_id = uuid.uuid4().hex[:8]
+    trace_id = record_id or uuid.uuid4().hex[:8]
     state: AnalysisState = {"trace_id": trace_id, "text": text, "product_hint": product_hint}
     logger.info("[%s] GRAPH START", trace_id)
     final_state = get_graph().invoke(state)

@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     GUARDRAIL_ID: str | None = None
     GUARDRAIL_VERSION: str = "DRAFT"
 
+    # ---- Batch paralelo ----
+    BATCH_MAX_WORKERS: int = 10
+    BATCH_RATE_LIMIT_DELAY: float = 0.0
+    BATCH_MAX_RETRIES: int = 2
+
     # ---- RAG (alimenta o agente de risco com trechos da Política Interna) ----
     RAG_DOCS_DIR: str = "/app/assets/docs"
     RAG_INDEX_DIR: str = "/app/assets/index"

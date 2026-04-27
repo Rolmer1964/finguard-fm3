@@ -20,6 +20,11 @@
   nav { display:flex; gap:12px; font-size:13px; margin-bottom:16px; }
   .dl-btn { color:white; padding:3px 10px; border-radius:4px; font-size:12px; text-decoration:none; }
   .dl-none { color:#d1d5db; }
+  .recompose-btn { background:none; border:1px solid #6b7280; color:#374151; padding:3px 10px;
+                   border-radius:4px; font-size:12px; cursor:pointer; }
+  .recompose-btn:hover { background:#f3f4f6; }
+  .recompose-ok  { color:#059669; font-size:12px; }
+  .recompose-err { color:#dc2626; font-size:12px; }
 </style>
 </head>
 <body>
@@ -37,6 +42,7 @@
       <th>Tamanho</th>
       <th>Relatório</th>
       <th>Downloads</th>
+      <th>Log</th>
     </tr>
   </thead>
   <tbody>
@@ -66,6 +72,11 @@
             <span class="dl-none">— MD</span>
           {% endif %}
         </td>
+        <td>
+          {% if r.has_json %}
+          <button class="recompose-btn" onclick="recompose('{{ r.stem }}', this)">↺ Recompor log</button>
+          {% endif %}
+        </td>
       </tr>
       {% endfor %}
     {% else %}
@@ -77,5 +88,28 @@
     {% endif %}
   </tbody>
 </table>
+{% raw %}
+<script>
+async function recompose(stem, btn) {
+  btn.disabled = true;
+  btn.textContent = '⏳';
+  try {
+    const r = await fetch('/traces/recompose?stem=' + encodeURIComponent(stem), {method: 'POST'});
+    const d = await r.json();
+    if (r.ok) {
+      btn.outerHTML = '<span class="recompose-ok">✓ ' + d.recomposed + ' entradas</span>';
+    } else {
+      btn.disabled = false;
+      btn.textContent = '↺ Recompor log';
+      alert('Erro: ' + (d.detail || JSON.stringify(d)));
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '↺ Recompor log';
+    alert('Falha na requisição: ' + e);
+  }
+}
+</script>
+{% endraw %}
 </body>
 </html>

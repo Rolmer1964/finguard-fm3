@@ -12,7 +12,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from .graph import analyze, clear_traces, get_traces
+from .graph import analyze, clear_traces, get_traces, inject_trace
 from .helpers import bar_width_px, compute_stats, count_output_files, pill_html, rag_vector_count
 from .models import AnalyzeRequest
 from .profanity import mask as mask_profanity
@@ -123,7 +123,7 @@ async def batch(file: UploadFile = File(...)) -> JSONResponse:
         canal   = (row.get("canal") or "").strip() or "Não informado"
         rec_id  = (row.get("id") or f"REC-{i:05d}")
         try:
-            r = analyze(texto, produto_hint)
+            r = analyze(texto, produto_hint, record_id=rec_id)
         except Exception as exc:
             logger.exception("[%s] falha ao analisar linha %d", rec_id, i)
             r = {"category": "Outros", "product": "Não Identificado",
@@ -285,6 +285,37 @@ def traces_page(request: Request):
         "has_data": bool(data),
         "traces":   traces_display,
     })
+
+
+@app.post("/traces/recompose")
+def traces_recompose(stem: str) -> JSONResponse:
+    """Reconstrói o log de execução em memória a partir de um relatório batch salvo."""
+    import json as _json
+    json_path = Path(settings.OUTPUT_DIR) / f"{stem}.json"
+    if not json_path.exists():
+        raise HTTPException(404, f"Relatório '{stem}' não encontrado")
+
+    items = _json.loads(json_path.read_text(encoding="utf-8"))
+    for item in reversed(items):
+        texto = item.get("texto_original", "")
+        tm    = item.get("timings_ms", {})
+        inject_trace({
+            "trace_id":     item.get("id", "?"),
+            "timestamp":    item.get("timestamp", stem),
+            "text_preview": (texto[:70] + "…") if len(texto) > 70 else texto,
+            "blocked":      item.get("blocked", False),
+            "category":     item.get("category"),
+            "urgency":      item.get("urgency"),
+            "risk_level":   item.get("risk_level"),
+            "timings_ms":   tm,
+            "total_ms": (
+                (tm.get("triage") or 0)
+                + (tm.get("risk") or 0)
+                + (tm.get("report") or 0)
+            ),
+        })
+
+    return JSONResponse({"status": "ok", "recomposed": len(items)})
 
 
 # ── Rotas: documentação ───────────────────────────────────────────────────────
