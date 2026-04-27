@@ -13,8 +13,18 @@ class Settings(BaseSettings):
     BEDROCK_MODEL_TRIAGE: str = "anthropic.claude-3-haiku-20240307-v1:0"
     BEDROCK_MODEL_RISK: str = "anthropic.claude-3-5-sonnet-20241022-v2:0"
 
-    POLICY_PATH: str = "/app/data/politica_interna.md"
+    # Embeddings para o RAG (Titan v2: 1024 dim, normalizado)
+    BEDROCK_EMBED_MODEL_ID: str = "amazon.titan-embed-text-v2:0"
+    EMBED_DIM: int = 1024
+
     OUTPUT_DIR: str = "/app/output"
+
+    # ---- RAG (sempre ativo no nível 2 — alimenta o agente de risco) ----
+    RAG_DOCS_DIR: str = "/app/assets/docs"
+    RAG_INDEX_DIR: str = "/app/assets/index"
+    RAG_TOP_K: int = 4
+    RAG_CHUNK_CHARS: int = 1000
+    RAG_CHUNK_OVERLAP: int = 200
 
 
 settings = Settings()
