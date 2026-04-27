@@ -305,9 +305,10 @@ def traces_page(request: Request):
     for t in data:
         tm = t.get("timings_ms", {})
         series["total_ms"].append(float(t.get("total_ms") or 0))
-        series["triage"].append(float(tm.get("triage") or 0))
-        series["risk"].append(float(tm.get("risk") or 0))
-        series["report"].append(float(tm.get("report") or 0))
+        if not t.get("blocked"):
+            series["triage"].append(float(tm.get("triage") or 0))
+            series["risk"].append(float(tm.get("risk") or 0))
+            series["report"].append(float(tm.get("report") or 0))
 
     st = {k: compute_stats(v) for k, v in series.items()}
 
@@ -318,17 +319,18 @@ def traces_page(request: Request):
         r_ms    = int(tm.get("risk",            0) or 0)
         rp_ms   = int(tm.get("report",          0) or 0)
         gi_ms   = int(tm.get("guardrail_input", 0) or 0)
-        total   = int(t.get("total_ms", t_ms + r_ms + rp_ms))
+        pipeline = t_ms + r_ms + rp_ms
+        total_e2e = int(t.get("total_ms") or gi_ms + pipeline)
         traces_display.append({
             **t,
             "t_ms":            t_ms,
             "r_ms":            r_ms,
             "rp_ms":           rp_ms,
             "gi_ms":           gi_ms,
-            "total_display":   gi_ms + total,
-            "bar_triage":      bar_width_px(t_ms,  total),
-            "bar_risk":        bar_width_px(r_ms,  total),
-            "bar_report":      bar_width_px(rp_ms, total),
+            "total_display":   total_e2e,
+            "bar_triage":      bar_width_px(t_ms,  pipeline),
+            "bar_risk":        bar_width_px(r_ms,  pipeline),
+            "bar_report":      bar_width_px(rp_ms, pipeline),
             "urgency_html":    pill_html(t.get("urgency"),    _LEVEL_STYLE),
             "risk_level_html": pill_html(t.get("risk_level"), _LEVEL_STYLE),
         })
@@ -363,9 +365,11 @@ def traces_recompose(stem: str) -> JSONResponse:
             "risk_level":   item.get("risk_level"),
             "timings_ms":   tm,
             "total_ms": (
-                (tm.get("triage") or 0)
+                (tm.get("guardrail_input") or 0)
+                + (tm.get("triage") or 0)
                 + (tm.get("risk") or 0)
                 + (tm.get("report") or 0)
+                + (tm.get("guardrail_output") or 0)
             ),
         })
 

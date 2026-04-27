@@ -60,10 +60,10 @@
 
 {% if has_data %}
 <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">
-  {{ stat_card("Total (E2E)",   "#1e40af", st.total_ms) }}
-  {{ stat_card("① Triagem",    "#4338ca", st.triage)   }}
-  {{ stat_card("② Risco + RAG","#b45309", st.risk)     }}
-  {{ stat_card("③ Relatório",  "#047857", st.report)   }}
+  {{ stat_card("Total E2E (todos)",        "#1e40af", st.total_ms) }}
+  {{ stat_card("① Triagem (não bloq.)",   "#4338ca", st.triage)   }}
+  {{ stat_card("② Risco + RAG (não bloq.)","#b45309", st.risk)    }}
+  {{ stat_card("③ Relatório (não bloq.)", "#047857", st.report)   }}
 </div>
 {% endif %}
 

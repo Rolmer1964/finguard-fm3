@@ -175,9 +175,11 @@ def _store_trace(trace_id: str, text: str, result: dict) -> None:
         "risk_level":   result.get("risk_level"),
         "timings_ms":   tm,
         "total_ms": (
-            (tm.get("triage") or 0)
+            (tm.get("guardrail_input") or 0)
+            + (tm.get("triage") or 0)
             + (tm.get("risk") or 0)
             + (tm.get("report") or 0)
+            + (tm.get("guardrail_output") or 0)
         ),
     })
 
