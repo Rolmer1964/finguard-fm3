@@ -12,6 +12,7 @@ _env = Environment(
     loader=FileSystemLoader(str(Path(__file__).parent / "templates")),
     autoescape=select_autoescape(["html"]),
 )
+_env.filters["tojson"] = lambda v, indent=None: json.dumps(v, ensure_ascii=False, indent=indent)
 
 
 def _bucket(items: list[dict], key: str) -> dict[str, int]:

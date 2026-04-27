@@ -53,6 +53,9 @@ app = FastAPI(title="FinGuard - Nível 3 (Arquiteto da Solução)", version="0.1
 
 BASE = Path(__file__).parent
 templates = Jinja2Templates(directory=str(BASE / "templates"))
+templates.env.filters["tojson"] = lambda v, indent=None: __import__("json").dumps(
+    v, ensure_ascii=False, indent=indent
+)
 app.mount("/output", StaticFiles(directory=settings.OUTPUT_DIR, check_dir=False), name="output")
 
 _ADR_PATH = BASE.parent.parent / "assets" / "adr.html"
