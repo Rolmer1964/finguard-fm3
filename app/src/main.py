@@ -1,3 +1,4 @@
+
 import csv
 import io
 import logging
@@ -14,6 +15,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 from .graph import analyze, clear_traces, get_traces
+from .profanity import mask as mask_profanity
 from .rag.ingest import ingest_all
 from .rag.retriever import _store as _rag_store
 from .report_writer import write_outputs
@@ -579,7 +581,7 @@ def analyze_from_form(request: Request, text: str = Form(...), product_hint: str
     result = analyze(text, product_hint or None)
     return templates.TemplateResponse(
         "result.html.j2",
-        {"request": request, "result": result, "texto_original": text},
+        {"request": request, "result": result, "texto_original": mask_profanity(text)},
     )
 
 
@@ -616,7 +618,7 @@ async def batch(file: UploadFile = File(...)) -> JSONResponse:
                  "sentiment": "Neutro", "urgency": "Baixa",
                  "summary": "[Entrada bloqueada pelo guardrail de proteção]",
                  "risk_level": "Bloqueado", "risk_justification": r.get("message", "")}
-        results.append({"id": rec_id, "canal": canal, "texto_original": texto, **r})
+        results.append({"id": rec_id, "canal": canal, "texto_original": mask_profanity(texto), **r})
 
     from datetime import datetime as _dt
     stem = _dt.utcnow().strftime("report_%Y-%m-%d-%H-%M-%S")
