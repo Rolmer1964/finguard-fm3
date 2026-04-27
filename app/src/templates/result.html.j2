@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <title>Resultado — FinGuard</title>
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 760px; margin: 32px auto; padding: 0 16px; color: #1f2937; background: #f9fafb; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 860px; margin: 32px auto; padding: 0 16px; color: #1f2937; background: #f9fafb; }
   .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-top: 16px; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
   .pill { padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; background: #e5e7eb; color: #374151; }
   .pill.crit { background: #fee2e2; color: #991b1b; }
   .pill.alta { background: #fed7aa; color: #9a3412; }
@@ -15,17 +15,159 @@
   pre { background: #f3f4f6; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px; white-space: pre-wrap; }
   a { color: #2563eb; }
   .muted { color: #6b7280; font-size: 13px; }
+
+  /* ── Pipeline trace ── */
+  .fn { flex: 1; border-radius: 8px; padding: 12px 10px; text-align: center; border: 1px solid; }
+  .fn.triage { background: #eef2ff; border-color: #a5b4fc; }
+  .fn.risk   { background: #fffbeb; border-color: #fcd34d; }
+  .fn.rpt    { background: #ecfdf5; border-color: #6ee7b7; }
+  .fn-lbl    { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+  .fn.triage .fn-lbl { color: #4338ca; }
+  .fn.risk   .fn-lbl { color: #b45309; }
+  .fn.rpt    .fn-lbl { color: #047857; }
+  .fn-model  { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+  .fn-time   { font-size: 22px; font-weight: 700; margin-top: 6px; }
+  .fn.triage .fn-time { color: #312e81; }
+  .fn.risk   .fn-time { color: #78350f; }
+  .fn.rpt    .fn-time { color: #064e3b; }
+
+  .t-track { flex: 1; height: 10px; background: #e5e7eb; border-radius: 5px; overflow: hidden; }
+  .t-fill  { height: 100%; border-radius: 5px; }
+  .t-fill.triage { background: #818cf8; }
+  .t-fill.risk   { background: #fbbf24; }
+  .t-fill.rpt    { background: #34d399; }
+
+  .io-step      { border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
+  .io-hdr       { background: #f9fafb; padding: 7px 12px; font-size: 12px; font-weight: 600; border-bottom: 1px solid #e5e7eb; color: #374151; }
+  .io-body      { display: flex; gap: 8px; padding: 10px 12px; align-items: flex-start; }
+  .io-col       { flex: 1; font-size: 13px; line-height: 1.55; }
+  .io-col.out   { color: #065f46; }
+  .io-tag       { font-size: 10px; font-weight: 700; letter-spacing: .07em; color: #9ca3af; text-transform: uppercase; margin-bottom: 4px; }
+  .io-mid       { align-self: center; color: #d1d5db; font-size: 18px; padding: 0 4px; flex-shrink: 0; }
 </style>
 </head>
 <body>
-<a href="/">&larr; Voltar</a>
+<a href="/">&larr; Voltar</a> &nbsp; <a href="/traces">Log de execuções →</a>
 <h1>Resultado da análise</h1>
-<div class="muted">Trace ID: <code>{{ result.trace_id }}</code> · Timings: triage {{ result.timings_ms.triage }}ms · risk {{ result.timings_ms.risk }}ms · report {{ result.timings_ms.report }}ms</div>
 
 <div class="card">
   <h3 style="margin-top:0">Texto original</h3>
   <p style="white-space:pre-wrap; margin: 0;">{{ texto_original }}</p>
 </div>
+
+<!-- ═══════════════ PIPELINE DE EXECUÇÃO ═══════════════ -->
+{% set t_ms  = result.timings_ms.triage or 1 %}
+{% set r_ms  = result.timings_ms.risk   or 0 %}
+{% set rp_ms = result.timings_ms.report or 0 %}
+{% set total_ms = t_ms + r_ms + rp_ms %}
+{% set t_pct  = (t_ms  / total_ms * 100) | round(1) %}
+{% set r_pct  = (r_ms  / total_ms * 100) | round(1) %}
+{% set rp_pct = (rp_ms / total_ms * 100) | round(1) %}
+
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <h3 style="margin:0">Pipeline de Execução</h3>
+    <span class="muted">trace_id: <code>{{ result.trace_id }}</code></span>
+  </div>
+
+  <!-- Boxes dos agentes -->
+  <div style="display:flex;align-items:stretch;gap:0;margin-bottom:16px">
+    <div class="fn triage">
+      <div class="fn-lbl">① Triagem</div>
+      <div class="fn-model">Claude Haiku</div>
+      <div class="fn-time">{{ t_ms }}ms</div>
+    </div>
+    <div style="display:flex;align-items:center;color:#d1d5db;font-size:20px;padding:0 6px">→</div>
+    <div class="fn risk">
+      <div class="fn-lbl">② Risco + RAG</div>
+      <div class="fn-model">Claude Sonnet</div>
+      <div class="fn-time">{{ r_ms }}ms</div>
+    </div>
+    <div style="display:flex;align-items:center;color:#d1d5db;font-size:20px;padding:0 6px">→</div>
+    <div class="fn rpt">
+      <div class="fn-lbl">③ Relatório</div>
+      <div class="fn-model">Consolidação (sem LLM)</div>
+      <div class="fn-time">{{ rp_ms }}ms</div>
+    </div>
+  </div>
+
+  <!-- Barras de tempo -->
+  <div style="margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+      <span style="font-size:11px;font-weight:600;color:#4338ca;width:72px;text-align:right">Triagem</span>
+      <div class="t-track"><div class="t-fill triage" style="width:{{ [t_pct, 1] | max }}%"></div></div>
+      <span style="font-size:12px;color:#6b7280;width:58px">{{ t_ms }}ms</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+      <span style="font-size:11px;font-weight:600;color:#b45309;width:72px;text-align:right">Risco</span>
+      <div class="t-track"><div class="t-fill risk" style="width:{{ [r_pct, 1] | max }}%"></div></div>
+      <span style="font-size:12px;color:#6b7280;width:58px">{{ r_ms }}ms</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+      <span style="font-size:11px;font-weight:600;color:#047857;width:72px;text-align:right">Relatório</span>
+      <div class="t-track"><div class="t-fill rpt" style="width:{{ [rp_pct, 1] | max }}%"></div></div>
+      <span style="font-size:12px;color:#6b7280;width:58px">{{ rp_ms }}ms</span>
+    </div>
+    <div style="text-align:right;font-size:12px;color:#374151;margin-top:4px">Total: <strong>{{ total_ms }}ms</strong></div>
+  </div>
+
+  <!-- Entradas e saídas por agente -->
+  <div>
+    <div class="io-step">
+      <div class="io-hdr">① Triagem — Entrada e Saída</div>
+      <div class="io-body">
+        <div class="io-col">
+          <div class="io-tag">Entrada</div>
+          <div>{{ texto_original | truncate(90, True, '…') }}</div>
+          <div class="muted" style="margin-top:4px">{{ texto_original | length }} caracteres de texto livre</div>
+        </div>
+        <div class="io-mid">→</div>
+        <div class="io-col out">
+          <div class="io-tag">Saída → propagada para Risco</div>
+          <div><strong>categoria:</strong> {{ result.triage.category }}</div>
+          <div><strong>produto:</strong> {{ result.triage.product }}</div>
+          <div><strong>urgência:</strong> {{ result.triage.urgency }}</div>
+          <div><strong>sentimento:</strong> {{ result.triage.sentiment }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="io-step">
+      <div class="io-hdr">② Risco — Entrada e Saída</div>
+      <div class="io-body">
+        <div class="io-col">
+          <div class="io-tag">Entrada</div>
+          <div>Saída da Triagem +</div>
+          <div>{{ result.risk.rag_chunks_used | default('N') }} trecho(s) da Política Interna via RAG (FAISS + Titan Embeddings)</div>
+        </div>
+        <div class="io-mid">→</div>
+        <div class="io-col out">
+          <div class="io-tag">Saída → propagada para Relatório</div>
+          <div><strong>nível de risco:</strong> {{ result.risk.risk_level }}</div>
+          <div style="font-size:12px;margin-top:4px;color:#374151">{{ result.risk.risk_justification | truncate(130, True, '…') }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="io-step">
+      <div class="io-hdr">③ Relatório — Consolidação Determinística</div>
+      <div class="io-body">
+        <div class="io-col">
+          <div class="io-tag">Entrada</div>
+          <div>7 campos dos agentes anteriores</div>
+          <div class="muted" style="margin-top:4px">category, product, sentiment, urgency, summary (Triagem) + risk_level, risk_justification (Risco)</div>
+        </div>
+        <div class="io-mid">→</div>
+        <div class="io-col out">
+          <div class="io-tag">Saída</div>
+          <div>Payload JSON estruturado final</div>
+          <div class="muted" style="margin-top:4px">Sem chamada LLM — agregação determinística, previsível e de custo zero.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ═══════════════ FIM PIPELINE ═══════════════ -->
 
 <div class="grid">
   <div class="card">

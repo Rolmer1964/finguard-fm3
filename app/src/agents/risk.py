@@ -67,4 +67,5 @@ Avalie o risco e justifique com base nos trechos da política. Responda apenas c
     return {
         "risk_level": data.get("risco") or "Baixo",
         "risk_justification": data.get("justificativa") or "",
+        "rag_chunks_used": len(chunks),
     }

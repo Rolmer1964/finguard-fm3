@@ -59,8 +59,33 @@
 </head>
 <body>
 
-<h1>FinGuard — Relatório Gerencial</h1>
-<div class="meta">Gerado em {{ generated_at }}</div>
+<div style="margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:13px">
+  <a href="/"        style="color:#2563eb;text-decoration:none">← Voltar</a>
+  <a href="/reports" style="color:#2563eb;text-decoration:none">Relatórios</a>
+  <a href="/traces"  style="color:#2563eb;text-decoration:none">Log de execuções</a>
+  <a href="/admin"   style="color:#6b7280;text-decoration:none">Admin</a>
+</div>
+
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+  <div>
+    <h1 style="margin:0">FinGuard — Relatório Gerencial</h1>
+    <div class="meta" style="margin-top:4px">Gerado em {{ generated_at }}</div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <a href="/output/{{ stem }}.json" download
+       style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#1e40af;color:white;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">
+      &#8659; JSON
+    </a>
+    <a href="/output/{{ stem }}.csv" download
+       style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#047857;color:white;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">
+      &#8659; CSV
+    </a>
+    <a href="/output/{{ stem }}.md" download
+       style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#6b7280;color:white;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">
+      &#8659; Markdown
+    </a>
+  </div>
+</div>
 
 <div class="kpi">
   <div class="card"><div class="v">{{ total }}</div><div class="l">Total de reclamações</div></div>
@@ -69,6 +94,7 @@
 
 <div class="grid">
   <div class="card"><h3 style="margin-top:0">Por categoria</h3><canvas id="chCategoria"></canvas></div>
+  <div class="card"><h3 style="margin-top:0">Por canal</h3><canvas id="chCanal"></canvas></div>
   <div class="card"><h3 style="margin-top:0">Por produto</h3><canvas id="chProduto"></canvas></div>
   <div class="card"><h3 style="margin-top:0">Por urgência</h3><canvas id="chUrgencia"></canvas></div>
   <div class="card"><h3 style="margin-top:0">Por nível de risco</h3><canvas id="chRisco"></canvas></div>
@@ -105,13 +131,14 @@
 <div class="card" style="margin-top: 24px">
   <h3 style="margin-top:0">Todas as reclamações</h3>
   <table>
-    <thead><tr><th>ID</th><th>Categoria</th><th>Produto</th><th>Sentimento</th><th>Urgência</th><th>Risco</th><th>Resumo</th></tr></thead>
+    <thead><tr><th>ID</th><th>Canal</th><th>Categoria</th><th>Produto</th><th>Sentimento</th><th>Urgência</th><th>Risco</th><th>Resumo</th></tr></thead>
     <tbody>
     {% for r in results %}
       {% set u = (r.urgency or '') %}
       {% set rl = (r.risk_level or '') %}
       <tr class="clickable" onclick="openDetail('{{ r.id }}')">
         <td>{{ r.id }}</td>
+        <td>{{ r.canal or '-' }}</td>
         <td>{{ r.category or '-' }}</td>
         <td>{{ r.product or '-' }}</td>
         <td>{{ r.sentiment or '-' }}</td>
@@ -168,6 +195,8 @@
       </div>
     </div>
 
+    <div class="m-card" id="m-pipeline-card" style="margin-top:16px"></div>
+
     <div class="m-card">
       <h3 style="margin-top:0">JSON bruto</h3>
       <pre id="m-json"></pre>
@@ -194,6 +223,84 @@ function pill(v) {
   return '<span class="m-pill ' + cls + '">' + (v || '-') + '</span>';
 }
 
+function buildPipeline(r) {
+  var tm = r.timings_ms || {};
+  var triage_obj = r.triage || {};
+  var risk_obj   = r.risk   || {};
+  var t_ms  = tm.triage  || 0;
+  var r_ms  = tm.risk    || 0;
+  var rp_ms = tm.report  || 0;
+  var total = t_ms + r_ms + rp_ms || 1;
+  function pct(ms) { return Math.max(ms / total * 100, 1).toFixed(1) + '%'; }
+
+  function ioBlock(label, lines, accent) {
+    return '<div style="flex:1;font-size:13px;line-height:1.55' + (accent ? ';color:#065f46' : '') + '">'
+      + '<div style="font-size:10px;font-weight:700;letter-spacing:.07em;color:#9ca3af;text-transform:uppercase;margin-bottom:4px">' + label + '</div>'
+      + lines.map(function(l){ return '<div>' + l + '</div>'; }).join('')
+      + '</div>';
+  }
+
+  function ioRow(hdr, inLines, outLines) {
+    return '<div style="border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;margin-bottom:8px">'
+      + '<div style="background:#f9fafb;padding:7px 12px;font-size:12px;font-weight:600;border-bottom:1px solid #e5e7eb">' + hdr + '</div>'
+      + '<div style="display:flex;gap:8px;padding:10px 12px;align-items:flex-start">'
+      + ioBlock('Entrada', inLines, false)
+      + '<div style="align-self:center;color:#d1d5db;font-size:18px;padding:0 4px;flex-shrink:0">→</div>'
+      + ioBlock('Saída', outLines, true)
+      + '</div></div>';
+  }
+
+  var txt = r.texto_original || '';
+  var preview = txt.length > 90 ? txt.substring(0, 90) + '…' : txt;
+  var ragN = risk_obj.rag_chunks_used !== undefined ? risk_obj.rag_chunks_used : '?';
+
+  return '<h3 style="margin-top:0">Pipeline de Execução</h3>'
+    + '<div style="display:flex;align-items:stretch;gap:0;margin-bottom:14px">'
+    +   '<div style="flex:1;background:#eef2ff;border:1px solid #a5b4fc;border-radius:8px;padding:12px 10px;text-align:center">'
+    +     '<div style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#4338ca">① Triagem</div>'
+    +     '<div style="font-size:11px;color:#9ca3af;margin-top:2px">Claude Haiku</div>'
+    +     '<div style="font-size:22px;font-weight:700;margin-top:6px;color:#312e81">' + t_ms + 'ms</div>'
+    +   '</div>'
+    +   '<div style="display:flex;align-items:center;color:#d1d5db;font-size:20px;padding:0 6px">→</div>'
+    +   '<div style="flex:1;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:12px 10px;text-align:center">'
+    +     '<div style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#b45309">② Risco + RAG</div>'
+    +     '<div style="font-size:11px;color:#9ca3af;margin-top:2px">Claude Sonnet</div>'
+    +     '<div style="font-size:22px;font-weight:700;margin-top:6px;color:#78350f">' + r_ms + 'ms</div>'
+    +   '</div>'
+    +   '<div style="display:flex;align-items:center;color:#d1d5db;font-size:20px;padding:0 6px">→</div>'
+    +   '<div style="flex:1;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:12px 10px;text-align:center">'
+    +     '<div style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#047857">③ Relatório</div>'
+    +     '<div style="font-size:11px;color:#9ca3af;margin-top:2px">Consolidação (sem LLM)</div>'
+    +     '<div style="font-size:22px;font-weight:700;margin-top:6px;color:#064e3b">' + rp_ms + 'ms</div>'
+    +   '</div>'
+    + '</div>'
+    + ['Triagem,#818cf8,' + t_ms, 'Risco,#fbbf24,' + r_ms, 'Relatório,#34d399,' + rp_ms].map(function(s) {
+        var p = s.split(','); var label = p[0], color = p[1], ms = parseInt(p[2]);
+        return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">'
+          + '<span style="font-size:11px;font-weight:600;color:' + color + ';width:72px;text-align:right">' + label + '</span>'
+          + '<div style="flex:1;height:10px;background:#e5e7eb;border-radius:5px;overflow:hidden">'
+          + '<div style="width:' + pct(ms) + ';height:100%;background:' + color + ';border-radius:5px"></div></div>'
+          + '<span style="font-size:12px;color:#6b7280;width:58px">' + ms + 'ms</span></div>';
+      }).join('')
+    + '<div style="text-align:right;font-size:12px;color:#374151;margin-top:4px">Total: <strong>' + total + 'ms</strong></div>'
+    + '<div style="margin-top:12px">'
+    + ioRow('① Triagem — Entrada e Saída',
+        [preview, '<span style="color:#6b7280;font-size:12px">' + txt.length + ' caracteres de texto livre</span>'],
+        ['<strong>categoria:</strong> ' + (triage_obj.category || r.category || '-'),
+         '<strong>produto:</strong> '   + (triage_obj.product  || r.product  || '-'),
+         '<strong>urgência:</strong> '  + (triage_obj.urgency  || r.urgency  || '-'),
+         '<strong>sentimento:</strong> '+ (triage_obj.sentiment|| r.sentiment|| '-'),
+         '<span style="color:#9ca3af;font-size:11px">→ propagada para Risco</span>'])
+    + ioRow('② Risco — Entrada e Saída',
+        ['Saída da Triagem +', ragN + ' trecho(s) da Política Interna via RAG (FAISS + Titan Embeddings)'],
+        ['<strong>nível de risco:</strong> ' + (risk_obj.risk_level || r.risk_level || '-'),
+         '<span style="color:#9ca3af;font-size:11px">→ propagada para Relatório</span>'])
+    + ioRow('③ Relatório — Consolidação Determinística',
+        ['7 campos dos agentes anteriores', '<span style="color:#6b7280;font-size:12px">(category, product, sentiment, urgency, summary + risk_level, risk_justification)</span>'],
+        ['Payload JSON estruturado final', '<span style="color:#6b7280;font-size:12px">Sem chamada LLM — determinístico e de custo zero.</span>'])
+    + '</div>';
+}
+
 function openDetail(id) {
   var r = INDEX[id];
   if (!r) return;
@@ -201,8 +308,7 @@ function openDetail(id) {
   var timings = r.timings_ms || {};
   document.getElementById('m-meta').textContent =
     'trace_id: ' + (r.trace_id || '-') +
-    ' · triage ' + (timings.triage || 0) + 'ms' +
-    ' · risk ' + (timings.risk || 0) + 'ms';
+    ' · total ' + ((timings.triage || 0) + (timings.risk || 0) + (timings.report || 0)) + 'ms';
   document.getElementById('m-texto').textContent = r.texto_original || '';
   document.getElementById('m-category').textContent   = r.category || '-';
   document.getElementById('m-product').textContent    = r.product || '-';
@@ -211,6 +317,7 @@ function openDetail(id) {
   document.getElementById('m-summary').textContent    = r.summary || '-';
   document.getElementById('m-risk_level').innerHTML   = pill(r.risk_level);
   document.getElementById('m-risk_justification').textContent = r.risk_justification || '-';
+  document.getElementById('m-pipeline-card').innerHTML = buildPipeline(r);
   document.getElementById('m-json').textContent = JSON.stringify(r, null, 2);
   document.getElementById('modal-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -239,6 +346,7 @@ function bar(id, data, color) {
   });
 }
 bar('chCategoria', {{ by_category|tojson }}, '#3b82f6');
+bar('chCanal',     {{ by_canal|tojson }},    '#8b5cf6');
 bar('chProduto',   {{ by_product|tojson }},  '#10b981');
 bar('chUrgencia',  {{ by_urgency|tojson }},  '#f59e0b');
 bar('chRisco',     {{ by_risk|tojson }},     '#ef4444');

@@ -6,7 +6,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./output:/app/output
+      - ./assets/docs:/app/assets/docs:ro  # política interna — somente leitura no container
+      - ./assets/index:/app/assets/index   # índice FAISS — persiste entre restarts
+      - ./output:/app/output               # relatórios gerados — persiste entre restarts
       - ./data:/app/data:ro
-      - ./assets:/app/assets
     restart: unless-stopped

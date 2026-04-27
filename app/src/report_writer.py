@@ -80,7 +80,7 @@ def write_outputs(results: list[dict], stem: str | None = None) -> dict[str, str
 
     json_path.write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    fields = ["id", "texto_original", "category", "product", "sentiment", "urgency",
+    fields = ["id", "canal", "texto_original", "category", "product", "sentiment", "urgency",
               "summary", "risk_level", "risk_justification"]
     with csv_path.open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
@@ -93,10 +93,12 @@ def write_outputs(results: list[dict], stem: str | None = None) -> dict[str, str
     by_urgency = _bucket(results, "urgency")
     by_risk = _bucket(results, "risk_level")
     by_sentiment = _bucket(results, "sentiment")
+    by_canal = _bucket(results, "canal")
     critical = [r for r in results if r.get("urgency") == "Crítica" or r.get("risk_level") == "Crítico"]
     totals = {
         "by_category": by_category, "by_product": by_product,
-        "by_urgency": by_urgency, "by_risk": by_risk, "by_sentiment": by_sentiment,
+        "by_urgency": by_urgency, "by_risk": by_risk,
+        "by_sentiment": by_sentiment, "by_canal": by_canal,
     }
     recs = _build_recommendations(by_category, by_risk, critical)
 
@@ -111,8 +113,10 @@ def write_outputs(results: list[dict], stem: str | None = None) -> dict[str, str
         by_urgency=by_urgency,
         by_risk=by_risk,
         by_sentiment=by_sentiment,
+        by_canal=by_canal,
         recommendations=recs,
         generated_at=datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        stem=stem,
     )
     html_path.write_text(html, encoding="utf-8")
 

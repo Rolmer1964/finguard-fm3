@@ -20,14 +20,23 @@
 </style>
 </head>
 <body>
-<h1>FinGuard — Orquestrador</h1>
-<div class="muted">Nível 2 do desafio Future Minds 3. Pipeline multi-agente com LangGraph.</div>
-<div class="pipeline">
-  <span class="step">triage (Haiku)</span>
+<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+  <div>
+    <h1 style="margin-bottom:4px">FinGuard — Orquestrador</h1>
+    <div class="muted">Nível 2 · Future Minds 3 · Pipeline multi-agente com LangGraph + AWS Bedrock</div>
+  </div>
+  <div style="display:flex;gap:8px;align-self:center">
+    <a href="/reports" style="background:#1e40af;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">Relatórios</a>
+    <a href="/traces"  style="background:#1e40af;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">Log</a>
+    <a href="/admin"   style="background:#6b7280;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">Admin</a>
+  </div>
+</div>
+<div class="pipeline" style="margin-top:10px">
+  <span class="step">① triage (Haiku)</span>
   <span class="arrow">→</span>
-  <span class="step">risk (Sonnet + RAG)</span>
+  <span class="step">② risk (Sonnet + RAG)</span>
   <span class="arrow">→</span>
-  <span class="step">report (consolidação)</span>
+  <span class="step">③ report (consolidação)</span>
 </div>
 
 <form action="/analyze-form" method="post" class="card">
