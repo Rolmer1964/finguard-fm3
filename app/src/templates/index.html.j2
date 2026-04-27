@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>FinGuard — Classificador (Nível 1)</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 720px; margin: 32px auto; padding: 0 16px; color: #1f2937; background: #f9fafb; }
+  h1 { margin-bottom: 4px; }
+  .muted { color: #6b7280; font-size: 14px; }
+  .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-top: 16px; }
+  label { display: block; font-size: 13px; font-weight: 500; margin-top: 12px; }
+  input, textarea, select { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-family: inherit; font-size: 14px; box-sizing: border-box; }
+  button { margin-top: 16px; padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; }
+  button:hover { background: #1d4ed8; }
+  pre { background: #f3f4f6; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
+  code { background: #f3f4f6; padding: 1px 6px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<h1>FinGuard — Classificador</h1>
+<div class="muted">Nível 1 do desafio Future Minds 3. Cole uma reclamação e receba a análise estruturada.</div>
+
+<form action="/classify-form" method="post" class="card">
+  <label>Texto da reclamação</label>
+  <textarea name="text" rows="6" required placeholder="Ex.: Já é a terceira vez que ligo pedindo o estorno de uma cobrança no meu cartão que eu não fiz..."></textarea>
+  <label>Produto (opcional)</label>
+  <input name="product_hint" placeholder="Ex.: Cartão de Crédito" />
+  <button type="submit">Analisar</button>
+</form>
+
+<div class="card">
+  <h3 style="margin-top:0">Processamento em lote</h3>
+  <p class="muted">Faça upload de um CSV (colunas <code>id, texto_reclamacao, produto</code>). Gera <code>.json</code>, <code>.csv</code> e <code>.html</code> em <code>output/</code>.</p>
+  <form action="/batch" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".csv" required />
+    <button type="submit">Processar lote</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">API</h3>
+  <p class="muted">Para integração programática:</p>
+  <pre>curl -X POST http://localhost:8000/classify \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Já é a terceira vez..."}'</pre>
+</div>
+
+</body>
+</html>

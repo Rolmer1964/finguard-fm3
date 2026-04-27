@@ -1,20 +1,19 @@
 SHELL := /bin/bash
 COMPOSE := docker compose
 
-.PHONY: help up down build logs ps restart clean security-scan generate-data seed-complaints
+.PHONY: help up down build logs ps clean generate-data batch batch-500
 
 help:
-	@echo "FinGuard - alvos disponíveis:"
-	@echo "  make up               Sobe toda a stack em background"
-	@echo "  make down             Para a stack"
-	@echo "  make build            Reconstrói as imagens"
+	@echo "FinGuard Nível 1 - alvos disponíveis:"
+	@echo "  make up               Sobe o serviço (build + start)"
+	@echo "  make down             Para o serviço"
+	@echo "  make build            Reconstrói a imagem"
 	@echo "  make logs             Tail dos logs"
-	@echo "  make ps               Status dos containers"
-	@echo "  make restart          Restart de todos os serviços"
-	@echo "  make clean            Para e remove volumes (apaga dados!)"
-	@echo "  make generate-data    Gera dataset sintético em data/"
-	@echo "  make seed-complaints  Envia o dataset para o backend"
-	@echo "  make security-scan    Roda Bandit/Semgrep/pip-audit/npm-audit/Trivy"
+	@echo "  make ps               Status do container"
+	@echo "  make clean            Para e remove volumes"
+	@echo "  make generate-data    Gera data/synthetic_complaints.csv (~50 reclamações)"
+	@echo "  make batch            Processa data/synthetic_complaints.csv via /batch"
+	@echo "  make batch-500        Processa scripts/reclamacoes_bancarias_500.csv via /batch"
 
 up:
 	$(COMPOSE) up -d --build
@@ -31,17 +30,14 @@ logs:
 ps:
 	$(COMPOSE) ps
 
-restart:
-	$(COMPOSE) restart
-
 clean:
 	$(COMPOSE) down -v
 
 generate-data:
 	python scripts/generate_synthetic.py
 
-seed-complaints:
-	python scripts/seed_complaints.py
+batch:
+	@curl -s -F "file=@data/synthetic_complaints.csv" http://localhost:8000/batch | python -m json.tool
 
-security-scan:
-	bash infra/security/scan.sh
+batch-500:
+	@curl -s -F "file=@scripts/reclamacoes_bancarias_500.csv" http://localhost:8000/batch | python -m json.tool

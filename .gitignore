@@ -10,14 +10,6 @@ __pycache__/
 .venv/
 venv/
 .pytest_cache/
-.mypy_cache/
-.ruff_cache/
-
-# Node
-node_modules/
-dist/
-.vite/
-coverage/
 
 # OS
 .DS_Store
@@ -27,13 +19,8 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Data / outputs
-data/reports/*.html
+# Outputs gerados
+output/*.html
+output/*.json
+output/*.csv
 data/synthetic_complaints.csv
-
-# Security scan
-infra/security/report-*.md
-infra/security/raw/
-
-# Postgres volume
-postgres-data/

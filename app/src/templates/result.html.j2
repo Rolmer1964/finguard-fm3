@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Resultado — FinGuard</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 720px; margin: 32px auto; padding: 0 16px; color: #1f2937; background: #f9fafb; }
+  .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-top: 16px; }
+  .muted { color: #6b7280; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
+  .pill { padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; background: #e5e7eb; color: #374151; }
+  .pill.crit { background: #fee2e2; color: #991b1b; }
+  .pill.alta { background: #fed7aa; color: #9a3412; }
+  .pill.media { background: #fef3c7; color: #92400e; }
+  .pill.baixa { background: #d1fae5; color: #065f46; }
+  pre { background: #f3f4f6; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px; white-space: pre-wrap; }
+  a { color: #2563eb; }
+</style>
+</head>
+<body>
+<a href="/">&larr; Voltar</a>
+<h1>Resultado da análise</h1>
+
+<div class="card">
+  <h3 style="margin-top:0">Texto original</h3>
+  <p style="white-space:pre-wrap; margin: 0;">{{ texto_original }}</p>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">Análise estruturada</h3>
+  <p><strong>Categoria:</strong> {{ result.categoria }}</p>
+  <p><strong>Produto:</strong> {{ result.produto }}</p>
+  <p><strong>Sentimento:</strong> {{ result.sentimento }}</p>
+  <p><strong>Urgência:</strong>
+    {% set u = (result.urgencia or '').lower() %}
+    {% if u.startswith('crít') %}<span class="pill crit">{{ result.urgencia }}</span>
+    {% elif u.startswith('alt') %}<span class="pill alta">{{ result.urgencia }}</span>
+    {% elif u.startswith('méd') or u.startswith('med') %}<span class="pill media">{{ result.urgencia }}</span>
+    {% elif u.startswith('baix') %}<span class="pill baixa">{{ result.urgencia }}</span>
+    {% else %}<span class="pill">{{ result.urgencia }}</span>{% endif %}
+  </p>
+  <p><strong>Resumo:</strong></p>
+  <p style="white-space:pre-wrap; margin: 0;">{{ result.resumo }}</p>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">JSON bruto</h3>
+  <pre>{{ result | tojson(indent=2) }}</pre>
+</div>
+
+</body>
+</html>

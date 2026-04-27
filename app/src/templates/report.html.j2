@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>FinGuard — Relatório de classificação</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 24px; color: #1f2937; background: #f9fafb; }
+  h1 { margin-bottom: 4px; }
+  .meta { color: #6b7280; margin-bottom: 24px; }
+  .card { background: white; padding: 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: top; font-size: 13px; }
+  th { background: #f3f4f6; }
+  .pill { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .pill.crit { background: #fee2e2; color: #991b1b; }
+  .pill.alta { background: #fed7aa; color: #9a3412; }
+  .pill.media { background: #fef3c7; color: #92400e; }
+  .pill.baixa { background: #d1fae5; color: #065f46; }
+</style>
+</head>
+<body>
+<h1>FinGuard — Relatório de classificação</h1>
+<div class="meta">Total de reclamações: <strong>{{ total }}</strong> · Gerado em {{ generated_at }}</div>
+
+<div class="grid">
+  <div class="card"><h3 style="margin-top:0">Por categoria</h3><canvas id="chCategoria"></canvas></div>
+  <div class="card"><h3 style="margin-top:0">Por produto</h3><canvas id="chProduto"></canvas></div>
+  <div class="card"><h3 style="margin-top:0">Por urgência</h3><canvas id="chUrgencia"></canvas></div>
+  <div class="card"><h3 style="margin-top:0">Por sentimento</h3><canvas id="chSentimento"></canvas></div>
+</div>
+
+<div class="card" style="margin-top: 24px">
+  <h3 style="margin-top:0">Detalhe das classificações</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th><th>Categoria</th><th>Produto</th><th>Sentimento</th><th>Urgência</th><th>Resumo</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in results %}
+      <tr>
+        <td>{{ r.id }}</td>
+        <td>{{ r.categoria }}</td>
+        <td>{{ r.produto }}</td>
+        <td>{{ r.sentimento }}</td>
+        <td>
+          {% set u = (r.urgencia or '').lower() %}
+          {% if u.startswith('crít') %}<span class="pill crit">{{ r.urgencia }}</span>
+          {% elif u.startswith('alt') %}<span class="pill alta">{{ r.urgencia }}</span>
+          {% elif u.startswith('méd') or u.startswith('med') %}<span class="pill media">{{ r.urgencia }}</span>
+          {% elif u.startswith('baix') %}<span class="pill baixa">{{ r.urgencia }}</span>
+          {% else %}<span class="pill">{{ r.urgencia }}</span>{% endif %}
+        </td>
+        <td>{{ r.resumo }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+function bar(id, data, color) {
+  const labels = Object.keys(data);
+  const values = Object.values(data);
+  new Chart(document.getElementById(id), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: values, backgroundColor: color }] },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+  });
+}
+bar('chCategoria',  {{ by_category|tojson }}, '#3b82f6');
+bar('chProduto',    {{ by_product|tojson }},  '#10b981');
+bar('chUrgencia',   {{ by_urgency|tojson }},  '#f59e0b');
+bar('chSentimento', {{ by_sentiment|tojson }},'#8b5cf6');
+</script>
+</body>
+</html>
