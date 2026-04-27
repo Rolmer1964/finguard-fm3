@@ -2,6 +2,7 @@
 import concurrent.futures
 import csv
 import io
+import json as _json
 import logging
 import threading
 import time
@@ -344,7 +345,6 @@ def traces_page(request: Request):
 @app.post("/traces/recompose")
 def traces_recompose(stem: str) -> JSONResponse:
     """Reconstrói o log de execução em memória a partir de um relatório batch salvo."""
-    import json as _json
     json_path = Path(settings.OUTPUT_DIR) / f"{stem}.json"
     if not json_path.exists():
         raise HTTPException(404, f"Relatório '{stem}' não encontrado")
@@ -370,6 +370,24 @@ def traces_recompose(stem: str) -> JSONResponse:
         })
 
     return JSONResponse({"status": "ok", "recomposed": len(items)})
+
+
+# ── Rotas: API de registros ───────────────────────────────────────────────────
+
+@app.get("/api/record/{record_id}")
+def get_record(record_id: str) -> JSONResponse:
+    """Busca o payload completo de um registro pelo ID nos relatórios JSON salvos."""
+    out_dir = Path(settings.OUTPUT_DIR)
+    for json_file in sorted(out_dir.glob("*.json"), reverse=True):
+        try:
+            items = _json.loads(json_file.read_text(encoding="utf-8"))
+            if isinstance(items, list):
+                for item in items:
+                    if item.get("id") == record_id:
+                        return JSONResponse(item)
+        except Exception:
+            continue
+    raise HTTPException(404, f"Registro '{record_id}' não encontrado nos relatórios salvos")
 
 
 # ── Rotas: documentação ───────────────────────────────────────────────────────

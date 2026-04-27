@@ -21,6 +21,8 @@
   .legend { display:flex; gap:16px; margin-bottom:12px; font-size:12px; color:#6b7280; }
   .dot { display:inline-block; width:10px; height:10px; border-radius:2px;
          margin-right:4px; vertical-align:middle; }
+  tr.clickable { cursor:pointer; }
+  tr.clickable:hover td { background:#eff6ff; }
 </style>
 </head>
 <body>
@@ -82,7 +84,7 @@
   <tbody>
     {% if traces %}
       {% for t in traces %}
-      <tr{% if t.blocked %} style="background:#fff5f5"{% endif %}>
+      <tr class="clickable" onclick="openDetail('{{ t.trace_id }}')"{% if t.blocked %} style="background:#fff5f5"{% endif %}>
         <td><code>{{ t.trace_id }}</code></td>
         <td>{{ t.timestamp }}</td>
         <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">
@@ -132,5 +134,7 @@
     {% endif %}
   </tbody>
 </table>
+
+{% include '_modal.html.j2' %}
 </body>
 </html>

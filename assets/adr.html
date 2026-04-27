@@ -105,6 +105,8 @@
   <a href="#grafo">Estrutura do Grafo</a>
   <a href="#custos">Análise de Custos</a>
   <a href="#guardrails">Guardrails e Segurança</a>
+  <a href="#batch-paralelo">Batch Paralelo</a>
+  <a href="#modal-api">Modal de Detalhe</a>
   <a href="#consequencias">Consequências</a>
   <a href="#recomendacoes">Recomendações</a>
   <div class="sep"></div>
@@ -471,6 +473,101 @@
   <li>Dados sensíveis nos textos de entrada são removidos antes de entrar nos relatórios exportáveis</li>
   <li>Logs em stdout não contêm o texto completo da reclamação — apenas preview truncado (70 chars)</li>
 </ul>
+</section>
+
+<!-- ═══ BATCH PARALELO ═══ -->
+<section id="batch-paralelo">
+<h2>Processamento Batch em Paralelo</h2>
+<div class="card decision">
+  <p>
+    <strong>Adotar <code>ThreadPoolExecutor</code> com 5 workers para processar o CSV em paralelo</strong>,
+    com retry automático por registro (backoff exponencial: 2⁰s, 2¹s) e até 2 tentativas adicionais.
+  </p>
+</div>
+
+<h3>Contexto</h3>
+<p>
+  O pipeline de análise é I/O-bound (latência dominada pelas chamadas à API Bedrock, não por CPU).
+  O processamento sequencial de 500 reclamações levava aproximadamente <strong>1 hora</strong> —
+  tornando inviável para demos e avaliações em tempo real.
+</p>
+
+<div class="options-grid">
+  <div class="option">
+    <h4>Opção A <span class="badge rejected">Rejeitada</span><br>Sequencial (original)</h4>
+    <ul class="pros"><li>Zero complexidade</li><li>Sem risco de throttling</li></ul>
+    <ul class="cons"><li>~1h para 500 registros</li><li>Inviável para demo</li></ul>
+  </div>
+  <div class="option chosen">
+    <h4>Opção B <span class="badge accepted">Escolhida</span><br>ThreadPoolExecutor (5 workers)</h4>
+    <ul class="pros">
+      <li>~5× mais rápido (≈10–15 min para 500)</li>
+      <li>I/O-bound: sem GIL overhead</li>
+      <li>Retry por registro sem afetar os demais</li>
+      <li>Ordem preservada (<code>executor.map</code>)</li>
+    </ul>
+    <ul class="cons">
+      <li>Maior pressão sobre quotas Bedrock</li>
+      <li>5 workers é conservador — ajustável via <code>BATCH_MAX_WORKERS</code></li>
+    </ul>
+  </div>
+  <div class="option">
+    <h4>Opção C <span class="badge rejected">Rejeitada</span><br>asyncio + semáforo</h4>
+    <ul class="pros"><li>Melhor uso de event loop</li></ul>
+    <ul class="cons">
+      <li>LangGraph e boto3 não são nativamente assíncronos</li>
+      <li>Exigiria refatoração profunda dos agentes</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Configuração via variáveis de ambiente</h3>
+<table>
+  <thead><tr><th>Variável</th><th>Padrão</th><th>Descrição</th></tr></thead>
+  <tbody>
+    <tr><td><code>BATCH_MAX_WORKERS</code></td><td>5</td><td>Workers paralelos (aumentar com quota Bedrock elevada)</td></tr>
+    <tr><td><code>BATCH_RATE_LIMIT_DELAY</code></td><td>0.0s</td><td>Delay inicial por registro (throttling preventivo)</td></tr>
+    <tr><td><code>BATCH_MAX_RETRIES</code></td><td>2</td><td>Tentativas adicionais por registro em caso de falha</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ═══ MODAL API ═══ -->
+<section id="modal-api">
+<h2>Modal de Detalhe Compartilhado via API</h2>
+<div class="card decision">
+  <p>
+    <strong>Expor endpoint <code>GET /api/record/{id}</code></strong> que busca o payload completo
+    de um registro nos relatórios JSON já salvos, permitindo que tanto o relatório gerencial quanto
+    o log de execuções abram o mesmo modal de detalhe sem duplicação de código.
+  </p>
+</div>
+
+<h3>Problema</h3>
+<p>
+  O relatório gerencial (gerado por batch) embute todos os dados em JavaScript para o modal funcionar
+  offline. O log de execuções (<code>/traces</code>) armazena apenas metadados resumidos em memória —
+  sem texto completo, sem pipeline detalhado. Criar um segundo modal seria duplicação de ~200 linhas de JS.
+</p>
+
+<h3>Decisão de design</h3>
+<ul>
+  <li>O modal HTML + CSS + JS foi extraído para <code>_modal.html.j2</code> (Jinja2 include compartilhado)</li>
+  <li>Na página de relatório: lookup local via <code>INDEX[id]</code> (dados já embutidos — zero latência)</li>
+  <li>Na página de traces: fetch para <code>/api/record/{id}</code> com loading state enquanto aguarda</li>
+  <li>O endpoint varre os arquivos <code>*.json</code> em <code>/output</code> do mais recente ao mais antigo</li>
+</ul>
+
+<div class="card ok">
+  <strong>Reaproveitamento:</strong> um único arquivo de template serve dois contextos com estratégias
+  de busca diferentes — local (rápido) e remota (sob demanda). Nenhum arquivo extra por registro é criado.
+</div>
+
+<div class="card warn" style="margin-top:12px">
+  <strong>Limitação:</strong> se o registro não estiver em nenhum relatório JSON salvo (ex: análise
+  unitária via <code>/analyze-form</code>), o modal exibe mensagem de orientação. O "Recompor log"
+  em <code>/reports</code> reindexar os traces — mas não os dados completos para a API.
+</div>
 </section>
 
 <!-- ═══ CONSEQUÊNCIAS ═══ -->
