@@ -14,7 +14,7 @@ from .agents.triage import run_triage
 
 logger = logging.getLogger("graph")
 
-_traces: deque = deque(maxlen=50)
+_traces: deque = deque()
 
 
 class AnalysisState(TypedDict, total=False):
