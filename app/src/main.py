@@ -1,8 +1,10 @@
 
+import concurrent.futures
 import csv
 import io
 import logging
 import threading
+import time
 from contextlib import asynccontextmanager
 from datetime import datetime as _dt
 from pathlib import Path
@@ -73,6 +75,34 @@ app.mount("/assets/hackathon", StaticFiles(directory=str(BASE.parent / "assets" 
 _ADR_PATH = BASE.parent / "assets" / "adr.html"
 
 
+# ── Helpers de processamento ─────────────────────────────────────────────────
+
+def _analyze_with_retry(
+    texto: str,
+    produto_hint: str | None,
+    rec_id: str,
+    rate_limit_delay: float,
+    max_retries: int,
+) -> dict:
+    if rate_limit_delay > 0:
+        time.sleep(rate_limit_delay)
+    last_exc: Exception | None = None
+    for attempt in range(max_retries + 1):
+        try:
+            return analyze(texto, produto_hint, record_id=rec_id)
+        except Exception as exc:
+            last_exc = exc
+            if attempt < max_retries:
+                wait = 2 ** attempt
+                logger.warning(
+                    "[%s] tentativa %d/%d falhou — retry em %ds: %s",
+                    rec_id, attempt + 1, max_retries + 1, wait, exc,
+                )
+                time.sleep(wait)
+    logger.error("[%s] todas %d tentativas falharam: %s", rec_id, max_retries + 1, last_exc)
+    raise last_exc  # type: ignore[misc]
+
+
 # ── Rotas: páginas principais ─────────────────────────────────────────────────
 
 @app.get("/", response_class=HTMLResponse)
@@ -104,8 +134,7 @@ def analyze_from_form(request: Request, text: str = Form(...), product_hint: str
 
 @app.post("/batch")
 async def batch(file: UploadFile = File(...)) -> JSONResponse:
-    """Processa um CSV (colunas: id, texto_reclamacao, produto opcional) através do grafo
-    completo e gera JSON, CSV, MD e HTML em /output."""
+    """Processa um CSV em paralelo (ThreadPoolExecutor) com retry automático por registro."""
     if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(400, "Envie um arquivo .csv")
 
@@ -114,28 +143,53 @@ async def batch(file: UploadFile = File(...)) -> JSONResponse:
     if not reader.fieldnames or "texto_reclamacao" not in reader.fieldnames:
         raise HTTPException(400, "CSV precisa ter ao menos a coluna 'texto_reclamacao'")
 
-    results: list[dict] = []
+    rows = []
     for i, row in enumerate(reader, start=1):
         texto = (row.get("texto_reclamacao") or "").strip()
         if not texto:
             continue
-        produto_hint = (row.get("produto") or "").strip() or None
-        canal   = (row.get("canal") or "").strip() or "Não informado"
-        rec_id  = (row.get("id") or f"REC-{i:05d}")
+        rows.append({
+            "texto":        texto,
+            "produto_hint": (row.get("produto") or "").strip() or None,
+            "canal":        (row.get("canal") or "").strip() or "Não informado",
+            "rec_id":       (row.get("id") or f"REC-{i:05d}"),
+        })
+
+    max_workers       = settings.BATCH_MAX_WORKERS
+    rate_limit_delay  = settings.BATCH_RATE_LIMIT_DELAY
+    max_retries       = settings.BATCH_MAX_RETRIES
+
+    def process_row(row_data: dict) -> dict:
+        rec_id       = row_data["rec_id"]
+        texto        = row_data["texto"]
+        produto_hint = row_data["produto_hint"]
+        canal        = row_data["canal"]
         try:
-            r = analyze(texto, produto_hint, record_id=rec_id)
+            r = _analyze_with_retry(
+                texto=texto,
+                produto_hint=produto_hint,
+                rec_id=rec_id,
+                rate_limit_delay=rate_limit_delay,
+                max_retries=max_retries,
+            )
         except Exception as exc:
-            logger.exception("[%s] falha ao analisar linha %d", rec_id, i)
+            logger.error("[%s] falha definitiva: %s", rec_id, exc)
             r = {"category": "Outros", "product": "Não Identificado",
                  "sentiment": "Neutro", "urgency": "Baixa", "summary": f"[falha: {exc}]",
                  "risk_level": "Baixo", "risk_justification": ""}
         if r.get("blocked"):
-            logger.warning("[%s] linha %d bloqueada pelo guardrail", rec_id, i)
+            logger.warning("[%s] bloqueada pelo guardrail", rec_id)
             r = {"category": "Bloqueado", "product": "Não Identificado",
                  "sentiment": "Neutro", "urgency": "Baixa",
                  "summary": "[Entrada bloqueada pelo guardrail de proteção]",
                  "risk_level": "Bloqueado", "risk_justification": r.get("message", "")}
-        results.append({"id": rec_id, "canal": canal, "texto_original": mask_profanity(texto), **r})
+        return {"id": rec_id, "canal": canal, "texto_original": mask_profanity(texto), **r}
+
+    logger.info("batch: %d registros | workers=%d delay=%.1fs retries=%d",
+                len(rows), max_workers, rate_limit_delay, max_retries)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        results = list(executor.map(process_row, rows))
 
     stem = _dt.utcnow().strftime("report_%Y-%m-%d-%H-%M-%S")
     paths = write_outputs(results, stem=stem)
