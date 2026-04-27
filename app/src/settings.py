@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     GUARDRAIL_VERSION: str = "DRAFT"
 
     # ---- Batch paralelo ----
-    BATCH_MAX_WORKERS: int = 10
+    BATCH_MAX_WORKERS: int = 5
     BATCH_RATE_LIMIT_DELAY: float = 0.0
     BATCH_MAX_RETRIES: int = 2
 
