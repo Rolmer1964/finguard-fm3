@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>FinGuard — Orquestrador (Nível 2)</title>
+<title>FinGuard — Arquiteto da Solução (Nível 3)</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 760px; margin: 32px auto; padding: 0 16px; color: #1f2937; background: #f9fafb; }
   h1 { margin-bottom: 4px; }
@@ -22,21 +22,26 @@
 <body>
 <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
   <div>
-    <h1 style="margin-bottom:4px">FinGuard — Orquestrador</h1>
-    <div class="muted">Nível 2 · Future Minds 3 · Pipeline multi-agente com LangGraph + AWS Bedrock</div>
+    <h1 style="margin-bottom:4px">FinGuard — Arquiteto da Solução</h1>
+    <div class="muted">Nível 3 · Future Minds 3 · Pipeline multi-agente com Guardrails, LangGraph + AWS Bedrock</div>
   </div>
   <div style="display:flex;gap:8px;align-self:center">
     <a href="/reports" style="background:#1e40af;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">Relatórios</a>
     <a href="/traces"  style="background:#1e40af;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">Log</a>
+    <a href="/adr"     style="background:#065f46;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">ADR</a>
     <a href="/admin"   style="background:#6b7280;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">Admin</a>
   </div>
 </div>
 <div class="pipeline" style="margin-top:10px">
-  <span class="step">① triage (Haiku)</span>
+  <span class="step" style="background:#d1fae5;color:#065f46">✓ guardrail entrada</span>
   <span class="arrow">→</span>
-  <span class="step">② risk (Sonnet + RAG)</span>
+  <span class="step">① triagem (Haiku)</span>
   <span class="arrow">→</span>
-  <span class="step">③ report (consolidação)</span>
+  <span class="step">② risco (Sonnet + RAG)</span>
+  <span class="arrow">→</span>
+  <span class="step">③ relatório</span>
+  <span class="arrow">→</span>
+  <span class="step" style="background:#d1fae5;color:#065f46">✓ guardrail saída</span>
 </div>
 
 <form action="/analyze-form" method="post" class="card">

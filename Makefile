@@ -4,7 +4,7 @@ COMPOSE := docker compose
 .PHONY: help up down build logs ps clean generate-data batch batch-500 analyze rag-ingest rag-status
 
 help:
-	@echo "FinGuard Nível 2 - alvos disponíveis:"
+	@echo "FinGuard Nível 3 - alvos disponíveis:"
 	@echo "  make up               Sobe o serviço (build + start)"
 	@echo "  make down             Para o serviço"
 	@echo "  make build            Reconstrói a imagem"

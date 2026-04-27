@@ -35,7 +35,7 @@ def _build_recommendations(by_category: dict, by_risk: dict, critical: list) -> 
 
 def _render_md(items: list[dict], totals: dict, critical: list, recs: list[str]) -> str:
     lines = [
-        "# FinGuard — Relatório Gerencial (Nível 2)",
+        "# FinGuard — Relatório Gerencial (Nível 3)",
         "",
         f"_Gerado em {datetime.utcnow().isoformat(timespec='seconds')}Z_",
         "",

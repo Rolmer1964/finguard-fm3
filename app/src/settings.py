@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     GUARDRAIL_ID: str | None = None
     GUARDRAIL_VERSION: str = "DRAFT"
 
-    # ---- RAG (sempre ativo no nível 2 — alimenta o agente de risco) ----
+    # ---- RAG (alimenta o agente de risco com trechos da Política Interna) ----
     RAG_DOCS_DIR: str = "/app/assets/docs"
     RAG_INDEX_DIR: str = "/app/assets/index"
     RAG_TOP_K: int = 4
