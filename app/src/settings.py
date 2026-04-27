@@ -10,8 +10,8 @@ class Settings(BaseSettings):
     AWS_SESSION_TOKEN: str | None = None
 
     # Combinação estratégica: barato para classificação, melhor para risco.
-    BEDROCK_MODEL_TRIAGE: str = "anthropic.claude-3-haiku-20240307-v1:0"
-    BEDROCK_MODEL_RISK: str = "anthropic.claude-3-5-sonnet-20241022-v2:0"
+    BEDROCK_MODEL_TRIAGE: str = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+    BEDROCK_MODEL_RISK: str = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
 
     # Embeddings para o RAG (Titan v2: 1024 dim, normalizado)
     BEDROCK_EMBED_MODEL_ID: str = "amazon.titan-embed-text-v2:0"
