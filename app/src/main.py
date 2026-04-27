@@ -7,7 +7,9 @@ import logging
 import threading
 import time
 from contextlib import asynccontextmanager
-from datetime import datetime as _dt
+from datetime import datetime as _dt, timezone, timedelta
+
+_TZ_BRT = timezone(timedelta(hours=-3))
 from pathlib import Path
 
 from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, Request, UploadFile
@@ -157,7 +159,7 @@ async def batch(file: UploadFile = File(...)) -> JSONResponse:
         })
 
     t_start     = time.time()
-    started_at  = _dt.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    started_at  = _dt.now(_TZ_BRT).strftime("%Y-%m-%d %H:%M:%S (UTC-3)")
     stem        = _dt.utcnow().strftime("report_%Y-%m-%d-%H-%M-%S")
     failed_path = Path(settings.OUTPUT_DIR) / f"failed_{stem}.json"
     max_passes  = settings.BATCH_MAX_PASSES
@@ -249,7 +251,7 @@ async def batch(file: UploadFile = File(...)) -> JSONResponse:
     if failed_path.exists() and not pending:
         failed_path.unlink()
 
-    finished_at = _dt.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    finished_at = _dt.now(_TZ_BRT).strftime("%Y-%m-%d %H:%M:%S (UTC-3)")
     elapsed_s   = time.time() - t_start
     paths = write_outputs(
         all_results, stem=stem,
