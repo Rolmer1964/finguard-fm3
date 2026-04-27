@@ -89,11 +89,12 @@ def write_outputs(results: list[dict], stem: str | None = None) -> dict[str, str
         for r in results:
             w.writerow({k: r.get(k, "") for k in fields})
 
+    unblocked = [r for r in results if r.get("category") != "Bloqueado"]
     by_category = _bucket(results, "category")
-    by_product = _bucket(results, "product")
-    by_urgency = _bucket(results, "urgency")
-    by_risk = _bucket(results, "risk_level")
-    by_sentiment = _bucket(results, "sentiment")
+    by_product = _bucket(unblocked, "product")
+    by_urgency = _bucket(unblocked, "urgency")
+    by_risk = _bucket(unblocked, "risk_level")
+    by_sentiment = _bucket(unblocked, "sentiment")
     by_canal = _bucket(results, "canal")
     critical = [r for r in results if r.get("urgency") == "Crítica" or r.get("risk_level") == "Crítico"]
     totals = {

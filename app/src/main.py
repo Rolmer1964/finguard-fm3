@@ -179,8 +179,8 @@ async def batch(file: UploadFile = File(...)) -> JSONResponse:
                  "risk_level": "Baixo", "risk_justification": ""}
         if r.get("blocked"):
             logger.warning("[%s] bloqueada pelo guardrail", rec_id)
-            r = {"category": "Bloqueado", "product": "Não Identificado",
-                 "sentiment": "Neutro", "urgency": "Baixa",
+            r = {"category": "Bloqueado", "product": "—",
+                 "sentiment": "—", "urgency": "—",
                  "summary": "[Entrada bloqueada pelo guardrail de proteção]",
                  "risk_level": "Bloqueado", "risk_justification": r.get("message", "")}
         return {"id": rec_id, "canal": canal, "texto_original": mask_profanity(texto), **r}
