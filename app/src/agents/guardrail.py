@@ -23,7 +23,15 @@ _INJECTION_TERMS = [
     "you are now", "você agora é", "finja ser", "aja como se fosse",
     "pretend to be", "jailbreak", "system prompt", "prompt injection",
     "revelar suas instruções", "mostre seu prompt", "what is your system prompt",
-    "ignore previous instructions",
+    "ignore previous instructions", "repita as instruções", "prompt inicial",
+    "histórico de conversas", "dados dos outros clientes", "você é agora dan",
+    "sem filtros", "sem restrições", "aja como o gerente",
+]
+
+_THREAT_TERMS = [
+    "vou explodir", "vou incendiar", "vou machucar", "vou te encontrar",
+    "sei onde vocês moram", "sei onde você mora", "vocês vão se arrepender",
+    "vou matar", "vou destruir a agência",
 ]
 
 
@@ -78,6 +86,8 @@ def _local_input_check(text: str) -> dict:
     lower = text.lower()
     if any(term in lower for term in _INJECTION_TERMS):
         return {"blocked": True, "reason": "prompt_injection_local", "sanitized_text": text}
+    if any(term in lower for term in _THREAT_TERMS):
+        return {"blocked": True, "reason": "ameaca_direta_local", "sanitized_text": text}
     if len(text.strip()) < 10:
         return {"blocked": True, "reason": "input_muito_curto", "sanitized_text": text}
     return {"blocked": False, "reason": None, "sanitized_text": text}
