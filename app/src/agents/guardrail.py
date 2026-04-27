@@ -96,11 +96,14 @@ def sanitize_output(text: str, field: str = "") -> str:
     if settings.GUARDRAIL_ID:
         try:
             r = _apply("OUTPUT", text)
-            outputs = r["outputs"]
-            sanitized = outputs[0].get("text", text) if outputs else text
             if r["action"] == "GUARDRAIL_INTERVENED":
-                logger.warning("guardrail OUTPUT interveio campo=%s", field)
-            text = sanitized
+                # Quando o guardrail bloqueia (falso positivo de content policy),
+                # outputs[0] contém blockedOutputsMessaging — não o texto sanitizado.
+                # Nesse caso, mantemos o original e aplicamos apenas o regex local.
+                logger.warning("guardrail OUTPUT bloqueou campo=%s — usando regex como fallback", field)
+            else:
+                outputs = r["outputs"]
+                text = outputs[0].get("text", text) if outputs else text
         except Exception:
             logger.exception("erro Bedrock guardrail OUTPUT campo=%s — fallback regex", field)
 
