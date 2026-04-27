@@ -61,13 +61,13 @@ def _node_report(state: AnalysisState) -> AnalysisState:
 
 def build_graph():
     g = StateGraph(AnalysisState)
-    g.add_node("triage", _node_triage)
-    g.add_node("risk", _node_risk)
-    g.add_node("report", _node_report)
-    g.set_entry_point("triage")
-    g.add_edge("triage", "risk")
-    g.add_edge("risk", "report")
-    g.add_edge("report", END)
+    g.add_node("step_triage", _node_triage)
+    g.add_node("step_risk", _node_risk)
+    g.add_node("step_report", _node_report)
+    g.set_entry_point("step_triage")
+    g.add_edge("step_triage", "step_risk")
+    g.add_edge("step_risk", "step_report")
+    g.add_edge("step_report", END)
     return g.compile()
 
 
