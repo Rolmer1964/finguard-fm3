@@ -156,6 +156,8 @@ async def batch(file: UploadFile = File(...)) -> JSONResponse:
             "rec_id":       (row.get("id") or f"REC-{i:05d}"),
         })
 
+    t_start     = time.time()
+    started_at  = _dt.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
     stem        = _dt.utcnow().strftime("report_%Y-%m-%d-%H-%M-%S")
     failed_path = Path(settings.OUTPUT_DIR) / f"failed_{stem}.json"
     max_passes  = settings.BATCH_MAX_PASSES
@@ -247,7 +249,12 @@ async def batch(file: UploadFile = File(...)) -> JSONResponse:
     if failed_path.exists() and not pending:
         failed_path.unlink()
 
-    paths = write_outputs(all_results, stem=stem)
+    finished_at = _dt.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    elapsed_s   = time.time() - t_start
+    paths = write_outputs(
+        all_results, stem=stem,
+        started_at=started_at, finished_at=finished_at, elapsed_s=elapsed_s,
+    )
     return RedirectResponse(url=f"/output/{Path(paths['html']).name}", status_code=303)
 
 

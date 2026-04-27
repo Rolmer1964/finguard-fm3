@@ -15,6 +15,13 @@ _env = Environment(
 _env.filters["tojson"] = lambda v, indent=None: json.dumps(v, ensure_ascii=False, indent=indent)
 
 
+def _fmt_elapsed(seconds: float | None) -> str:
+    if seconds is None:
+        return "—"
+    m, s = divmod(int(seconds), 60)
+    return f"{m}min {s:02d}s" if m else f"{s}s"
+
+
 def _bucket(items: list[dict], key: str) -> dict[str, int]:
     return dict(Counter((it.get(key) or "Não informado") for it in items))
 
@@ -68,7 +75,13 @@ def _render_md(items: list[dict], totals: dict, critical: list, recs: list[str])
     return "\n".join(lines)
 
 
-def write_outputs(results: list[dict], stem: str | None = None) -> dict[str, str]:
+def write_outputs(
+    results: list[dict],
+    stem: str | None = None,
+    started_at: str | None = None,
+    finished_at: str | None = None,
+    elapsed_s: float | None = None,
+) -> dict[str, str]:
     """Grava JSON, CSV, MD e HTML com os resultados de uma execução em batch."""
     out_dir = Path(settings.OUTPUT_DIR)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -119,6 +132,10 @@ def write_outputs(results: list[dict], stem: str | None = None) -> dict[str, str
         recommendations=recs,
         generated_at=datetime.utcnow().isoformat(timespec="seconds") + "Z",
         stem=stem,
+        started_at=started_at or "—",
+        finished_at=finished_at or "—",
+        elapsed_s=elapsed_s,
+        elapsed_fmt=_fmt_elapsed(elapsed_s),
     )
     html_path.write_text(html, encoding="utf-8")
 
