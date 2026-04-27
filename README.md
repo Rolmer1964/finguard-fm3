@@ -88,6 +88,39 @@ curl -F "file=@scripts/reclamacoes_bancarias_500.csv" http://localhost:8000/batc
 
 > Atenção: 500 reclamações × 1 chamada Bedrock cada = leva alguns minutos e tem custo. Para iterar no desenvolvimento, prefira o dataset menor.
 
+---
+
+## RAG opcional (Bedrock Embeddings + FAISS)
+
+Coloque PDFs/MDs/TXTs de política interna em `assets/docs/`. O sistema gera um índice vetorial **incremental** (apenas arquivos novos ou alterados são re-tokenizados) e o classificador pode injetar trechos relevantes como contexto no prompt.
+
+```bash
+# 1. Coloque seus PDFs/MDs em assets/docs/
+ls assets/docs/
+
+# 2. Gere/atualize o índice (Bedrock Titan Text Embeddings v2 → FAISS)
+make up                  # precisa do container rodando para chamar Bedrock
+make rag-ingest          # roda dentro do container; é incremental (só novos/alterados)
+make rag-status          # mostra resumo: arquivos indexados, chunks, hash
+
+# 3. Ative no .env
+echo "RAG_ENABLED=true" >> .env
+make restart             # ou: make down && make up
+
+# Próximas classificações injetam top-3 trechos da política como contexto
+```
+
+**Como funciona:**
+- `assets/docs/` é o input (PDF, MD, TXT) — você coloca o que quiser
+- `assets/index/` é o output (`faiss.bin` + `manifest.json`) — gitignored, regenerável
+- `manifest.json` guarda hash SHA-256 de cada arquivo. Na próxima ingestão:
+  - **Novo arquivo** → tokeniza + adiciona ao índice
+  - **Arquivo alterado** (hash mudou) → remove os chunks antigos do FAISS e reinsere os novos
+  - **Arquivo removido** → remove os chunks correspondentes do FAISS
+  - **Arquivo inalterado** → pula (zero custo)
+
+**Tier (do quadro de RAG):** 2 — *Embeddings + FAISS in-memory persistido em disco*. Para escala maior (milhares de docs), trocar FAISS por OpenSearch/pgvector ou migrar para Bedrock Knowledge Bases.
+
 Saídas em `./output/`:
 - `synthetic_complaints.json` — estrutura completa
 - `synthetic_complaints.csv` — para análise em Excel/Sheets

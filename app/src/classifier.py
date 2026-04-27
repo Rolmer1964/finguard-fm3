@@ -5,6 +5,7 @@ import re
 import boto3
 
 from .profanity import mask
+from .rag.retriever import format_for_prompt, retrieve
 from .settings import settings
 
 logger = logging.getLogger("classifier")
@@ -58,6 +59,13 @@ def classify(text: str, product_hint: str | None = None) -> dict:
     user = f"Texto da reclamação:\n\n{text}\n"
     if product_hint:
         user += f"\nProduto sugerido pelo canal: {product_hint}\n"
+
+    if settings.RAG_ENABLED:
+        chunks = retrieve(text, k=settings.RAG_TOP_K)
+        ctx = format_for_prompt(chunks)
+        if ctx:
+            user += f"\n{ctx}\n"
+
     user += "\nResponda apenas com o JSON solicitado."
 
     body = {

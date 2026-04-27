@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 COMPOSE := docker compose
 
-.PHONY: help up down build logs ps clean generate-data batch batch-500
+.PHONY: help up down build logs ps clean generate-data batch batch-500 rag-ingest rag-status
 
 help:
 	@echo "FinGuard Nível 1 - alvos disponíveis:"
@@ -14,6 +14,8 @@ help:
 	@echo "  make generate-data    Gera data/synthetic_complaints.csv (~50 reclamações)"
 	@echo "  make batch            Processa data/synthetic_complaints.csv via /batch"
 	@echo "  make batch-500        Processa scripts/reclamacoes_bancarias_500.csv via /batch"
+	@echo "  make rag-ingest       Sincroniza assets/docs/ com o índice RAG (incremental por hash)"
+	@echo "  make rag-status       Mostra resumo do índice RAG (manifest)"
 
 up:
 	$(COMPOSE) up -d --build
@@ -41,3 +43,13 @@ batch:
 
 batch-500:
 	@curl -s -F "file=@scripts/reclamacoes_bancarias_500.csv" http://localhost:8000/batch | python -m json.tool
+
+rag-ingest:
+	$(COMPOSE) exec app python -m src.rag.ingest
+
+rag-status:
+	@if [ -f assets/index/manifest.json ]; then \
+		python -c "import json; m=json.load(open('assets/index/manifest.json',encoding='utf-8')); print(f\"vetores: {m['next_id']}\\narquivos: {len(m['files'])}\\natualizado: {m.get('updated_at')}\\n\"); [print(f'  {p} ({len(v[\"chunk_ids\"])} chunks, sha={v[\"hash\"][:8]})') for p,v in m['files'].items()]"; \
+	else \
+		echo "Nenhum índice ainda. Rode: make rag-ingest"; \
+	fi

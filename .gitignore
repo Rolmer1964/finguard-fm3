@@ -24,3 +24,6 @@ output/*.html
 output/*.json
 output/*.csv
 data/synthetic_complaints.csv
+
+# Índice RAG (regenerável via `make rag-ingest`)
+assets/index/
