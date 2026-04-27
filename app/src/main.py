@@ -156,44 +156,98 @@ async def batch(file: UploadFile = File(...)) -> JSONResponse:
             "rec_id":       (row.get("id") or f"REC-{i:05d}"),
         })
 
-    max_workers       = settings.BATCH_MAX_WORKERS
-    rate_limit_delay  = settings.BATCH_RATE_LIMIT_DELAY
-    max_retries       = settings.BATCH_MAX_RETRIES
+    stem        = _dt.utcnow().strftime("report_%Y-%m-%d-%H-%M-%S")
+    failed_path = Path(settings.OUTPUT_DIR) / f"failed_{stem}.json"
+    max_passes  = settings.BATCH_MAX_PASSES
 
-    def process_row(row_data: dict) -> dict:
-        rec_id       = row_data["rec_id"]
-        texto        = row_data["texto"]
-        produto_hint = row_data["produto_hint"]
-        canal        = row_data["canal"]
-        try:
-            r = _analyze_with_retry(
-                texto=texto,
-                produto_hint=produto_hint,
-                rec_id=rec_id,
-                rate_limit_delay=rate_limit_delay,
-                max_retries=max_retries,
+    # Configuração por passe: (workers, delay_por_registro, retries_internos)
+    pass_configs = [
+        (settings.BATCH_MAX_WORKERS, settings.BATCH_RATE_LIMIT_DELAY, settings.BATCH_MAX_RETRIES),
+        (settings.BATCH_RETRY_WORKERS, 0.0, 1),
+        (1,                            0.0, 0),
+    ]
+
+    def _make_processor(delay: float, retries: int):
+        def process_row(row_data: dict) -> dict:
+            rec_id       = row_data["rec_id"]
+            texto        = row_data["texto"]
+            produto_hint = row_data["produto_hint"]
+            canal        = row_data["canal"]
+            try:
+                r = _analyze_with_retry(
+                    texto=texto,
+                    produto_hint=produto_hint,
+                    rec_id=rec_id,
+                    rate_limit_delay=delay,
+                    max_retries=retries,
+                )
+            except Exception as exc:
+                if "ThrottlingException" in str(exc) or "throttling" in str(exc).lower():
+                    logger.warning("[%s] throttling — agendado para próximo passe", rec_id)
+                    return {"_throttled": True, "_row": row_data}
+                logger.error("[%s] falha definitiva: %s", rec_id, exc)
+                r = {"category": "Erro", "product": "—", "sentiment": "—", "urgency": "—",
+                     "summary": f"[falha: {exc}]", "risk_level": "—", "risk_justification": ""}
+            else:
+                if r.get("blocked"):
+                    logger.warning("[%s] bloqueada pelo guardrail", rec_id)
+                    r = {"category": "Bloqueado", "product": "—", "sentiment": "—", "urgency": "—",
+                         "summary": "[Entrada bloqueada pelo guardrail de proteção]",
+                         "risk_level": "Bloqueado", "risk_justification": r.get("message", "")}
+            return {"id": rec_id, "canal": canal, "texto_original": mask_profanity(texto), **r}
+        return process_row
+
+    pending     = rows
+    all_results: list[dict] = []
+
+    for pass_num in range(max_passes):
+        if not pending:
+            break
+
+        workers, delay, retries = pass_configs[min(pass_num, len(pass_configs) - 1)]
+
+        if pass_num > 0:
+            wait = settings.BATCH_RETRY_DELAY * pass_num
+            logger.info("batch passe %d/%d: aguardando %.0fs para throttling recuperar",
+                        pass_num + 1, max_passes, wait)
+            time.sleep(wait)
+
+        logger.info("batch passe %d/%d: %d registros | workers=%d delay=%.1fs retries=%d",
+                    pass_num + 1, max_passes, len(pending), workers, delay, retries)
+
+        next_pending: list[dict] = []
+        fn = _make_processor(delay, retries)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+            for result in executor.map(fn, pending):
+                if result.get("_throttled"):
+                    next_pending.append(result["_row"])
+                else:
+                    all_results.append(result)
+
+        pending = next_pending
+        if pending:
+            Path(settings.OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
+            failed_path.write_text(
+                _json.dumps(pending, ensure_ascii=False, indent=2), encoding="utf-8"
             )
-        except Exception as exc:
-            logger.error("[%s] falha definitiva: %s", rec_id, exc)
-            r = {"category": "Outros", "product": "Não Identificado",
-                 "sentiment": "Neutro", "urgency": "Baixa", "summary": f"[falha: {exc}]",
-                 "risk_level": "Baixo", "risk_justification": ""}
-        if r.get("blocked"):
-            logger.warning("[%s] bloqueada pelo guardrail", rec_id)
-            r = {"category": "Bloqueado", "product": "—",
-                 "sentiment": "—", "urgency": "—",
-                 "summary": "[Entrada bloqueada pelo guardrail de proteção]",
-                 "risk_level": "Bloqueado", "risk_justification": r.get("message", "")}
-        return {"id": rec_id, "canal": canal, "texto_original": mask_profanity(texto), **r}
+            logger.warning("batch passe %d/%d: %d registros ainda pendentes → %s",
+                           pass_num + 1, max_passes, len(pending), failed_path.name)
 
-    logger.info("batch: %d registros | workers=%d delay=%.1fs retries=%d",
-                len(rows), max_workers, rate_limit_delay, max_retries)
+    # Registros que esgotaram todos os passes
+    for row_data in pending:
+        logger.error("[%s] esgotou %d passes — ThrottlingException persistente", row_data["rec_id"], max_passes)
+        all_results.append({
+            "id": row_data["rec_id"], "canal": row_data["canal"],
+            "texto_original": mask_profanity(row_data["texto"]),
+            "category": "Erro", "product": "—", "sentiment": "—", "urgency": "—",
+            "summary": f"[falha após {max_passes} passes — ThrottlingException persistente]",
+            "risk_level": "—", "risk_justification": "",
+        })
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        results = list(executor.map(process_row, rows))
+    if failed_path.exists() and not pending:
+        failed_path.unlink()
 
-    stem = _dt.utcnow().strftime("report_%Y-%m-%d-%H-%M-%S")
-    paths = write_outputs(results, stem=stem)
+    paths = write_outputs(all_results, stem=stem)
     return RedirectResponse(url=f"/output/{Path(paths['html']).name}", status_code=303)
 
 

@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     BATCH_MAX_WORKERS: int = 5
     BATCH_RATE_LIMIT_DELAY: float = 0.0
     BATCH_MAX_RETRIES: int = 2
+    # Passes de recuperação para registros com ThrottlingException
+    BATCH_MAX_PASSES: int = 3
+    BATCH_RETRY_WORKERS: int = 2
+    BATCH_RETRY_DELAY: float = 15.0  # segundos de espera entre passes
 
     # ---- RAG (alimenta o agente de risco com trechos da Política Interna) ----
     RAG_DOCS_DIR: str = "/app/assets/docs"
