@@ -1,0 +1,102 @@
+schema-version: v3
+kind: action
+metadata:
+  name: stackspot-shift-ai
+  display-name: stackspot-shift-ai
+  description: Custom action to call stackspot ai and shift codes
+  version: 0.0.12
+spec:
+  type: python
+  docs:
+    pt-br: docs/pt-br/docs.md
+    en-us: docs/en-us/docs.md
+  repository: git@github.com:stack-spot/stackspot-code-shift-content.git
+  inputs:
+    - name: module_inputs
+      label: Module inputs
+      type: object
+      required: false
+      inputs:
+        - label: "How do you want to change the files?"
+          name: how_to_change
+          type: select
+          required: true
+          items:
+            - Agent
+            - RQC
+            - Prompt
+
+        - label: Enter Remote Quick Command SLUG
+          name: slug_rqc
+          type: text
+          required: false
+          condition:
+            variable: module_inputs.how_to_change
+            operator: "=="
+            value: RQC
+
+        - label: "Agent ID"
+          name: agent_id
+          type: text
+          help: "Enter the Agent ID."
+          required: false
+          condition:
+            variable: module_inputs.how_to_change
+            operator: "=="
+            value: Agent
+
+        - label: "Prompt"
+          name: prompt
+          type: textarea
+          help: "Enter what changes you want to make to the files."
+          required: false
+          condition:
+            variable: module_inputs.how_to_change
+            operator: "!="
+            value: RQC
+
+        - label: "Advanced settings"
+          name: advanced
+          type: bool
+          default: false
+          required: false
+
+        - label: "Directory"
+          name: path_filter
+          type: text
+          required: false
+          default: "."
+          help: "Enter the path to be filtered (example: /src, /app)"
+          condition:
+            variable: module_inputs.advanced
+            operator: "=="
+            value: true
+
+        - label: "File types"
+          name: files_filter
+          type: text
+          default: "*.*"
+          required: false
+          help: "Enter file filter(s) (example: *.java, *.js). Only files with text MIME type."
+          condition:
+            variable: module_inputs.advanced
+            operator: "=="
+            value: true
+
+        - label: "Filter by term"
+          name: files_filter_text
+          type: list
+          required: false
+          add-question: "Add filter term"
+          input:
+            type: text
+            label: "Term"
+            required: true
+            help: "Add one or more terms to filter file content. Each term must be entered as a separate item in the list."
+          condition:
+            variable: module_inputs.advanced
+            operator: "=="
+            value: true
+  python:
+    workdir: .
+    script: script.py
