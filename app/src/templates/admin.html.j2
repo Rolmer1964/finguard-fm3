@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Admin — FinGuard</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+         max-width:700px; margin:40px auto; padding:0 16px; color:#1f2937; background:#f9fafb; }
+  h1 { margin-bottom:4px; }
+  .muted { color:#6b7280; font-size:13px; }
+  .card { background:white; padding:20px; border-radius:8px;
+          box-shadow:0 1px 3px rgba(0,0,0,.08); margin-top:16px; }
+  .stat-row { display:flex; justify-content:space-between; align-items:center;
+              padding:10px 0; border-bottom:1px solid #e5e7eb; font-size:14px; }
+  .stat-row:last-child { border-bottom:none; }
+  .stat-val { font-weight:700; font-size:18px; }
+  .stat-val.zero { color:#9ca3af; }
+  .stat-val.ok   { color:#059669; }
+  .stat-val.warn { color:#d97706; }
+  .btn { display:inline-block; padding:9px 18px; border-radius:6px; font-size:13px;
+         font-weight:500; border:none; cursor:pointer; text-decoration:none; }
+  .btn-danger  { background:#dc2626; color:white; }
+  .btn-danger:hover  { background:#b91c1c; }
+  .btn-primary { background:#2563eb; color:white; }
+  .btn-primary:hover { background:#1d4ed8; }
+  .btn-gray    { background:#6b7280; color:white; }
+  .btn-gray:hover    { background:#4b5563; }
+  .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+  #result { margin-top:12px; padding:12px; border-radius:6px; font-size:13px;
+            font-family:monospace; white-space:pre; display:none; }
+  #result.ok  { background:#d1fae5; color:#065f46; }
+  #result.err { background:#fee2e2; color:#991b1b; }
+  .doc-list { font-size:13px; color:#374151; margin:8px 0 0; padding-left:20px; }
+</style>
+</head>
+<body>
+<nav style="display:flex;gap:12px;font-size:13px;margin-bottom:16px">
+  <a href="/" style="color:#2563eb;text-decoration:none">← Voltar</a>
+  <a href="/reports" style="color:#2563eb;text-decoration:none">Relatórios</a>
+  <a href="/traces" style="color:#2563eb;text-decoration:none">Log</a>
+  <a href="/adr" style="color:#2563eb;text-decoration:none">ADR</a>
+</nav>
+<h1 style="margin-top:4px">Painel Administrativo</h1>
+<p class="muted">Gerenciamento de estado do FinGuard. Use antes ou após apresentações.</p>
+
+<div class="card">
+  <h3 style="margin-top:0">Estado atual</h3>
+
+  <div class="stat-row">
+    <div>
+      <strong>Relatórios gerados</strong>
+      <div class="muted">Arquivos em /output (JSON, CSV, MD, HTML)</div>
+    </div>
+    <span class="stat-val {{ 'ok' if n_out > 0 else 'zero' }}">{{ n_out }}</span>
+  </div>
+
+  <div class="stat-row">
+    <div>
+      <strong>Índice RAG — vetores</strong>
+      <div class="muted">Chunks da Política Interna indexados no FAISS</div>
+      <ul class="doc-list">{% for d in docs %}<li>{{ d }}</li>{% endfor %}</ul>
+    </div>
+    <span class="stat-val {{ 'ok' if n_vec > 0 else 'warn' }}">{{ n_vec if n_vec >= 0 else 'erro' }}</span>
+  </div>
+
+  <div class="stat-row">
+    <div>
+      <strong>Log de execuções (memória)</strong>
+      <div class="muted">Traces em memória desde o último restart</div>
+    </div>
+    <span class="stat-val {{ 'ok' if n_traces > 0 else 'zero' }}">{{ n_traces }}</span>
+  </div>
+
+  <div class="stat-row">
+    <div>
+      <strong>Bedrock Guardrail (Nível 3)</strong>
+      <div class="muted">ID: <code>{{ guardrail_id or 'não configurado' }}</code> · Versão: {{ guardrail_ver }}</div>
+    </div>
+    <span class="stat-val {{ 'ok' if guardrail_id else 'warn' }}"
+          title="{{ 'Ativo' if guardrail_id else 'Defina GUARDRAIL_ID no ambiente' }}">
+      {{ '✓ Ativo' if guardrail_id else '⚠ Fallback local' }}
+    </span>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">Ações</h3>
+  <div class="actions">
+    <button class="btn btn-primary" onclick="doIngest()">↺ Re-ingerir documentos</button>
+    <button class="btn btn-gray"    onclick="doReset('traces')">Limpar log de execuções</button>
+    <button class="btn btn-gray"    onclick="doReset('outputs')">Limpar relatórios</button>
+    <button class="btn btn-gray"    onclick="doReset('index')">Zerar índice RAG</button>
+    <button class="btn btn-danger"  onclick="doReset('all')" style="margin-left:auto">⚠ Zerar tudo</button>
+  </div>
+  <div id="result"></div>
+</div>
+
+{% raw %}
+<script>
+async function doIngest() {
+  setResult('Iniciando ingestão…', '');
+  const r = await fetch('/ingest', {method:'POST'});
+  const d = await r.json();
+  if (r.status === 409) { setResult(JSON.stringify(d, null, 2), 'err'); return; }
+  setResult('⏳ Ingestão em andamento — embedando chunks via Bedrock Titan…', '');
+  const poll = setInterval(async () => {
+    const s = await fetch('/ingest/status');
+    const st = await s.json();
+    if (st.status === 'done') {
+      clearInterval(poll);
+      setResult(JSON.stringify(st, null, 2), 'ok');
+      setTimeout(() => location.reload(), 1500);
+    } else if (st.status === 'error') {
+      clearInterval(poll);
+      setResult(JSON.stringify(st, null, 2), 'err');
+    } else {
+      setResult('⏳ Ingestão em andamento… ' + new Date().toLocaleTimeString(), '');
+    }
+  }, 2000);
+}
+
+async function doReset(target) {
+  const labels = {
+    traces:  'o log de execuções em memória',
+    outputs: 'todos os relatórios gerados',
+    index:   'o índice RAG (será necessário re-ingerir)',
+    all:     'TUDO (relatórios, índice RAG e log de execuções)',
+  };
+  if (!confirm('Confirma: zerar ' + labels[target] + '?')) return;
+  setResult('Zerando…', '');
+  const r = await fetch('/admin/reset?target=' + target, {method:'POST'});
+  const d = await r.json();
+  setResult(JSON.stringify(d, null, 2), r.ok ? 'ok' : 'err');
+  if (r.ok) setTimeout(() => location.reload(), 1500);
+}
+
+function setResult(text, cls) {
+  const el = document.getElementById('result');
+  el.textContent = text;
+  el.className = cls;
+  el.style.display = 'block';
+}
+</script>
+{% endraw %}
+</body>
+</html>

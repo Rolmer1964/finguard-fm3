@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Log de Execuções — FinGuard</title>
+<style>
+  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+         max-width:1100px; margin:32px auto; padding:0 16px; color:#1f2937; background:#f9fafb; }
+  h1 { margin-bottom:4px; }
+  .muted { color:#6b7280; font-size:13px; margin-bottom:16px; display:block; }
+  table { width:100%; border-collapse:collapse; background:white; border-radius:8px;
+          overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  th { background:#1e40af; color:white; padding:10px 12px; text-align:left;
+       font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+  td { padding:10px 12px; border-bottom:1px solid #e5e7eb; vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:#f0f9ff; }
+  a { color:#2563eb; text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  nav { display:flex; gap:12px; font-size:13px; margin-bottom:16px; }
+  .legend { display:flex; gap:16px; margin-bottom:12px; font-size:12px; color:#6b7280; }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:2px;
+         margin-right:4px; vertical-align:middle; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/">← Voltar</a>
+  <a href="/reports">Relatórios</a>
+  <a href="/admin" style="color:#6b7280">Admin</a>
+</nav>
+<h1>Log de Execuções — {{ count }} registro(s)</h1>
+<span class="muted">Em memória desde o último restart. Logs completos estão no console (stdout).</span>
+
+{% macro stat_card(label, color, s) %}
+<div style="background:white;border-radius:8px;padding:16px;
+            box-shadow:0 1px 3px rgba(0,0,0,.08);min-width:180px;flex:1">
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;
+              letter-spacing:.05em;color:{{ color }};margin-bottom:10px">{{ label }}</div>
+  <table style="width:100%;font-size:13px;border-collapse:collapse">
+    <tr><td style="color:#6b7280;padding:2px 0">Média</td>
+        <td style="text-align:right;font-weight:600">{{ s.mean }}ms</td></tr>
+    <tr><td style="color:#6b7280;padding:2px 0">Desvio Padrão</td>
+        <td style="text-align:right;font-weight:600">{{ s.stdev }}ms</td></tr>
+    <tr><td style="color:#6b7280;padding:2px 0">Coef. Variação</td>
+        <td style="text-align:right;font-weight:600">{{ s.cv }}%</td></tr>
+    <tr><td style="color:#6b7280;padding:2px 0">P50</td>
+        <td style="text-align:right;font-weight:600">{{ s.median }}ms</td></tr>
+    <tr style="border-top:1px solid #e5e7eb">
+        <td style="color:#6b7280;padding:4px 0 2px">P95</td>
+        <td style="text-align:right;font-weight:700;color:{{ color }}">{{ s.p95 }}ms</td></tr>
+    <tr><td style="color:#6b7280;padding:2px 0">P99</td>
+        <td style="text-align:right;font-weight:700;color:{{ color }}">{{ s.p99 }}ms</td></tr>
+  </table>
+</div>
+{% endmacro %}
+
+{% if has_data %}
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">
+  {{ stat_card("Total (E2E)",   "#1e40af", st.total_ms) }}
+  {{ stat_card("① Triagem",    "#4338ca", st.triage)   }}
+  {{ stat_card("② Risco + RAG","#b45309", st.risk)     }}
+  {{ stat_card("③ Relatório",  "#047857", st.report)   }}
+</div>
+{% endif %}
+
+<div class="legend">
+  <span><span class="dot" style="background:#818cf8"></span>Triagem (Haiku)</span>
+  <span><span class="dot" style="background:#fbbf24"></span>Risco (Sonnet + RAG)</span>
+  <span><span class="dot" style="background:#34d399"></span>Relatório (consolidação)</span>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Trace ID</th><th>Hora</th><th>Texto (preview)</th>
+      <th>Categoria</th><th>Urgência</th><th>Risco</th>
+      <th>Tempo por Agente</th><th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if traces %}
+      {% for t in traces %}
+      <tr{% if t.blocked %} style="background:#fff5f5"{% endif %}>
+        <td><code>{{ t.trace_id }}</code></td>
+        <td>{{ t.timestamp }}</td>
+        <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">
+          {% if t.blocked %}
+            <span style="background:#dc2626;color:white;font-size:10px;padding:2px 6px;
+                         border-radius:4px;font-weight:700">BLOQUEADO</span>
+          {% endif %}
+          {{ t.text_preview }}
+        </td>
+        <td style="font-size:12px">{{ t.category or '—' }}</td>
+        <td style="font-size:12px">{{ t.urgency_html | safe }}</td>
+        <td style="font-size:12px">{{ t.risk_level_html | safe }}</td>
+        <td>
+          {% if t.blocked %}
+            <div style="font-size:11px;color:#dc2626">
+              ⛔ Guardrail {{ t.gi_ms }}ms — pipeline não executado
+            </div>
+          {% else %}
+            <div style="display:flex;flex-direction:column;gap:2px;font-size:11px">
+              <div>
+                <span style="display:inline-block;width:{{ t.bar_triage }};height:8px;
+                             background:#818cf8;border-radius:3px;vertical-align:middle;
+                             margin-right:4px"></span>Triagem {{ t.t_ms }}ms
+              </div>
+              <div>
+                <span style="display:inline-block;width:{{ t.bar_risk }};height:8px;
+                             background:#fbbf24;border-radius:3px;vertical-align:middle;
+                             margin-right:4px"></span>Risco {{ t.r_ms }}ms
+              </div>
+              <div>
+                <span style="display:inline-block;width:{{ t.bar_report }};height:8px;
+                             background:#34d399;border-radius:3px;vertical-align:middle;
+                             margin-right:4px"></span>Relatório {{ t.rp_ms }}ms
+              </div>
+            </div>
+          {% endif %}
+        </td>
+        <td style="font-weight:700;font-size:13px">{{ t.total_display }}ms</td>
+      </tr>
+      {% endfor %}
+    {% else %}
+      <tr>
+        <td colspan="8" style="text-align:center;padding:32px;color:#9ca3af">
+          Nenhuma execução ainda. Analise uma reclamação para ver o log.
+        </td>
+      </tr>
+    {% endif %}
+  </tbody>
+</table>
+</body>
+</html>
