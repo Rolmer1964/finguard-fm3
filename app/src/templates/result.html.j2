@@ -55,11 +55,25 @@
   <p style="white-space:pre-wrap; margin: 0;">{{ texto_original }}</p>
 </div>
 
+{% if result.blocked %}
+<!-- ═══════ BLOQUEADO PELO GUARDRAIL ═══════ -->
+<div class="card" style="border-left:4px solid #dc2626;background:#fff5f5">
+  <h3 style="color:#dc2626;margin-top:0">⛔ Entrada bloqueada pelo Guardrail de Proteção</h3>
+  <p style="margin:0">{{ result.message }}</p>
+  <p class="muted" style="margin-top:12px">
+    trace_id: <code>{{ result.trace_id }}</code> ·
+    Guardrail: <code>{{ result.timings_ms.guardrail_input or '?' }}ms</code> ·
+    Pipeline não foi executado.
+  </p>
+</div>
+{% else %}
 <!-- ═══════════════ PIPELINE DE EXECUÇÃO ═══════════════ -->
+{% set gi_ms = result.timings_ms.guardrail_input or 0 %}
 {% set t_ms  = result.timings_ms.triage or 1 %}
 {% set r_ms  = result.timings_ms.risk   or 0 %}
 {% set rp_ms = result.timings_ms.report or 0 %}
-{% set total_ms = t_ms + r_ms + rp_ms %}
+{% set go_ms = result.timings_ms.guardrail_output or 0 %}
+{% set total_ms = gi_ms + t_ms + r_ms + rp_ms + go_ms %}
 {% set t_pct  = (t_ms  / total_ms * 100) | round(1) %}
 {% set r_pct  = (r_ms  / total_ms * 100) | round(1) %}
 {% set rp_pct = (rp_ms / total_ms * 100) | round(1) %}
@@ -71,23 +85,35 @@
   </div>
 
   <!-- Boxes dos agentes -->
-  <div style="display:flex;align-items:stretch;gap:0;margin-bottom:16px">
+  <div style="display:flex;align-items:stretch;gap:0;margin-bottom:16px;flex-wrap:wrap">
+    <div class="fn" style="background:#f0fdf4;border-color:#86efac;flex:0 0 auto;min-width:90px">
+      <div class="fn-lbl" style="color:#166534">✓ Guardrail<br>Entrada</div>
+      <div class="fn-model">Bedrock / Local</div>
+      <div class="fn-time" style="color:#14532d;font-size:16px">{{ gi_ms }}ms</div>
+    </div>
+    <div style="display:flex;align-items:center;color:#d1d5db;font-size:20px;padding:0 4px">→</div>
     <div class="fn triage">
       <div class="fn-lbl">① Triagem</div>
       <div class="fn-model">Claude Haiku</div>
       <div class="fn-time">{{ t_ms }}ms</div>
     </div>
-    <div style="display:flex;align-items:center;color:#d1d5db;font-size:20px;padding:0 6px">→</div>
+    <div style="display:flex;align-items:center;color:#d1d5db;font-size:20px;padding:0 4px">→</div>
     <div class="fn risk">
       <div class="fn-lbl">② Risco + RAG</div>
       <div class="fn-model">Claude Sonnet</div>
       <div class="fn-time">{{ r_ms }}ms</div>
     </div>
-    <div style="display:flex;align-items:center;color:#d1d5db;font-size:20px;padding:0 6px">→</div>
+    <div style="display:flex;align-items:center;color:#d1d5db;font-size:20px;padding:0 4px">→</div>
     <div class="fn rpt">
       <div class="fn-lbl">③ Relatório</div>
       <div class="fn-model">Consolidação (sem LLM)</div>
       <div class="fn-time">{{ rp_ms }}ms</div>
+    </div>
+    <div style="display:flex;align-items:center;color:#d1d5db;font-size:20px;padding:0 4px">→</div>
+    <div class="fn" style="background:#f0fdf4;border-color:#86efac;flex:0 0 auto;min-width:90px">
+      <div class="fn-lbl" style="color:#166534">✓ Guardrail<br>Saída</div>
+      <div class="fn-model">Bedrock / Regex</div>
+      <div class="fn-time" style="color:#14532d;font-size:16px">{{ go_ms }}ms</div>
     </div>
   </div>
 
@@ -206,6 +232,7 @@
   <h3 style="margin-top:0">JSON bruto</h3>
   <pre>{{ result | tojson(indent=2) }}</pre>
 </div>
+{% endif %}
 
 </body>
 </html>

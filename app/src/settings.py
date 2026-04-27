@@ -19,6 +19,10 @@ class Settings(BaseSettings):
 
     OUTPUT_DIR: str = "/app/output"
 
+    # ---- Bedrock Guardrails (Nível 3) ----
+    GUARDRAIL_ID: str | None = None
+    GUARDRAIL_VERSION: str = "DRAFT"
+
     # ---- RAG (sempre ativo no nível 2 — alimenta o agente de risco) ----
     RAG_DOCS_DIR: str = "/app/assets/docs"
     RAG_INDEX_DIR: str = "/app/assets/index"

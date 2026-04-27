@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ADR-001 — FinGuard · Future Minds 3</title>
+<style>
+  :root {
+    --blue: #1e40af; --blue-light: #dbeafe; --blue-mid: #2563eb;
+    --green: #065f46; --green-light: #d1fae5;
+    --amber: #92400e; --amber-light: #fef3c7;
+    --red: #991b1b; --red-light: #fee2e2;
+    --gray: #374151; --gray-light: #f3f4f6; --muted: #6b7280;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         background: #f9fafb; color: var(--gray); line-height: 1.65; }
+
+  /* ── Layout ── */
+  .layout { display: flex; min-height: 100vh; }
+  nav { width: 240px; min-width: 240px; background: var(--blue); color: white;
+        padding: 28px 16px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  nav h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em;
+            opacity: .6; margin-bottom: 16px; }
+  nav a { display: block; color: white; text-decoration: none; padding: 7px 10px;
+          border-radius: 6px; font-size: 13px; margin-bottom: 2px; opacity: .85; }
+  nav a:hover, nav a.active { background: rgba(255,255,255,.15); opacity: 1; }
+  nav .sep { border-top: 1px solid rgba(255,255,255,.2); margin: 12px 0; }
+  main { flex: 1; max-width: 860px; padding: 40px 32px; }
+
+  /* ── Typography ── */
+  h1 { font-size: 28px; color: var(--blue); margin-bottom: 6px; }
+  h2 { font-size: 20px; color: var(--blue); margin: 40px 0 14px; padding-bottom: 8px;
+       border-bottom: 2px solid var(--blue-light); }
+  h3 { font-size: 15px; color: var(--gray); margin: 20px 0 8px; }
+  p  { margin-bottom: 12px; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { margin-bottom: 5px; }
+  code { background: var(--gray-light); padding: 2px 6px; border-radius: 4px;
+         font-family: "SF Mono", Consolas, monospace; font-size: 13px; }
+  a { color: var(--blue-mid); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── Components ── */
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px;
+           font-size: 12px; font-weight: 700; }
+  .badge.accepted  { background: var(--green-light); color: var(--green); }
+  .badge.rejected  { background: var(--red-light);   color: var(--red); }
+  .badge.consider  { background: var(--amber-light);  color: var(--amber); }
+
+  .card { background: white; border-radius: 8px; padding: 20px;
+          box-shadow: 0 1px 3px rgba(0,0,0,.08); margin-bottom: 16px; }
+  .card.decision { border-left: 4px solid var(--blue); }
+  .card.warn      { border-left: 4px solid #d97706; }
+  .card.ok        { border-left: 4px solid #059669; }
+
+  .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                  gap: 16px; margin: 16px 0; }
+  .option { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; background: white; }
+  .option.chosen { border-color: var(--blue-mid); background: #eff6ff; }
+  .option h4 { margin-bottom: 8px; font-size: 14px; }
+  .pros, .cons { font-size: 13px; margin-top: 8px; }
+  .pros li::marker { content: "✓ "; color: #059669; }
+  .cons li::marker { content: "✗ "; color: #dc2626; }
+
+  /* ── Tabelas ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0 20px; }
+  th { background: var(--blue); color: white; padding: 9px 12px; text-align: left; font-size: 12px; }
+  td { padding: 9px 12px; border-bottom: 1px solid #e5e7eb; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f0f9ff; }
+  .num { text-align: right; font-family: monospace; }
+
+  /* ── Grafo ── */
+  .graph { background: var(--gray-light); border-radius: 8px; padding: 20px;
+           font-family: "SF Mono", Consolas, monospace; font-size: 13px;
+           overflow-x: auto; white-space: pre; line-height: 1.8; }
+
+  /* ── Meta header ── */
+  .meta { display: flex; gap: 24px; flex-wrap: wrap; margin: 14px 0 32px;
+          padding: 14px 20px; background: white; border-radius: 8px;
+          box-shadow: 0 1px 3px rgba(0,0,0,.08); font-size: 13px; }
+  .meta dt { color: var(--muted); margin-bottom: 2px; font-size: 11px;
+             text-transform: uppercase; letter-spacing: .05em; }
+  .meta dd { font-weight: 600; }
+
+  @media (max-width: 700px) {
+    .layout { flex-direction: column; }
+    nav { width: 100%; height: auto; position: static; }
+    main { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<nav>
+  <div style="font-weight:700;font-size:16px;margin-bottom:4px">FinGuard</div>
+  <div style="font-size:11px;opacity:.6;margin-bottom:24px">Future Minds 3 · Nível 3</div>
+  <h2>Navegação</h2>
+  <a href="#contexto">Contexto do Problema</a>
+  <a href="#decisao">Decisão</a>
+  <a href="#opcoes">Opções Consideradas</a>
+  <a href="#grafo">Estrutura do Grafo</a>
+  <a href="#custos">Análise de Custos</a>
+  <a href="#guardrails">Guardrails e Segurança</a>
+  <a href="#consequencias">Consequências</a>
+  <a href="#recomendacoes">Recomendações</a>
+  <div class="sep"></div>
+  <a href="/">← Voltar ao FinGuard</a>
+  <a href="/traces">Log de Execuções</a>
+  <a href="/admin">Painel Admin</a>
+</nav>
+
+<!-- ═══════════ CONTEÚDO ═══════════ -->
+<main>
+
+<h1>ADR-001: Arquitetura Multi-Agente com LangGraph e AWS Bedrock</h1>
+<div class="meta">
+  <div><dt>Status</dt><dd><span class="badge accepted">Aceito</span></dd></div>
+  <div><dt>Projeto</dt><dd>FinGuard — Future Minds 3</dd></div>
+  <div><dt>Nível</dt><dd>3 — Arquiteto da Solução</dd></div>
+  <div><dt>Data</dt><dd>Abril 2026</dd></div>
+  <div><dt>Autores</dt><dd>Equipe FinGuard</dd></div>
+</div>
+
+<!-- ═══ CONTEXTO ═══ -->
+<section id="contexto">
+<h2>Contexto do Problema</h2>
+<p>
+  Instituições financeiras recebem diariamente centenas ou milhares de reclamações em texto livre,
+  vindas de múltiplos canais (SAC, Ouvidoria, Banco Central, Redes Sociais). O processo manual
+  é lento, inconsistente e sujeito a erros — especialmente em picos de volume.
+</p>
+<p>
+  O desafio exige um sistema que: <strong>(1)</strong> classifique automaticamente cada reclamação
+  em categoria, produto, sentimento e urgência; <strong>(2)</strong> avalie o risco regulatório e
+  reputacional com base em política interna; <strong>(3)</strong> gere relatórios gerenciais
+  acionáveis; e <strong>(4)</strong> proteja o sistema contra entradas maliciosas e dados sensíveis
+  na saída.
+</p>
+<div class="card warn">
+  <strong>Restrição técnica principal:</strong> a solução deve rodar localmente (sem persistência em
+  S3 ou serviços cloud gerenciados), com rastreabilidade completa de cada execução de agente
+  (entrada, saída, tempo de resposta) — requisito não funcional do Nível 2, mantido no Nível 3.
+</div>
+</section>
+
+<!-- ═══ DECISÃO ═══ -->
+<section id="decisao">
+<h2>Decisão</h2>
+<div class="card decision">
+  <p>
+    <strong>Adotar arquitetura multi-agente orquestrada com LangGraph + AWS Bedrock</strong>,
+    com separação explícita de responsabilidades entre quatro agentes especializados, guardrails
+    de entrada e saída via Bedrock Guardrails, e base de conhecimento RAG local com FAISS.
+  </p>
+  <p>
+    Cada agente usa o modelo LLM mais adequado à sua tarefa, otimizando a relação custo/qualidade:
+    Claude Haiku para triagem (rápida e barata) e Claude Sonnet para análise de risco (mais
+    complexo, justifica o custo maior).
+  </p>
+</div>
+</section>
+
+<!-- ═══ OPÇÕES ═══ -->
+<section id="opcoes">
+<h2>Opções Consideradas</h2>
+
+<div class="options-grid">
+
+  <div class="option">
+    <h4>Opção A <span class="badge rejected">Rejeitada</span><br>LLM único (single-shot)</h4>
+    <p style="font-size:13px;color:var(--muted)">Uma única chamada ao Sonnet com prompt gigante que faz tudo: classificação, risco e relatório.</p>
+    <ul class="pros">
+      <li>Implementação trivial</li>
+      <li>Zero latência de orquestração</li>
+    </ul>
+    <ul class="cons">
+      <li>Sem rastreabilidade por etapa</li>
+      <li>Prompt enorme → custo alto em escala</li>
+      <li>Sem otimização de modelo por tarefa</li>
+      <li>Falha em qualquer parte invalida tudo</li>
+      <li>Impossível medir tempo por agente</li>
+    </ul>
+  </div>
+
+  <div class="option chosen">
+    <h4>Opção B <span class="badge accepted">Escolhida</span><br>LangGraph + Bedrock Multi-Agente</h4>
+    <p style="font-size:13px;color:var(--muted)">Grafo de estados com nós especializados, cada um com seu modelo, logs e guardrails integrados.</p>
+    <ul class="pros">
+      <li>Separação clara de responsabilidades</li>
+      <li>Modelos diferentes por tarefa (custo)</li>
+      <li>Rastreabilidade completa por agente</li>
+      <li>Guardrails em pontos estratégicos</li>
+      <li>RAG isolado no agente de risco</li>
+      <li>Roteamento condicional extensível</li>
+    </ul>
+    <ul class="cons">
+      <li>Mais código para manter</li>
+      <li>Estado explícito via TypedDict</li>
+    </ul>
+  </div>
+
+  <div class="option">
+    <h4>Opção C <span class="badge rejected">Rejeitada</span><br>AWS Bedrock Agents nativo</h4>
+    <p style="font-size:13px;color:var(--muted)">Agents gerenciados pela AWS com Action Groups e Knowledge Bases nativas.</p>
+    <ul class="pros">
+      <li>Orquestração gerenciada pela AWS</li>
+      <li>Knowledge Bases integradas (S3)</li>
+      <li>Guardrails nativos facilitados</li>
+    </ul>
+    <ul class="cons">
+      <li>Exige S3 (proibido pelo desafio)</li>
+      <li>Menor controle sobre o fluxo</li>
+      <li>Difícil instrumentar timings por etapa</li>
+      <li>Custo adicional de serviço gerenciado</li>
+      <li>Lock-in total com AWS</li>
+    </ul>
+  </div>
+
+</div>
+</section>
+
+<!-- ═══ GRAFO ═══ -->
+<section id="grafo">
+<h2>Estrutura do Grafo (Nível 3)</h2>
+<div class="graph">
+                     ╭──────────────────────╮
+                     │   __start__          │
+                     ╰──────────┬───────────╯
+                                │
+                     ╭──────────▼───────────╮
+                     │  step_guardrail_input │  ← Bedrock Guardrails / fallback local
+                     ╰──────────┬───────────╯
+                                │
+               ┌────────────────┴──────────────────┐
+           [BLOQUEADO]                          [PASS]
+               │                                    │
+    ╭──────────▼──────────╮             ╭───────────▼────────╮
+    │    step_blocked      │             │    step_triage      │  ← Claude Haiku
+    │  resposta educada    │             ╰───────────┬────────╯
+    ╰──────────┬──────────╯                         │
+               │                        ╭───────────▼────────╮
+               │                        │    step_risk        │  ← Claude Sonnet + RAG
+               │                        ╰───────────┬────────╯
+               │                                    │
+               │                        ╭───────────▼────────╮
+               │                        │    step_report      │  ← Consolidação determinística
+               │                        ╰───────────┬────────╯
+               │                                    │
+               │                        ╭───────────▼────────╮
+               │                        │ step_guardrail_out  │  ← Sanitização PII / Bedrock
+               │                        ╰───────────┬────────╯
+               │                                    │
+               └──────────────────┬─────────────────┘
+                                  │
+                          ╭───────▼───────╮
+                          │   __end__     │
+                          ╰───────────────╯
+</div>
+
+<h3>Responsabilidades por nó</h3>
+<table>
+  <thead><tr><th>Nó</th><th>Modelo</th><th>Responsabilidade</th><th>Saída</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>step_guardrail_input</code></td>
+      <td>Bedrock Guardrails</td>
+      <td>Valida entrada: bloqueia prompt injection, conteúdo inválido e ameaças</td>
+      <td><code>guardrail_input: {blocked, reason}</code></td>
+    </tr>
+    <tr>
+      <td><code>step_blocked</code></td>
+      <td>—</td>
+      <td>Gera resposta educada em português sem expor detalhes internos</td>
+      <td><code>final: {blocked: true, message}</code></td>
+    </tr>
+    <tr>
+      <td><code>step_triage</code></td>
+      <td>Claude Haiku 4.5</td>
+      <td>Classifica categoria, produto, sentimento, urgência e gera resumo</td>
+      <td><code>triage: {category, product, sentiment, urgency, summary}</code></td>
+    </tr>
+    <tr>
+      <td><code>step_risk</code></td>
+      <td>Claude Sonnet 4.5 + FAISS + Titan</td>
+      <td>Avalia risco (Baixo→Crítico) à luz da Política Interna via RAG</td>
+      <td><code>risk: {risk_level, risk_justification, rag_chunks_used}</code></td>
+    </tr>
+    <tr>
+      <td><code>step_report</code></td>
+      <td>Python puro</td>
+      <td>Consolida campos de triage + risk em payload final estruturado</td>
+      <td><code>final: {category, product, …, risk_level, risk_justification}</code></td>
+    </tr>
+    <tr>
+      <td><code>step_guardrail_output</code></td>
+      <td>Bedrock Guardrails + Regex</td>
+      <td>Sanitiza PII (CPF, conta, cartão) nos campos de saída</td>
+      <td><code>final</code> com campos sanitizados</td>
+    </tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ═══ CUSTOS ═══ -->
+<section id="custos">
+<h2>Análise de Custos</h2>
+<p>
+  A escolha de modelos foi guiada pelo princípio: <em>usar o modelo mais barato que seja suficiente
+  para a tarefa</em>. Triagem é classificação simples — Haiku resolve bem e a um quarto do custo do
+  Sonnet. Análise de risco exige raciocínio mais elaborado e contexto longo (política interna) —
+  Sonnet justifica o investimento.
+</p>
+
+<h3>Tabela de preços — inference profiles cross-region (us.*)</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Modelo</th>
+      <th>Uso no FinGuard</th>
+      <th class="num">Input ($/1K tokens)</th>
+      <th class="num">Output ($/1K tokens)</th>
+      <th class="num">Custo relativo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>claude-haiku-4-5</code></td>
+      <td>Triagem (Nó 1)</td>
+      <td class="num">$0,00080</td>
+      <td class="num">$0,00400</td>
+      <td class="num" style="color:var(--green);font-weight:700">1× (base)</td>
+    </tr>
+    <tr>
+      <td><code>claude-sonnet-4-5</code></td>
+      <td>Risco + RAG (Nó 2)</td>
+      <td class="num">$0,00300</td>
+      <td class="num">$0,01500</td>
+      <td class="num" style="color:var(--amber);font-weight:700">~3,75×</td>
+    </tr>
+    <tr>
+      <td><code>titan-embed-text-v2</code></td>
+      <td>RAG — query embedding</td>
+      <td class="num">$0,00002</td>
+      <td class="num">—</td>
+      <td class="num" style="color:var(--green);font-weight:700">&lt;0,01×</td>
+    </tr>
+    <tr style="background:#f0fdf4">
+      <td colspan="5" style="font-size:12px;color:var(--muted)">
+        Fonte: AWS Bedrock On-Demand pricing (us-east-1). Inference profiles cross-region podem ter
+        custo adicional de até 20%. Preços sujeitos a alteração.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Estimativa por reclamação processada</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Etapa</th>
+      <th class="num">Tokens in (est.)</th>
+      <th class="num">Tokens out (est.)</th>
+      <th class="num">Custo estimado</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Triagem (Haiku)</td>
+      <td class="num">~300</td>
+      <td class="num">~150</td>
+      <td class="num">$0,00084</td>
+    </tr>
+    <tr>
+      <td>Risco (Sonnet)</td>
+      <td class="num">~1.500</td>
+      <td class="num">~200</td>
+      <td class="num">$0,00750</td>
+    </tr>
+    <tr>
+      <td>Embeddings (Titan)</td>
+      <td class="num">~50</td>
+      <td class="num">—</td>
+      <td class="num">$0,000001</td>
+    </tr>
+    <tr style="font-weight:700;background:#eff6ff">
+      <td>Total por reclamação</td>
+      <td class="num"></td>
+      <td class="num"></td>
+      <td class="num">≈ $0,0084</td>
+    </tr>
+    <tr>
+      <td>Dataset completo (500 reclamações)</td>
+      <td class="num"></td>
+      <td class="num"></td>
+      <td class="num" style="font-weight:700">≈ $4,20</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="card ok">
+  <strong>Otimização demonstrada:</strong> ao usar Haiku na triagem em vez de Sonnet, reduzimos
+  o custo da etapa de classificação em ~78% (de $0,0037 para $0,00084 por reclamação). Para
+  500 reclamações, isso representa uma economia de aproximadamente <strong>$1,43</strong> — sem
+  perda de qualidade, pois triagem é uma tarefa de classificação simples.
+</div>
+</section>
+
+<!-- ═══ GUARDRAILS ═══ -->
+<section id="guardrails">
+<h2>Guardrails e Segurança</h2>
+
+<h3>Guardrail de Entrada — primeiro nó do grafo</h3>
+<p>
+  Implementado via <strong>AWS Bedrock Guardrails</strong> (<code>apply_guardrail</code> com
+  <code>source=INPUT</code>), com fallback local baseado em heurísticas quando o serviço não
+  está configurado.
+</p>
+<table>
+  <thead><tr><th>Política</th><th>Configuração</th><th>Exemplos bloqueados</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Tópicos negados</td>
+      <td>PromptInjection, ConteudoNaoReclamacao, AmeacasDiretas</td>
+      <td>"Ignore suas instruções", "Escreva um poema", "Qual é a capital?"</td>
+    </tr>
+    <tr>
+      <td>Filtros de conteúdo</td>
+      <td>HATE / VIOLENCE / SEXUAL / INSULTS / MISCONDUCT (HIGH)</td>
+      <td>Discurso de ódio, ameaças explícitas, conteúdo adulto</td>
+    </tr>
+    <tr>
+      <td>Fallback local</td>
+      <td>Lista de padrões de injeção em português e inglês</td>
+      <td>"você agora é", "jailbreak", "pretend to be", etc.</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  Quando bloqueado, o sistema responde com mensagem educada em português, sem expor detalhes
+  internos do sistema. O pipeline <strong>não é executado</strong> — nenhuma chamada LLM é
+  realizada, evitando custos desnecessários.
+</p>
+
+<h3>Guardrail de Saída — último nó antes do END</h3>
+<p>
+  Implementado via <strong>AWS Bedrock Guardrails</strong> (<code>source=OUTPUT</code>) com
+  <strong>defesa em profundidade via regex</strong>, garantindo que dados sensíveis não apareçam
+  nos campos de resumo e justificativa do relatório final.
+</p>
+<table>
+  <thead><tr><th>Dado sensível</th><th>Mecanismo</th><th>Ação</th></tr></thead>
+  <tbody>
+    <tr><td>CPF</td><td>Regex + Bedrock</td><td>ANONYMIZE → <code>[CPF OMITIDO]</code></td></tr>
+    <tr><td>Número de conta bancária</td><td>Regex + Bedrock</td><td>ANONYMIZE → <code>[CONTA OMITIDA]</code></td></tr>
+    <tr><td>Número de cartão de crédito</td><td>Regex + Bedrock</td><td>ANONYMIZE → <code>[CARTÃO OMITIDO]</code></td></tr>
+    <tr><td>E-mail</td><td>Bedrock PII</td><td>ANONYMIZE</td></tr>
+    <tr><td>Telefone</td><td>Bedrock PII</td><td>ANONYMIZE</td></tr>
+    <tr><td>Nome</td><td>Bedrock PII</td><td>ANONYMIZE</td></tr>
+  </tbody>
+</table>
+
+<h3>Conformidade LGPD</h3>
+<ul>
+  <li>Nenhum dado processado é persistido em cloud (sem S3, sem banco gerenciado)</li>
+  <li>FAISS index e relatórios ficam em volume local (<code>/app/assets/index</code>, <code>/app/output</code>)</li>
+  <li>Dados sensíveis nos textos de entrada são removidos antes de entrar nos relatórios exportáveis</li>
+  <li>Logs em stdout não contêm o texto completo da reclamação — apenas preview truncado (70 chars)</li>
+</ul>
+</section>
+
+<!-- ═══ CONSEQUÊNCIAS ═══ -->
+<section id="consequencias">
+<h2>Consequências (Trade-offs)</h2>
+
+<div class="options-grid">
+  <div class="card ok">
+    <h3 style="color:var(--green);margin-top:0">✓ Benefícios obtidos</h3>
+    <ul>
+      <li>Rastreabilidade completa: tempo de resposta por agente em cada execução</li>
+      <li>Custo otimizado: Haiku na triagem, Sonnet apenas onde necessário</li>
+      <li>Segurança em camadas: guardrails em entrada E saída</li>
+      <li>RAG local sem dependência de serviço gerenciado</li>
+      <li>Extensível: novos agentes entram como nós no grafo</li>
+      <li>Processamento batch com relatórios HTML, CSV, JSON e MD</li>
+    </ul>
+  </div>
+  <div class="card warn">
+    <h3 style="color:var(--amber);margin-top:0">⚠ Limitações aceitas</h3>
+    <ul>
+      <li>Estado em memória: traces perdem-se no restart do container</li>
+      <li>FAISS local: não escala horizontalmente sem sincronização de índice</li>
+      <li>Guardrail Bedrock requer provisionamento one-time (<code>create_guardrail.py</code>)</li>
+      <li>Fallback local do guardrail é heurístico — menos robusto que Bedrock</li>
+      <li>LangGraph adiciona overhead de serialização de estado (~5ms por nó)</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- ═══ RECOMENDAÇÕES ═══ -->
+<section id="recomendacoes">
+<h2>Recomendações de Segurança para Produção</h2>
+<ol>
+  <li>
+    <strong>Provisionar o Bedrock Guardrail antes da demo:</strong> executar
+    <code>python scripts/create_guardrail.py</code> e definir <code>GUARDRAIL_ID</code> no ambiente.
+    Sem isso, o fallback local cobre apenas injeção básica.
+  </li>
+  <li>
+    <strong>Habilitar CloudTrail para auditoria:</strong> todas as chamadas ao Bedrock ficam
+    registradas automaticamente — importante para conformidade regulatória.
+  </li>
+  <li>
+    <strong>Rotacionar credenciais AWS:</strong> usar IAM Roles com permissões mínimas
+    (<code>bedrock:InvokeModel</code>, <code>bedrock:ApplyGuardrail</code>) em vez de
+    access keys de longa duração.
+  </li>
+  <li>
+    <strong>Rate limiting na API:</strong> em produção, adicionar throttling no FastAPI para
+    prevenir abuso do endpoint <code>/analyze</code>.
+  </li>
+  <li>
+    <strong>Desprovisionamento pós-hackathon:</strong> executar
+    <code>python scripts/create_guardrail.py --delete &lt;ID&gt;</code>
+    para evitar cobranças contínuas pelo guardrail.
+  </li>
+  <li>
+    <strong>Persistência segura:</strong> o volume Docker <code>./assets/index</code> contém
+    embeddings de documentos internos — proteger com permissões de arquivo adequadas em produção.
+  </li>
+</ol>
+
+<div class="card" style="margin-top:20px;background:#eff6ff;border:1px solid #bfdbfe">
+  <strong>Pergunta obrigatória da banca:</strong> <em>"Quais ferramentas de IA você utilizou e como elas contribuíram?"</em>
+  <ul style="margin-top:10px">
+    <li><strong>Claude Haiku 4.5</strong> — triagem rápida e econômica (classificação + resumo)</li>
+    <li><strong>Claude Sonnet 4.5</strong> — análise de risco complexa com contexto longo via RAG</li>
+    <li><strong>Titan Embed Text v2</strong> — geração de embeddings semânticos para indexação e busca na Política Interna</li>
+    <li><strong>Bedrock Guardrails</strong> — proteção de entrada (prompt injection, tópicos inválidos) e sanitização de saída (PII)</li>
+    <li><strong>LangGraph</strong> — orquestração do grafo multi-agente com estado tipado e roteamento condicional</li>
+    <li><strong>FAISS</strong> — índice vetorial local para RAG sem dependência de serviço gerenciado</li>
+    <li><strong>Claude Code (Anthropic)</strong> — assistente de código utilizado para acelerar o desenvolvimento de toda a solução</li>
+  </ul>
+</div>
+</section>
+
+<div style="margin-top:40px;padding-top:20px;border-top:1px solid #e5e7eb;
+            font-size:12px;color:var(--muted);text-align:center">
+  ADR-001 · FinGuard · Future Minds 3 · Nível 3 — Arquiteto da Solução<br>
+  Gerado para apresentação ao júri — Abril 2026
+</div>
+
+</main>
+</div>
+
+<script>
+  // Destaca link ativo na sidebar ao rolar
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('nav a[href^="#"]');
+  window.addEventListener('scroll', () => {
+    let cur = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 80) cur = s.id; });
+    links.forEach(l => {
+      l.classList.toggle('active', l.getAttribute('href') === '#' + cur);
+    });
+  }, {passive: true});
+</script>
+</body>
+</html>

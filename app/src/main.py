@@ -49,11 +49,20 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="FinGuard - Nível 2 (Orquestrador)", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="FinGuard - Nível 3 (Arquiteto da Solução)", version="0.1.0", lifespan=lifespan)
 
 BASE = Path(__file__).parent
 templates = Jinja2Templates(directory=str(BASE / "templates"))
 app.mount("/output", StaticFiles(directory=settings.OUTPUT_DIR, check_dir=False), name="output")
+
+_ADR_PATH = BASE.parent.parent / "assets" / "adr.html"
+
+
+@app.get("/adr", response_class=HTMLResponse)
+def adr_page():
+    if _ADR_PATH.exists():
+        return HTMLResponse(_ADR_PATH.read_text(encoding="utf-8"))
+    return HTMLResponse("<p>ADR não encontrado em assets/adr.html</p>", status_code=404)
 
 
 class AnalyzeRequest(BaseModel):
@@ -105,6 +114,8 @@ def admin_page():
     n_vec = _rag_vector_count()
     n_traces = len(get_traces())
     docs = [d.name for d in Path(settings.RAG_DOCS_DIR).iterdir() if d.is_file()]
+    guardrail_id = settings.GUARDRAIL_ID or None
+    guardrail_ver = settings.GUARDRAIL_VERSION if guardrail_id else "—"
 
     return HTMLResponse(f"""<!DOCTYPE html>
 <html lang="pt-BR">
@@ -142,8 +153,13 @@ def admin_page():
 </style>
 </head>
 <body>
-<a href="/" class="muted">← Voltar</a>
-<h1 style="margin-top:12px">Painel Administrativo</h1>
+<nav style="display:flex;gap:12px;font-size:13px;margin-bottom:16px">
+  <a href="/" style="color:#2563eb;text-decoration:none">← Voltar</a>
+  <a href="/reports" style="color:#2563eb;text-decoration:none">Relatórios</a>
+  <a href="/traces" style="color:#2563eb;text-decoration:none">Log</a>
+  <a href="/adr" style="color:#2563eb;text-decoration:none">ADR</a>
+</nav>
+<h1 style="margin-top:4px">Painel Administrativo</h1>
 <p class="muted">Gerenciamento de estado do FinGuard. Use antes ou após apresentações.</p>
 
 <div class="card">
@@ -172,6 +188,17 @@ def admin_page():
       <div class="muted">Traces em memória desde o último restart</div>
     </div>
     <span class="stat-val {'ok' if n_traces > 0 else 'zero'}">{n_traces}</span>
+  </div>
+
+  <div class="stat-row">
+    <div>
+      <strong>Bedrock Guardrail (Nível 3)</strong>
+      <div class="muted">ID: <code>{guardrail_id or 'não configurado'}</code> · Versão: {guardrail_ver}</div>
+    </div>
+    <span class="stat-val {'ok' if guardrail_id else 'warn'}"
+          title="{'Ativo' if guardrail_id else 'Defina GUARDRAIL_ID no ambiente'}">
+      {'✓ Ativo' if guardrail_id else '⚠ Fallback local'}
+    </span>
   </div>
 </div>
 
@@ -444,22 +471,21 @@ def traces_page():
     # ── Linhas da tabela ──────────────────────────────────────────────────────
     rows = ""
     for t in data:
-        tm = t.get("timings_ms", {})
+        tm      = t.get("timings_ms", {})
+        blocked = t.get("blocked", False)
         t_ms  = tm.get("triage", 0) or 0
         r_ms  = tm.get("risk",   0) or 0
         rp_ms = tm.get("report", 0) or 0
+        gi_ms = tm.get("guardrail_input", 0) or 0
         total = t.get("total_ms", t_ms + r_ms + rp_ms)
         bar_w = lambda ms: f'{max(int(ms / max(total, 1) * 80), 1)}px'  # noqa: E731
-        rows += f"""<tr>
-          <td><code>{t['trace_id']}</code></td>
-          <td>{t['timestamp']}</td>
-          <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;
-                     white-space:nowrap;font-size:12px">{t['text_preview']}</td>
-          <td style="font-size:12px">{t.get('category') or '—'}</td>
-          <td style="font-size:12px">{_pill(t.get('urgency'), urg_style)}</td>
-          <td style="font-size:12px">{_pill(t.get('risk_level'), risk_style)}</td>
-          <td>
-            <div style="display:flex;flex-direction:column;gap:2px;font-size:11px">
+        blocked_badge = ('<span style="background:#dc2626;color:white;font-size:10px;'
+                         'padding:2px 6px;border-radius:4px;font-weight:700">BLOQUEADO</span> '
+                         if blocked else "")
+        timing_col = (
+            f'<div style="font-size:11px;color:#dc2626">⛔ Guardrail {gi_ms}ms — pipeline não executado</div>'
+            if blocked else
+            f"""<div style="display:flex;flex-direction:column;gap:2px;font-size:11px">
               <div><span style="display:inline-block;width:{bar_w(t_ms)};height:8px;
                    background:#818cf8;border-radius:3px;vertical-align:middle;
                    margin-right:4px"></span>Triagem {t_ms}ms</div>
@@ -469,9 +495,18 @@ def traces_page():
               <div><span style="display:inline-block;width:{bar_w(rp_ms)};height:8px;
                    background:#34d399;border-radius:3px;vertical-align:middle;
                    margin-right:4px"></span>Relatório {rp_ms}ms</div>
-            </div>
-          </td>
-          <td style="font-weight:700;font-size:13px">{total}ms</td>
+            </div>"""
+        )
+        rows += f"""<tr{"style='background:#fff5f5'" if blocked else ""}>
+          <td><code>{t['trace_id']}</code></td>
+          <td>{t['timestamp']}</td>
+          <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;
+                     white-space:nowrap;font-size:12px">{blocked_badge}{t['text_preview']}</td>
+          <td style="font-size:12px">{t.get('category') or '—'}</td>
+          <td style="font-size:12px">{_pill(t.get('urgency'), urg_style)}</td>
+          <td style="font-size:12px">{_pill(t.get('risk_level'), risk_style)}</td>
+          <td>{timing_col}</td>
+          <td style="font-weight:700;font-size:13px">{gi_ms + total}ms</td>
         </tr>"""
 
     empty = ("<tr><td colspan='8' style='text-align:center;padding:32px;color:#9ca3af'>"
@@ -572,6 +607,12 @@ async def batch(file: UploadFile = File(...)) -> JSONResponse:
             r = {"category": "Outros", "product": "Não Identificado",
                  "sentiment": "Neutro", "urgency": "Baixa", "summary": f"[falha: {exc}]",
                  "risk_level": "Baixo", "risk_justification": ""}
+        if r.get("blocked"):
+            logger.warning("[%s] linha %d bloqueada pelo guardrail", rec_id, i)
+            r = {"category": "Bloqueado", "product": "Não Identificado",
+                 "sentiment": "Neutro", "urgency": "Baixa",
+                 "summary": "[Entrada bloqueada pelo guardrail de proteção]",
+                 "risk_level": "Bloqueado", "risk_justification": r.get("message", "")}
         results.append({"id": rec_id, "canal": canal, "texto_original": texto, **r})
 
     from datetime import datetime as _dt
