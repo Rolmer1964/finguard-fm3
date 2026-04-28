@@ -129,7 +129,7 @@ def _node_guardrail_output(state: AnalysisState) -> AnalysisState:
     tid = state.get("trace_id", "?")
     logger.info("[%s] AGENT=guardrail_output IN", tid)
     final = dict(state.get("final", {}))
-    for field in ("summary", "risk_justification"):
+    for field in ("texto_original", "summary", "risk_justification"):
         if final.get(field):
             final[field] = sanitize_output(final[field], field=field)
     dt = _now_ms() - t0
