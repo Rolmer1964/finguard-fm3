@@ -11,6 +11,21 @@ _CPF_RE    = re.compile(r'\b\d{3}[.\s]?\d{3}[.\s]?\d{3}[-\s]?\d{2}\b')
 _CARD_RE   = re.compile(r'\b\d{4}[\s\-]?\d{4}[\s\-]?\d{4}[\s\-]?\d{4}\b')
 _ACCOUNT_RE = re.compile(r'\b\d{5,12}[-–]\d{1,2}\b')
 
+# Nome precedido de marcador explícito — evita falsos positivos em
+# "Banco Central", nomes de cidades, instituições, etc.
+_NOME_SEQ = (
+    r'[A-ZÁÉÍÓÚÂÊÎÔÛÃÕÀÈÌÒÙÇ][a-záéíóúâêîôûãõàèìòùç]+'
+    r'(?:\s+(?:(?:da|de|do|dos|das|e)\s+)?'
+    r'[A-ZÁÉÍÓÚÂÊÎÔÛÃÕÀÈÌÒÙÇ][a-záéíóúâêîôûãõàèìòùç]+){1,5}'
+)
+_NOME_RE = re.compile(
+    rf'(?i)'
+    rf'(meu nome é\s+|nome\s*[eé:]?\s+|sou (?:o|a)\s+|'
+    rf'titular[:\s]+|portador[a]?\s+do\s+cpf\b[^,]*,\s*)'
+    rf'({_NOME_SEQ})',
+    re.UNICODE,
+)
+
 BLOCKED_INPUT_MESSAGE = (
     "Esta entrada não pode ser processada pelo FinGuard. "
     "O sistema está disponível exclusivamente para análise de reclamações bancárias de clientes. "
@@ -140,4 +155,5 @@ def _regex_sanitize(text: str) -> str:
     text = _CPF_RE.sub("[CPF OMITIDO]", text)
     text = _CARD_RE.sub("[CARTÃO OMITIDO]", text)
     text = _ACCOUNT_RE.sub("[CONTA OMITIDA]", text)
+    text = _NOME_RE.sub(r'\1[NOME OMITIDO]', text)
     return text
