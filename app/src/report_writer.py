@@ -81,6 +81,7 @@ def write_outputs(
     started_at: str | None = None,
     finished_at: str | None = None,
     elapsed_s: float | None = None,
+    pass_stats: list[dict] | None = None,
 ) -> dict[str, str]:
     """Grava JSON, CSV, MD e HTML com os resultados de uma execução em batch."""
     out_dir = Path(settings.OUTPUT_DIR)
@@ -136,6 +137,7 @@ def write_outputs(
         finished_at=finished_at or "—",
         elapsed_s=elapsed_s,
         elapsed_fmt=_fmt_elapsed(elapsed_s),
+        pass_stats=pass_stats or [],
     )
     html_path.write_text(html, encoding="utf-8")
 

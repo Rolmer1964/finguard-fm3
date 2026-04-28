@@ -106,6 +106,7 @@
   <a href="#custos">Análise de Custos</a>
   <a href="#guardrails">Guardrails e Segurança</a>
   <a href="#batch-paralelo">Batch Paralelo</a>
+  <a href="#throttle-adaptivo">Throttle Adaptivo</a>
   <a href="#modal-api">Modal de Detalhe</a>
   <a href="#consequencias">Consequências</a>
   <a href="#recomendacoes">Recomendações</a>
@@ -530,6 +531,93 @@
     <tr><td><code>BATCH_MAX_RETRIES</code></td><td>2</td><td>Tentativas adicionais por registro em caso de falha</td></tr>
   </tbody>
 </table>
+</section>
+
+<!-- ═══ THROTTLE ADAPTIVO ═══ -->
+<section id="throttle-adaptivo">
+<h2>Controle Adaptivo de Throttling (AIMD)</h2>
+
+<div class="card warn">
+  <strong>Problema observado em produção:</strong> ao processar 500 registros com 5 workers paralelos
+  em conta AWS gratuita (on-demand, sem aumento de quota), a taxa de <code>ThrottlingException</code>
+  atingiu ~20% no primeiro passe. O limite padrão da AWS é de ~5 RPM por modelo — com 2 modelos
+  (Haiku + Sonnet) e 5 workers, o sistema disparava até 10 chamadas/s, excedendo o limite em segundos.
+</div>
+
+<h3>Decisão</h3>
+<div class="card decision">
+  <p>
+    <strong>Adotar controle adaptivo de concorrência baseado em AIMD</strong>
+    (Additive Increase / Multiplicative Decrease) — o mesmo mecanismo do controle de
+    congestionamento do TCP — para encontrar automaticamente o ponto de equilíbrio entre
+    vazão máxima e taxa de throttling aceitável.
+  </p>
+</div>
+
+<h3>Algoritmo AIMD aplicado</h3>
+<table>
+  <thead><tr><th>Condição (após cada passe)</th><th>Ação sobre Workers</th><th>Ação sobre Delay</th><th>Analogia TCP</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Taxa throttle <strong>&gt; 20%</strong></td>
+      <td><code>workers = max(1, workers // 2)</code></td>
+      <td><code>delay += 1.0s</code></td>
+      <td>Multiplicative Decrease — recua agressivamente ao detectar congestionamento</td>
+    </tr>
+    <tr>
+      <td>Taxa throttle <strong>&lt; 5%</strong> e zero throttled</td>
+      <td><code>workers = min(MAX, workers + 1)</code></td>
+      <td><code>delay = max(0, delay - 0.5s)</code></td>
+      <td>Additive Increase — cresce cautelosamente na zona estável</td>
+    </tr>
+    <tr>
+      <td>Taxa entre 5% e 20%</td>
+      <td>Mantém</td>
+      <td>Mantém</td>
+      <td>Zona de equilíbrio — sistema converge aqui</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Espera adaptiva entre passes</h3>
+<p>
+  O tempo de espera antes de cada passe também é proporcional à taxa de throttling observada:
+  <code>wait = BATCH_RETRY_DELAY × (1 + throttle_rate)</code>.
+  Com <code>BATCH_RETRY_DELAY=15s</code>: taxa 0% → espera 15s; taxa 100% → espera 30s.
+  Isso dá ao rate limiter da AWS tempo para resetar a janela de quota.
+</p>
+
+<h3>Observabilidade — métricas coletadas por passe</h3>
+<p>
+  Cada passe registra um snapshot das variáveis do sistema, permitindo visualizar a convergência:
+</p>
+<table>
+  <thead><tr><th>Métrica</th><th>Descrição</th></tr></thead>
+  <tbody>
+    <tr><td><code>workers</code></td><td>Número de threads ativas naquele passe</td></tr>
+    <tr><td><code>delay_s</code></td><td>Delay por registro (segundos) naquele passe</td></tr>
+    <tr><td><code>throttle_rate</code></td><td>Fração de registros com ThrottlingException</td></tr>
+    <tr><td><code>throughput_rpm</code></td><td>Registros processados com sucesso por minuto</td></tr>
+    <tr><td><code>duration_s</code></td><td>Duração do passe em segundos</td></tr>
+  </tbody>
+</table>
+<p>
+  O relatório HTML gerado inclui uma tabela e um gráfico combinado (barras + linhas com eixo duplo)
+  mostrando sucesso/throttled por passe, a taxa de throttle e a evolução do número de workers —
+  permitindo inspecionar visualmente a convergência.
+</p>
+
+<div class="card ok">
+  <strong>Convergência esperada:</strong> partindo de 5 workers com 20% de throttling, o AIMD deve
+  estabilizar em 2–3 workers com delay de 0.5–1s em contas gratuitas AWS, atingindo taxa &lt;5%
+  em 2–3 passes. Em contas com quota elevada, converge para o máximo configurado.
+</div>
+
+<div class="card warn" style="margin-top:12px">
+  <strong>Limitação conhecida:</strong> AIMD pode oscilar se o intervalo entre passes for menor que
+  a janela de reset do rate limit da AWS (~60s). O parâmetro <code>BATCH_RETRY_DELAY</code> deve ser
+  ajustado para pelo menos 15s em contas gratuitas.
+</div>
 </section>
 
 <!-- ═══ MODAL API ═══ -->

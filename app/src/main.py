@@ -164,13 +164,6 @@ async def batch(file: UploadFile = File(...)) -> JSONResponse:
     failed_path = Path(settings.OUTPUT_DIR) / f"failed_{stem}.json"
     max_passes  = settings.BATCH_MAX_PASSES
 
-    # Configuração por passe: (workers, delay_por_registro, retries_internos)
-    pass_configs = [
-        (settings.BATCH_MAX_WORKERS, settings.BATCH_RATE_LIMIT_DELAY, settings.BATCH_MAX_RETRIES),
-        (settings.BATCH_RETRY_WORKERS, 0.0, 1),
-        (1,                            0.0, 0),
-    ]
-
     def _make_processor(delay: float, retries: int):
         def process_row(row_data: dict) -> dict:
             rec_id       = row_data["rec_id"]
@@ -201,25 +194,32 @@ async def batch(file: UploadFile = File(...)) -> JSONResponse:
             return {"id": rec_id, "canal": canal, "texto_original": mask_profanity(texto), **r}
         return process_row
 
-    pending     = rows
+    # Estado inicial — AIMD parte dos valores configurados
+    workers  = settings.BATCH_MAX_WORKERS
+    delay    = settings.BATCH_RATE_LIMIT_DELAY
+    retries  = settings.BATCH_MAX_RETRIES
+    pending  = rows
     all_results: list[dict] = []
+    pass_stats: list[dict]  = []
 
     for pass_num in range(max_passes):
         if not pending:
             break
 
-        workers, delay, retries = pass_configs[min(pass_num, len(pass_configs) - 1)]
-
         if pass_num > 0:
-            wait = settings.BATCH_RETRY_DELAY * pass_num
-            logger.info("batch passe %d/%d: aguardando %.0fs para throttling recuperar",
-                        pass_num + 1, max_passes, wait)
+            # Espera adaptiva: quanto mais throttling, mais tempo para o rate limit recuperar
+            prev_rate = pass_stats[-1]["throttle_rate"]
+            wait = settings.BATCH_RETRY_DELAY * (1.0 + prev_rate)
+            logger.info("batch passe %d/%d: aguardando %.0fs (throttle_rate anterior=%.0f%%)",
+                        pass_num + 1, max_passes, wait, prev_rate * 100)
             time.sleep(wait)
 
-        logger.info("batch passe %d/%d: %d registros | workers=%d delay=%.1fs retries=%d",
+        logger.info("batch passe %d/%d: %d registros | workers=%d delay=%.2fs retries=%d",
                     pass_num + 1, max_passes, len(pending), workers, delay, retries)
 
+        pass_start    = time.time()
         next_pending: list[dict] = []
+        success_count = 0
         fn = _make_processor(delay, retries)
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
             for result in executor.map(fn, pending):
@@ -227,14 +227,53 @@ async def batch(file: UploadFile = File(...)) -> JSONResponse:
                     next_pending.append(result["_row"])
                 else:
                     all_results.append(result)
+                    success_count += 1
 
+        pass_elapsed    = time.time() - pass_start
+        throttled_count = len(next_pending)
+        total_pass      = len(pending)
+        throttle_rate   = throttled_count / total_pass if total_pass else 0.0
+        throughput_rpm  = round(success_count / pass_elapsed * 60, 1) if pass_elapsed > 0 else 0.0
+
+        pass_stats.append({
+            "pass_num":      pass_num + 1,
+            "workers":       workers,
+            "delay_s":       round(delay, 2),
+            "retries":       retries,
+            "total":         total_pass,
+            "success":       success_count,
+            "throttled":     throttled_count,
+            "throttle_rate": round(throttle_rate, 4),
+            "throttle_pct":  round(throttle_rate * 100, 1),
+            "duration_s":    round(pass_elapsed, 1),
+            "throughput_rpm": throughput_rpm,
+        })
+
+        logger.info(
+            "batch passe %d/%d: sucesso=%d throttled=%d (%.0f%%) | %.1fs | %.1f reg/min",
+            pass_num + 1, max_passes, success_count, throttled_count,
+            throttle_rate * 100, pass_elapsed, throughput_rpm,
+        )
+
+        # AIMD: ajusta workers e delay para o próximo passe
+        if throttle_rate > 0.20:
+            workers = max(1, workers // 2)
+            delay   = round(delay + 1.0, 2)
+            logger.info("AIMD ↓ throttle=%.0f%% → workers=%d delay=%.2fs", throttle_rate * 100, workers, delay)
+        elif throttle_rate < 0.05 and throttled_count == 0:
+            workers = min(settings.BATCH_MAX_WORKERS, workers + 1)
+            delay   = round(max(0.0, delay - 0.5), 2)
+            logger.info("AIMD ↑ throttle=%.0f%% → workers=%d delay=%.2fs", throttle_rate * 100, workers, delay)
+
+        retries = max(0, retries - 1)
         pending = next_pending
+
         if pending:
             Path(settings.OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
             failed_path.write_text(
                 _json.dumps(pending, ensure_ascii=False, indent=2), encoding="utf-8"
             )
-            logger.warning("batch passe %d/%d: %d registros ainda pendentes → %s",
+            logger.warning("batch passe %d/%d: %d registros pendentes → %s",
                            pass_num + 1, max_passes, len(pending), failed_path.name)
 
     # Registros que esgotaram todos os passes
@@ -256,6 +295,7 @@ async def batch(file: UploadFile = File(...)) -> JSONResponse:
     paths = write_outputs(
         all_results, stem=stem,
         started_at=started_at, finished_at=finished_at, elapsed_s=elapsed_s,
+        pass_stats=pass_stats,
     )
     return RedirectResponse(url=f"/output/{Path(paths['html']).name}", status_code=303)
 

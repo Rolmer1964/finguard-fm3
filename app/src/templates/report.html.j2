@@ -80,6 +80,49 @@
   <div class="card"><h3 style="margin-top:0">Por nível de risco</h3><canvas id="chRisco"></canvas></div>
 </div>
 
+{% if pass_stats %}
+<div class="card" style="margin-top:24px">
+  <h3 style="margin-top:0">Passes de processamento — controle adaptivo (AIMD)</h3>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+    <div style="flex:1;min-width:300px;overflow-x:auto">
+      <table style="font-size:12px">
+        <thead>
+          <tr>
+            <th>Passe</th><th>Workers</th><th>Delay(s)</th>
+            <th>Total</th><th>Sucesso</th><th>Throttled</th>
+            <th>Taxa</th><th>Duração</th><th>Vazão (reg/min)</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for p in pass_stats %}
+          {% set rate = p.throttle_pct %}
+          <tr>
+            <td style="text-align:center;font-weight:700">{{ p.pass_num }}</td>
+            <td style="text-align:center">{{ p.workers }}</td>
+            <td style="text-align:center">{{ p.delay_s }}</td>
+            <td style="text-align:center">{{ p.total }}</td>
+            <td style="text-align:center;color:#059669;font-weight:600">{{ p.success }}</td>
+            <td style="text-align:center;color:{% if p.throttled > 0 %}#dc2626{% else %}#6b7280{% endif %};font-weight:600">{{ p.throttled }}</td>
+            <td style="text-align:center">
+              <span style="padding:2px 7px;border-radius:999px;font-size:11px;font-weight:700;
+                background:{% if rate > 20 %}#fee2e2;color:#991b1b{% elif rate > 5 %}#fef3c7;color:#92400e{% else %}#d1fae5;color:#065f46{% endif %}">
+                {{ rate }}%
+              </span>
+            </td>
+            <td style="text-align:center">{{ p.duration_s }}s</td>
+            <td style="text-align:center">{{ p.throughput_rpm }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div style="flex:1;min-width:260px;max-width:420px">
+      <canvas id="chPasses" height="180"></canvas>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 <div class="card" style="margin-top: 24px">
   <h3 style="margin-top:0">Recomendações</h3>
   <ul class="recs">
@@ -168,6 +211,40 @@ bar('chCanal',     {{ by_canal|tojson }},    '#8b5cf6');
 bar('chProduto',   {{ by_product|tojson }},  '#10b981');
 bar('chUrgencia',  {{ by_urgency|tojson }},  '#f59e0b');
 bar('chRisco',     {{ by_risk|tojson }},     '#ef4444');
+
+{% if pass_stats %}
+(function() {
+  var ps = {{ pass_stats | tojson }};
+  var labels  = ps.map(function(p){ return 'Passe ' + p.pass_num; });
+  new Chart(document.getElementById('chPasses'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'Sucesso',   data: ps.map(function(p){ return p.success; }),   backgroundColor: '#34d399', yAxisID: 'y' },
+        { label: 'Throttled', data: ps.map(function(p){ return p.throttled; }), backgroundColor: '#f87171', yAxisID: 'y' },
+        { label: 'Taxa throttle %', data: ps.map(function(p){ return p.throttle_pct; }),
+          type: 'line', borderColor: '#f59e0b', backgroundColor: 'transparent',
+          pointBackgroundColor: '#f59e0b', borderWidth: 2, yAxisID: 'y2' },
+        { label: 'Workers', data: ps.map(function(p){ return p.workers; }),
+          type: 'line', borderColor: '#818cf8', backgroundColor: 'transparent',
+          pointBackgroundColor: '#818cf8', borderWidth: 2, borderDash: [4,3], yAxisID: 'y2' },
+      ]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+      scales: {
+        x:  { stacked: true },
+        y:  { stacked: true, beginAtZero: true, ticks: { precision: 0 },
+               title: { display: true, text: 'Registros', font: { size: 10 } } },
+        y2: { position: 'right', beginAtZero: true, max: 100,
+               title: { display: true, text: '% / Workers', font: { size: 10 } },
+               grid: { drawOnChartArea: false } }
+      }
+    }
+  });
+})();
+{% endif %}
 </script>
 </body>
 </html>
