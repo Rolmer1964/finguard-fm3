@@ -62,6 +62,7 @@
 <div class="kpi">
   <div class="card"><div class="v">{{ total }}</div><div class="l">Total de reclamações</div></div>
   <div class="card"><div class="v">{{ critical|length }}</div><div class="l">Críticas (urgência ou risco)</div></div>
+  {% if elapsed_s is not none %}
   <div class="card">
     <div style="font-size:13px;color:#6b7280;line-height:1.9">
       <div><span style="font-weight:600">Início:</span> {{ started_at }}</div>
@@ -70,6 +71,7 @@
     </div>
     <div class="l" style="margin-top:4px">Tempo de execução</div>
   </div>
+  {% endif %}
 </div>
 
 <div class="grid">
