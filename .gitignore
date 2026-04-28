@@ -19,6 +19,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Logs
+*.log
+
 # Outputs gerados
 output/*.html
 output/*.json
