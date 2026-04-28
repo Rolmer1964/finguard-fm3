@@ -116,6 +116,7 @@ def _node_report(state: AnalysisState) -> AnalysisState:
     tid = state.get("trace_id", "?")
     logger.info("[%s] AGENT=report IN", tid)
     final = consolidate(state.get("triage", {}), state.get("risk", {}))
+    final["texto_original"] = state.get("text", "")
     dt = _now_ms() - t0
     logger.info("[%s] AGENT=report OUT in %dms", tid, dt)
     timings = {**state.get("timings_ms", {}), "report": dt}
