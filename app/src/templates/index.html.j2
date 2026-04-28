@@ -148,12 +148,12 @@ document.addEventListener('keydown', e => {
 let timerEl, timerInterval, startTs, estSecs;
 
 const _overtime = [
-  [30,  '😅 Ah, não acredito que não terminou ainda…'],
-  [90,  '🦗 Ok, AWS, tô aqui esperando…'],
-  [180, '☕ Já deu pra buscar um café e voltar.'],
-  [300, '🤔 Acho que o Haiku foi escrever um poema.'],
-  [480, '😴 Tô pensando em cobrar hora extra do Bedrock.'],
-  [720, '🏳️ Considerei montar uma barraca aqui.'],
+  [ 30, '😅 Ah, não acredito que não terminou ainda…'],
+  [ 75, '🦗 Ok, AWS, tô aqui esperando…'],
+  [135, '☕ Já deu pra buscar um café e voltar.'],
+  [195, '🤔 Acho que o Haiku foi escrever um poema.'],
+  [255, '😴 Tô pensando em cobrar hora extra do Bedrock.'],
+  [300, '🏳️ Considerei montar uma barraca aqui.'],
 ];
 
 function timerStart(secs) {
@@ -192,7 +192,7 @@ document.querySelector('form[action="/batch"]').addEventListener('submit', funct
     const reader = new FileReader();
     reader.onload = function(ev) {
       const rows = Math.max(1, (ev.target.result.match(/\n/g)||[]).length - 1);
-      const est  = Math.ceil(rows * 5.5);
+      const est  = Math.max(37, Math.ceil(rows * 5.5) - 300);
       document.getElementById('ov-stats').textContent =
         rows + ' registro(s) · estimativa: ~' + Math.ceil(est/60) + ' min';
       timerStart(est);
