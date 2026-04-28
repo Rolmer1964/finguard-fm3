@@ -7,9 +7,7 @@ import logging
 import threading
 import time
 from contextlib import asynccontextmanager
-from datetime import datetime as _dt, timezone, timedelta
-
-_TZ_BRT = timezone(timedelta(hours=-3))
+from datetime import datetime as _dt, timedelta, timezone
 from pathlib import Path
 
 from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, Request, UploadFile
@@ -28,6 +26,8 @@ from .settings import settings
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 logger = logging.getLogger("app")
+
+_TZ_BRT = timezone(timedelta(hours=-3))
 
 _LEVEL_STYLE = {
     "crít": "color:#991b1b;font-weight:600", "alt": "color:#9a3412;font-weight:600",
@@ -69,9 +69,7 @@ app = FastAPI(title="FinGuard - Nível 3 (Arquiteto da Solução)", version="0.1
 
 BASE = Path(__file__).parent
 templates = Jinja2Templates(directory=str(BASE / "templates"))
-templates.env.filters["tojson"] = lambda v, indent=None: __import__("json").dumps(
-    v, ensure_ascii=False, indent=indent
-)
+templates.env.filters["tojson"] = lambda v, indent=None: _json.dumps(v, ensure_ascii=False, indent=indent)
 app.mount("/output", StaticFiles(directory=settings.OUTPUT_DIR, check_dir=False), name="output")
 app.mount("/assets/hackathon", StaticFiles(directory=str(BASE.parent / "assets" / "hackathon"), check_dir=False), name="hackathon")
 
