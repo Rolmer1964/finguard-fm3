@@ -1,4 +1,5 @@
 
+import asyncio
 import concurrent.futures
 import csv
 import io
@@ -134,7 +135,7 @@ def analyze_from_form(request: Request, text: str = Form(...), product_hint: str
 
 
 @app.post("/batch")
-async def batch(file: UploadFile = File(...)) -> JSONResponse:
+async def batch(file: UploadFile = File(...), label: str = Form("")) -> JSONResponse:
     """Processa um CSV em paralelo (ThreadPoolExecutor) com retry automático por registro."""
     if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(400, "Envie um arquivo .csv")
@@ -156,146 +157,149 @@ async def batch(file: UploadFile = File(...)) -> JSONResponse:
             "rec_id":       (row.get("id") or f"REC-{i:05d}"),
         })
 
-    t_start     = time.time()
-    started_at  = _dt.now(_TZ_BRT).strftime("%Y-%m-%d %H:%M:%S (UTC-3)")
-    stem        = _dt.utcnow().strftime("report_%Y-%m-%d-%H-%M-%S")
-    failed_path = Path(settings.OUTPUT_DIR) / f"failed_{stem}.json"
-    max_passes  = settings.BATCH_MAX_PASSES
+    t_start    = time.time()
+    started_at = _dt.now(_TZ_BRT).strftime("%Y-%m-%d %H:%M:%S (UTC-3)")
+    stem       = _dt.utcnow().strftime("report_%Y-%m-%d-%H-%M-%S")
+    csv_name   = file.filename or None
 
-    def _make_processor(delay: float, retries: int):
-        def process_row(row_data: dict) -> dict:
-            rec_id       = row_data["rec_id"]
-            texto        = row_data["texto"]
-            produto_hint = row_data["produto_hint"]
-            canal        = row_data["canal"]
-            try:
-                r = _analyze_with_retry(
-                    texto=texto,
-                    produto_hint=produto_hint,
-                    rec_id=rec_id,
-                    rate_limit_delay=delay,
-                    max_retries=retries,
-                )
-            except Exception as exc:
-                if "ThrottlingException" in str(exc) or "throttling" in str(exc).lower():
-                    logger.warning("[%s] throttling — agendado para próximo passe", rec_id)
-                    return {"_throttled": True, "_row": row_data}
-                logger.error("[%s] falha definitiva: %s", rec_id, exc)
-                r = {"category": "Erro", "product": "—", "sentiment": "—", "urgency": "—",
-                     "summary": f"[falha: {exc}]", "risk_level": "—", "risk_justification": ""}
-            else:
-                if r.get("blocked"):
-                    logger.warning("[%s] bloqueada pelo guardrail", rec_id)
-                    r = {"category": "Bloqueado", "product": "—", "sentiment": "—", "urgency": "—",
-                         "summary": "[Entrada bloqueada pelo guardrail de proteção]",
-                         "risk_level": "Bloqueado", "risk_justification": r.get("message", "")}
-            return {"id": rec_id, "canal": canal, "texto_original": mask_profanity(texto), **r}
-        return process_row
+    def _run_batch() -> str:
+        failed_path = Path(settings.OUTPUT_DIR) / f"failed_{stem}.json"
+        max_passes  = settings.BATCH_MAX_PASSES
 
-    # Estado inicial — AIMD parte dos valores configurados
-    workers  = settings.BATCH_MAX_WORKERS
-    delay    = settings.BATCH_RATE_LIMIT_DELAY
-    retries  = settings.BATCH_MAX_RETRIES
-    pending  = rows
-    all_results: list[dict] = []
-    pass_stats: list[dict]  = []
-
-    for pass_num in range(max_passes):
-        if not pending:
-            break
-
-        if pass_num > 0:
-            # Espera adaptiva: quanto mais throttling, mais tempo para o rate limit recuperar
-            prev_rate = pass_stats[-1]["throttle_rate"]
-            wait = settings.BATCH_RETRY_DELAY * (1.0 + prev_rate)
-            logger.info("batch passe %d/%d: aguardando %.0fs (throttle_rate anterior=%.0f%%)",
-                        pass_num + 1, max_passes, wait, prev_rate * 100)
-            time.sleep(wait)
-
-        logger.info("batch passe %d/%d: %d registros | workers=%d delay=%.2fs retries=%d",
-                    pass_num + 1, max_passes, len(pending), workers, delay, retries)
-
-        pass_start    = time.time()
-        next_pending: list[dict] = []
-        success_count = 0
-        fn = _make_processor(delay, retries)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
-            for result in executor.map(fn, pending):
-                if result.get("_throttled"):
-                    next_pending.append(result["_row"])
+        def _make_processor(delay: float, retries: int):
+            def process_row(row_data: dict) -> dict:
+                rec_id       = row_data["rec_id"]
+                texto        = row_data["texto"]
+                produto_hint = row_data["produto_hint"]
+                canal        = row_data["canal"]
+                try:
+                    r = _analyze_with_retry(
+                        texto=texto,
+                        produto_hint=produto_hint,
+                        rec_id=rec_id,
+                        rate_limit_delay=delay,
+                        max_retries=retries,
+                    )
+                except Exception as exc:
+                    if "ThrottlingException" in str(exc) or "throttling" in str(exc).lower():
+                        logger.warning("[%s] throttling — agendado para próximo passe", rec_id)
+                        return {"_throttled": True, "_row": row_data}
+                    logger.error("[%s] falha definitiva: %s", rec_id, exc)
+                    r = {"category": "Erro", "product": "—", "sentiment": "—", "urgency": "—",
+                         "summary": f"[falha: {exc}]", "risk_level": "—", "risk_justification": ""}
                 else:
-                    all_results.append(result)
-                    success_count += 1
+                    if r.get("blocked"):
+                        logger.warning("[%s] bloqueada pelo guardrail reason=%s", rec_id, r.get("block_reason"))
+                        r = {"category": "Bloqueado", "product": "—", "sentiment": "—", "urgency": "—",
+                             "summary": "[Entrada bloqueada pelo guardrail de proteção]",
+                             "risk_level": "Bloqueado", "risk_justification": r.get("message", ""),
+                             "block_reason": r.get("block_reason", "")}
+                return {"id": rec_id, "canal": canal, "texto_original": mask_profanity(texto), **r}
+            return process_row
 
-        pass_elapsed    = time.time() - pass_start
-        throttled_count = len(next_pending)
-        total_pass      = len(pending)
-        throttle_rate   = throttled_count / total_pass if total_pass else 0.0
-        throughput_rpm  = round(success_count / pass_elapsed * 60, 1) if pass_elapsed > 0 else 0.0
+        workers  = settings.BATCH_MAX_WORKERS
+        delay    = settings.BATCH_RATE_LIMIT_DELAY
+        retries  = settings.BATCH_MAX_RETRIES
+        pending  = rows
+        all_results: list[dict] = []
+        pass_stats: list[dict]  = []
 
-        pass_stats.append({
-            "pass_num":      pass_num + 1,
-            "workers":       workers,
-            "delay_s":       round(delay, 2),
-            "retries":       retries,
-            "total":         total_pass,
-            "success":       success_count,
-            "throttled":     throttled_count,
-            "throttle_rate": round(throttle_rate, 4),
-            "throttle_pct":  round(throttle_rate * 100, 1),
-            "duration_s":    round(pass_elapsed, 1),
-            "throughput_rpm": throughput_rpm,
-        })
+        for pass_num in range(max_passes):
+            if not pending:
+                break
 
-        logger.info(
-            "batch passe %d/%d: sucesso=%d throttled=%d (%.0f%%) | %.1fs | %.1f reg/min",
-            pass_num + 1, max_passes, success_count, throttled_count,
-            throttle_rate * 100, pass_elapsed, throughput_rpm,
-        )
+            if pass_num > 0:
+                prev_rate = pass_stats[-1]["throttle_rate"]
+                wait = settings.BATCH_RETRY_DELAY * (1.0 + prev_rate)
+                logger.info("batch passe %d/%d: aguardando %.0fs (throttle_rate anterior=%.0f%%)",
+                            pass_num + 1, max_passes, wait, prev_rate * 100)
+                time.sleep(wait)
 
-        # AIMD: qualquer throttling > 5% já é sinal de congestionamento em contas com quota baixa
-        if throttle_rate > 0.05:
-            workers = max(1, workers // 2)
-            delay   = round(delay + 1.0, 2)
-            logger.info("AIMD ↓ throttle=%.0f%% → workers=%d delay=%.2fs", throttle_rate * 100, workers, delay)
-        elif throttled_count == 0:
-            workers = min(settings.BATCH_MAX_WORKERS, workers + 1)
-            delay   = round(max(0.0, delay - 0.5), 2)
-            logger.info("AIMD ↑ throttle=0%% → workers=%d delay=%.2fs", workers, delay)
+            logger.info("batch passe %d/%d: %d registros | workers=%d delay=%.2fs retries=%d",
+                        pass_num + 1, max_passes, len(pending), workers, delay, retries)
 
-        retries = max(0, retries - 1)
-        pending = next_pending
+            pass_start    = time.time()
+            next_pending: list[dict] = []
+            success_count = 0
+            fn = _make_processor(delay, retries)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+                for result in executor.map(fn, pending):
+                    if result.get("_throttled"):
+                        next_pending.append(result["_row"])
+                    else:
+                        all_results.append(result)
+                        success_count += 1
 
-        if pending:
-            Path(settings.OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
-            failed_path.write_text(
-                _json.dumps(pending, ensure_ascii=False, indent=2), encoding="utf-8"
+            pass_elapsed    = time.time() - pass_start
+            throttled_count = len(next_pending)
+            total_pass      = len(pending)
+            throttle_rate   = throttled_count / total_pass if total_pass else 0.0
+            throughput_rpm  = round(success_count / pass_elapsed * 60, 1) if pass_elapsed > 0 else 0.0
+
+            pass_stats.append({
+                "pass_num":      pass_num + 1,
+                "workers":       workers,
+                "delay_s":       round(delay, 2),
+                "retries":       retries,
+                "total":         total_pass,
+                "success":       success_count,
+                "throttled":     throttled_count,
+                "throttle_rate": round(throttle_rate, 4),
+                "throttle_pct":  round(throttle_rate * 100, 1),
+                "duration_s":    round(pass_elapsed, 1),
+                "throughput_rpm": throughput_rpm,
+            })
+
+            logger.info(
+                "batch passe %d/%d: sucesso=%d throttled=%d (%.0f%%) | %.1fs | %.1f reg/min",
+                pass_num + 1, max_passes, success_count, throttled_count,
+                throttle_rate * 100, pass_elapsed, throughput_rpm,
             )
-            logger.warning("batch passe %d/%d: %d registros pendentes → %s",
-                           pass_num + 1, max_passes, len(pending), failed_path.name)
 
-    # Registros que esgotaram todos os passes
-    for row_data in pending:
-        logger.error("[%s] esgotou %d passes — ThrottlingException persistente", row_data["rec_id"], max_passes)
-        all_results.append({
-            "id": row_data["rec_id"], "canal": row_data["canal"],
-            "texto_original": mask_profanity(row_data["texto"]),
-            "category": "Erro", "product": "—", "sentiment": "—", "urgency": "—",
-            "summary": f"[falha após {max_passes} passes — ThrottlingException persistente]",
-            "risk_level": "—", "risk_justification": "",
-        })
+            if throttle_rate > 0.05:
+                workers = max(1, workers // 2)
+                delay   = round(delay + 1.0, 2)
+                logger.info("AIMD ↓ throttle=%.0f%% → workers=%d delay=%.2fs", throttle_rate * 100, workers, delay)
+            elif throttled_count == 0:
+                workers = min(settings.BATCH_MAX_WORKERS, workers + 1)
+                delay   = round(max(0.0, delay - 0.5), 2)
+                logger.info("AIMD ↑ throttle=0%% → workers=%d delay=%.2fs", workers, delay)
 
-    if failed_path.exists() and not pending:
-        failed_path.unlink()
+            retries = max(0, retries - 1)
+            pending = next_pending
 
-    finished_at = _dt.now(_TZ_BRT).strftime("%Y-%m-%d %H:%M:%S (UTC-3)")
-    elapsed_s   = time.time() - t_start
-    paths = write_outputs(
-        all_results, stem=stem,
-        started_at=started_at, finished_at=finished_at, elapsed_s=elapsed_s,
-        pass_stats=pass_stats,
-    )
-    return RedirectResponse(url=f"/output/{Path(paths['html']).name}", status_code=303)
+            if pending:
+                Path(settings.OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
+                failed_path.write_text(
+                    _json.dumps(pending, ensure_ascii=False, indent=2), encoding="utf-8"
+                )
+                logger.warning("batch passe %d/%d: %d registros pendentes → %s",
+                               pass_num + 1, max_passes, len(pending), failed_path.name)
+
+        for row_data in pending:
+            logger.error("[%s] esgotou %d passes — ThrottlingException persistente", row_data["rec_id"], max_passes)
+            all_results.append({
+                "id": row_data["rec_id"], "canal": row_data["canal"],
+                "texto_original": mask_profanity(row_data["texto"]),
+                "category": "Erro", "product": "—", "sentiment": "—", "urgency": "—",
+                "summary": f"[falha após {max_passes} passes — ThrottlingException persistente]",
+                "risk_level": "—", "risk_justification": "",
+            })
+
+        if failed_path.exists() and not pending:
+            failed_path.unlink()
+
+        finished_at = _dt.now(_TZ_BRT).strftime("%Y-%m-%d %H:%M:%S (UTC-3)")
+        elapsed_s   = time.time() - t_start
+        paths = write_outputs(
+            all_results, stem=stem,
+            started_at=started_at, finished_at=finished_at, elapsed_s=elapsed_s,
+            pass_stats=pass_stats, label=label or None, filename=csv_name,
+        )
+        return Path(paths["html"]).name
+
+    html_name = await asyncio.to_thread(_run_batch)
+    return RedirectResponse(url=f"/output/{html_name}", status_code=303)
 
 
 # ── Rotas: ingestão RAG ───────────────────────────────────────────────────────
@@ -378,17 +382,29 @@ def admin_reset(target: str = "all") -> JSONResponse:
 def reports_page(request: Request):
     out_dir    = Path(settings.OUTPUT_DIR)
     html_files = sorted(out_dir.glob("*.html"), reverse=True)
-    reports = [
-        {
+    def _read_meta(stem: str) -> dict:
+        meta = out_dir / f"{stem}.meta.json"
+        if meta.exists():
+            try:
+                return _json.loads(meta.read_text(encoding="utf-8"))
+            except Exception:
+                pass
+        return {}
+
+    def _report_entry(f: Path) -> dict:
+        meta = _read_meta(f.stem)
+        return {
             "stem":       f.stem,
             "ts_display": f.stem,
             "size_kb":    round(f.stat().st_size / 1024, 1),
             "has_json":   (out_dir / f"{f.stem}.json").exists(),
             "has_csv":    (out_dir / f"{f.stem}.csv").exists(),
             "has_md":     (out_dir / f"{f.stem}.md").exists(),
+            "label":      meta.get("label", ""),
+            "filename":   meta.get("filename", ""),
         }
-        for f in html_files
-    ]
+
+    reports = [_report_entry(f) for f in html_files]
     return templates.TemplateResponse("reports.html.j2", {
         "request": request,
         "reports": reports,

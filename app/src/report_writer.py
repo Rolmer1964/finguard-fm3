@@ -82,11 +82,23 @@ def write_outputs(
     finished_at: str | None = None,
     elapsed_s: float | None = None,
     pass_stats: list[dict] | None = None,
+    label: str | None = None,
+    filename: str | None = None,
 ) -> dict[str, str]:
     """Grava JSON, CSV, MD e HTML com os resultados de uma execução em batch."""
     out_dir = Path(settings.OUTPUT_DIR)
     out_dir.mkdir(parents=True, exist_ok=True)
     stem = stem or f"relatorio-{datetime.utcnow().strftime('%Y%m%d-%H%M%S')}"
+
+    if label or filename:
+        meta: dict = {}
+        if label:
+            meta["label"] = label
+        if filename:
+            meta["filename"] = filename
+        (out_dir / f"{stem}.meta.json").write_text(
+            json.dumps(meta, ensure_ascii=False), encoding="utf-8"
+        )
 
     json_path = out_dir / f"{stem}.json"
     csv_path = out_dir / f"{stem}.csv"

@@ -67,7 +67,11 @@ def _route_after_guardrail(state: AnalysisState) -> str:
 
 def _node_blocked(state: AnalysisState) -> AnalysisState:
     """Resposta educada quando o guardrail de entrada bloqueia a requisição."""
-    return {**state, "final": {"blocked": True, "message": BLOCKED_INPUT_MESSAGE}}
+    gi = state.get("guardrail_input", {})
+    final: dict = {"blocked": True, "message": BLOCKED_INPUT_MESSAGE}
+    if gi.get("block_reason"):
+        final["block_reason"] = gi["block_reason"]
+    return {**state, "final": final}
 
 
 # ── Nó 1: Triagem ─────────────────────────────────────────────────────────────

@@ -46,7 +46,7 @@ def _bedrock_runtime():
 
 
 def _apply(source: str, text: str) -> dict:
-    """Chama Bedrock apply_guardrail e devolve {"action", "outputs"}."""
+    """Chama Bedrock apply_guardrail e devolve {"action", "outputs", "assessments"}."""
     client = _bedrock_runtime()
     resp = client.apply_guardrail(
         guardrailIdentifier=settings.GUARDRAIL_ID,
@@ -55,9 +55,23 @@ def _apply(source: str, text: str) -> dict:
         content=[{"text": {"text": text}}],
     )
     return {
-        "action": resp.get("action", "NONE"),
-        "outputs": resp.get("outputs", []),
+        "action":      resp.get("action", "NONE"),
+        "outputs":     resp.get("outputs", []),
+        "assessments": resp.get("assessments", []),
     }
+
+
+def _extract_block_reason(assessments: list) -> str:
+    parts = []
+    for a in assessments:
+        for t in a.get("topicPolicy", {}).get("topics", []):
+            if t.get("action") == "BLOCKED":
+                parts.append(t["name"])
+        for f in a.get("contentPolicy", {}).get("filters", []):
+            if f.get("action") == "BLOCKED":
+                conf = f.get("confidence", "")
+                parts.append(f"{f['type']} ({conf})" if conf else f["type"])
+    return "; ".join(parts) if parts else "bedrock_guardrail"
 
 
 # ── Input guardrail ────────────────────────────────────────────────────────────
@@ -67,12 +81,14 @@ def check_input(text: str) -> dict:
     Valida o texto de entrada antes de entrar no pipeline.
     Retorna {"blocked": bool, "reason": str | None, "sanitized_text": str}.
     """
+    text = _regex_sanitize(text)
     if settings.GUARDRAIL_ID:
         try:
             r = _apply("INPUT", text)
             logger.info("guardrail INPUT action=%s", r["action"])
             if r["action"] == "GUARDRAIL_INTERVENED":
-                return {"blocked": True, "reason": "bedrock_guardrail", "sanitized_text": text}
+                reason = _extract_block_reason(r["assessments"])
+                return {"blocked": True, "reason": "bedrock_guardrail", "block_reason": reason, "sanitized_text": text}
             outputs = r["outputs"]
             sanitized = outputs[0].get("text", text) if outputs else text
             return {"blocked": False, "reason": None, "sanitized_text": sanitized}

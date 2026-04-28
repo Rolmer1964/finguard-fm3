@@ -5,25 +5,26 @@
 <title>Relatórios — FinGuard</title>
 <style>
   body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-         max-width:900px; margin:32px auto; padding:0 16px; color:#1f2937; background:#f9fafb; }
+         max-width:1100px; margin:32px auto; padding:0 16px; color:#1f2937; background:#f9fafb; }
   h1 { margin-bottom:4px; }
   .muted { color:#6b7280; font-size:13px; margin-bottom:16px; display:block; }
   table { width:100%; border-collapse:collapse; background:white; border-radius:8px;
           overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.08); }
-  th { background:#1e40af; color:white; padding:10px 14px; text-align:left;
-       font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
-  td { padding:10px 14px; border-bottom:1px solid #e5e7eb; vertical-align:middle; }
+  th { background:#1e40af; color:white; padding:10px 12px; text-align:left;
+       font-size:12px; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; }
+  td { padding:10px 12px; border-bottom:1px solid #e5e7eb; vertical-align:middle; }
   tr:last-child td { border-bottom:none; }
   tr:hover td { background:#f0f9ff; }
   a { color:#2563eb; text-decoration:none; }
   a:hover { text-decoration:underline; }
   nav { display:flex; gap:12px; font-size:13px; margin-bottom:16px; }
-  .dl-btn { color:white; padding:3px 10px; border-radius:4px; font-size:12px; text-decoration:none; }
-  .dl-none { color:#d1d5db; }
+  .dl-btn { color:white; padding:3px 10px; border-radius:4px; font-size:12px;
+            text-decoration:none; white-space:nowrap; }
+  .dl-none { color:#d1d5db; white-space:nowrap; }
   .recompose-btn { background:none; border:1px solid #6b7280; color:#374151; padding:3px 10px;
-                   border-radius:4px; font-size:12px; cursor:pointer; }
+                   border-radius:4px; font-size:12px; cursor:pointer; white-space:nowrap; }
   .recompose-btn:hover { background:#f3f4f6; }
-  .recompose-ok  { color:#059669; font-size:12px; }
+  .recompose-ok  { color:#059669; font-size:12px; white-space:nowrap; }
   .recompose-err { color:#dc2626; font-size:12px; }
 </style>
 </head>
@@ -38,10 +39,11 @@
 <table>
   <thead>
     <tr>
-      <th>Timestamp</th>
+      <th>Report ID</th>
+      <th>Identificação</th>
+      <th>Arquivo</th>
       <th>Tamanho</th>
       <th>Relatório</th>
-      <th>Downloads</th>
       <th>Log</th>
     </tr>
   </thead>
@@ -49,28 +51,17 @@
     {% if reports %}
       {% for r in reports %}
       <tr>
-        <td style="font-size:13px;font-family:monospace">{{ r.ts_display }}</td>
+        <td style="font-size:13px;font-family:monospace;white-space:nowrap">{{ r.ts_display }}</td>
+        <td style="font-size:13px;color:{% if r.label %}#1f2937{% else %}#9ca3af{% endif %}">
+          {{ r.label if r.label else "—" }}
+        </td>
+        <td style="font-size:12px;color:{% if r.filename %}#374151{% else %}#9ca3af{% endif %};white-space:nowrap">
+          {{ r.filename if r.filename else "—" }}
+        </td>
         <td style="font-size:12px;color:#6b7280">{{ r.size_kb }} KB</td>
         <td>
           <a href="/output/{{ r.stem }}.html"
              class="dl-btn" style="background:#1e40af">&#128196; Ver relatório</a>
-        </td>
-        <td style="display:flex;gap:6px;flex-wrap:wrap">
-          {% if r.has_json %}
-            <a href="/output/{{ r.stem }}.json" download class="dl-btn" style="background:#1e40af">⬇ JSON</a>
-          {% else %}
-            <span class="dl-none">— JSON</span>
-          {% endif %}
-          {% if r.has_csv %}
-            <a href="/output/{{ r.stem }}.csv" download class="dl-btn" style="background:#047857">⬇ CSV</a>
-          {% else %}
-            <span class="dl-none">— CSV</span>
-          {% endif %}
-          {% if r.has_md %}
-            <a href="/output/{{ r.stem }}.md" download class="dl-btn" style="background:#6b7280">⬇ MD</a>
-          {% else %}
-            <span class="dl-none">— MD</span>
-          {% endif %}
         </td>
         <td>
           {% if r.has_json %}
@@ -81,7 +72,7 @@
       {% endfor %}
     {% else %}
       <tr>
-        <td colspan="4" style="text-align:center;padding:32px;color:#9ca3af">
+        <td colspan="6" style="text-align:center;padding:32px;color:#9ca3af">
           Nenhum relatório gerado ainda. Processe um CSV para começar.
         </td>
       </tr>
