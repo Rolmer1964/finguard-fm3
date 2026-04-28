@@ -15,6 +15,7 @@ from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from markupsafe import Markup
 
 from .graph import analyze, clear_traces, get_traces, inject_trace, sum_timings
 from .helpers import bar_width_px, compute_stats, count_output_files, pill_html, rag_vector_count
@@ -70,7 +71,7 @@ app = FastAPI(title="FinGuard - Nível 3 (Arquiteto da Solução)", version="0.1
 
 BASE = Path(__file__).parent
 templates = Jinja2Templates(directory=str(BASE / "templates"))
-templates.env.filters["tojson"] = lambda v, indent=None: _json.dumps(v, ensure_ascii=False, indent=indent)
+templates.env.filters["tojson"] = lambda v, indent=None: Markup(_json.dumps(v, ensure_ascii=False, indent=indent))
 app.mount("/output", StaticFiles(directory=settings.OUTPUT_DIR, check_dir=False), name="output")
 app.mount("/assets/hackathon", StaticFiles(directory=str(BASE.parent / "assets" / "hackathon"), check_dir=False), name="hackathon")
 
