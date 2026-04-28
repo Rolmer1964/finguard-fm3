@@ -75,6 +75,44 @@ def _render_md(items: list[dict], totals: dict, critical: list, recs: list[str])
     return "\n".join(lines)
 
 
+def build_report_context(results: list[dict], meta: dict | None = None) -> dict:
+    """Computa todas as variáveis de contexto do template a partir de results + meta."""
+    meta = meta or {}
+    unblocked = [r for r in results if r.get("category") != "Bloqueado"]
+    by_category = _bucket(results, "category")
+    by_product = _bucket(unblocked, "product")
+    by_urgency = _bucket(unblocked, "urgency")
+    by_risk = _bucket(unblocked, "risk_level")
+    by_sentiment = _bucket(unblocked, "sentiment")
+    by_canal = _bucket(results, "canal")
+    critical = [r for r in results if r.get("urgency") == "Crítica" or r.get("risk_level") == "Crítico"]
+    totals = {
+        "by_category": by_category, "by_product": by_product,
+        "by_urgency": by_urgency, "by_risk": by_risk,
+        "by_sentiment": by_sentiment, "by_canal": by_canal,
+    }
+    recs = _build_recommendations(by_category, by_risk, critical)
+    elapsed_s = meta.get("elapsed_s")
+    return {
+        "results": results,
+        "total": len(results),
+        "critical": critical,
+        "by_category": by_category,
+        "by_product": by_product,
+        "by_urgency": by_urgency,
+        "by_risk": by_risk,
+        "by_sentiment": by_sentiment,
+        "by_canal": by_canal,
+        "recommendations": recs,
+        "generated_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "started_at": meta.get("started_at", "—"),
+        "finished_at": meta.get("finished_at", "—"),
+        "elapsed_s": elapsed_s,
+        "elapsed_fmt": _fmt_elapsed(elapsed_s),
+        "pass_stats": meta.get("pass_stats") or [],
+    }
+
+
 def write_outputs(
     results: list[dict],
     stem: str | None = None,
@@ -90,12 +128,20 @@ def write_outputs(
     out_dir.mkdir(parents=True, exist_ok=True)
     stem = stem or f"relatorio-{datetime.utcnow().strftime('%Y%m%d-%H%M%S')}"
 
-    if label or filename:
-        meta: dict = {}
-        if label:
-            meta["label"] = label
-        if filename:
-            meta["filename"] = filename
+    meta: dict = {}
+    if label:
+        meta["label"] = label
+    if filename:
+        meta["filename"] = filename
+    if started_at:
+        meta["started_at"] = started_at
+    if finished_at:
+        meta["finished_at"] = finished_at
+    if elapsed_s is not None:
+        meta["elapsed_s"] = elapsed_s
+    if pass_stats:
+        meta["pass_stats"] = pass_stats
+    if meta:
         (out_dir / f"{stem}.meta.json").write_text(
             json.dumps(meta, ensure_ascii=False), encoding="utf-8"
         )
@@ -115,42 +161,12 @@ def write_outputs(
         for r in results:
             w.writerow({k: r.get(k, "") for k in fields})
 
-    unblocked = [r for r in results if r.get("category") != "Bloqueado"]
-    by_category = _bucket(results, "category")
-    by_product = _bucket(unblocked, "product")
-    by_urgency = _bucket(unblocked, "urgency")
-    by_risk = _bucket(unblocked, "risk_level")
-    by_sentiment = _bucket(unblocked, "sentiment")
-    by_canal = _bucket(results, "canal")
-    critical = [r for r in results if r.get("urgency") == "Crítica" or r.get("risk_level") == "Crítico"]
-    totals = {
-        "by_category": by_category, "by_product": by_product,
-        "by_urgency": by_urgency, "by_risk": by_risk,
-        "by_sentiment": by_sentiment, "by_canal": by_canal,
-    }
-    recs = _build_recommendations(by_category, by_risk, critical)
+    ctx = build_report_context(results, meta)
+    totals = {k: ctx[k] for k in ("by_category", "by_product", "by_urgency", "by_risk", "by_sentiment", "by_canal")}
 
-    md_path.write_text(_render_md(results, totals, critical, recs), encoding="utf-8")
+    md_path.write_text(_render_md(results, totals, ctx["critical"], ctx["recommendations"]), encoding="utf-8")
 
-    html = _env.get_template("report.html.j2").render(
-        results=results,
-        total=len(results),
-        critical=critical,
-        by_category=by_category,
-        by_product=by_product,
-        by_urgency=by_urgency,
-        by_risk=by_risk,
-        by_sentiment=by_sentiment,
-        by_canal=by_canal,
-        recommendations=recs,
-        generated_at=datetime.utcnow().isoformat(timespec="seconds") + "Z",
-        stem=stem,
-        started_at=started_at or "—",
-        finished_at=finished_at or "—",
-        elapsed_s=elapsed_s,
-        elapsed_fmt=_fmt_elapsed(elapsed_s),
-        pass_stats=pass_stats or [],
-    )
+    html = _env.get_template("report.html.j2").render(stem=stem, **ctx)
     html_path.write_text(html, encoding="utf-8")
 
     return {"json": str(json_path), "csv": str(csv_path), "md": str(md_path), "html": str(html_path)}

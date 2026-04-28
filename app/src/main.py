@@ -22,7 +22,7 @@ from .models import AnalyzeRequest
 from .profanity import mask as mask_profanity
 from .rag.ingest import ingest_all
 from .rag.retriever import _store as _rag_store
-from .report_writer import write_outputs
+from .report_writer import build_report_context, write_outputs
 from .settings import settings
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -299,7 +299,8 @@ async def batch(file: UploadFile = File(...), label: str = Form("")) -> JSONResp
         return Path(paths["html"]).name
 
     html_name = await asyncio.to_thread(_run_batch)
-    return RedirectResponse(url=f"/output/{html_name}", status_code=303)
+    stem = html_name.removesuffix(".html")
+    return RedirectResponse(url=f"/report/{stem}", status_code=303)
 
 
 # ── Rotas: ingestão RAG ───────────────────────────────────────────────────────
@@ -410,6 +411,19 @@ def reports_page(request: Request):
         "reports": reports,
         "total":   len(html_files),
     })
+
+
+@app.get("/report/{stem}", response_class=HTMLResponse)
+def report_detail(request: Request, stem: str):
+    out_dir   = Path(settings.OUTPUT_DIR)
+    json_path = out_dir / f"{stem}.json"
+    if not json_path.exists():
+        raise HTTPException(status_code=404, detail="Relatório não encontrado")
+    results = _json.loads(json_path.read_text(encoding="utf-8"))
+    meta_path = out_dir / f"{stem}.meta.json"
+    meta = _json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
+    ctx = build_report_context(results, meta)
+    return templates.TemplateResponse("report.html.j2", {"request": request, "stem": stem, **ctx})
 
 
 # ── Rotas: traces / log ───────────────────────────────────────────────────────
