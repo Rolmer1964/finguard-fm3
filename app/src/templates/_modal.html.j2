@@ -87,10 +87,12 @@ function buildPipeline(r) {
   var tm = r.timings_ms || {};
   var triage_obj = r.triage || {};
   var risk_obj   = r.risk   || {};
-  var t_ms  = tm.triage  || 0;
-  var r_ms  = tm.risk    || 0;
-  var rp_ms = tm.report  || 0;
-  var total = t_ms + r_ms + rp_ms || 1;
+  var gi_ms = tm.guardrail_input  || 0;
+  var t_ms  = tm.triage           || 0;
+  var r_ms  = tm.risk             || 0;
+  var rp_ms = tm.report           || 0;
+  var go_ms = tm.guardrail_output || 0;
+  var total = gi_ms + t_ms + r_ms + rp_ms + go_ms || 1;
   function pct(ms) { return Math.max(ms / total * 100, 1).toFixed(1) + '%'; }
 
   function ioBlock(label, lines, accent) {
@@ -116,6 +118,12 @@ function buildPipeline(r) {
 
   return '<h3 style="margin-top:0">Pipeline de Execução</h3>'
     + '<div style="display:flex;align-items:stretch;gap:0;margin-bottom:14px">'
+    +   '<div style="flex:1;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px 10px;text-align:center">'
+    +     '<div style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#15803d">✓ Guardrail</div>'
+    +     '<div style="font-size:11px;color:#9ca3af;margin-top:2px">Entrada</div>'
+    +     '<div style="font-size:22px;font-weight:700;margin-top:6px;color:#14532d">' + gi_ms + 'ms</div>'
+    +   '</div>'
+    +   '<div style="display:flex;align-items:center;color:#d1d5db;font-size:20px;padding:0 6px">→</div>'
     +   '<div style="flex:1;background:#eef2ff;border:1px solid #a5b4fc;border-radius:8px;padding:12px 10px;text-align:center">'
     +     '<div style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#4338ca">① Triagem</div>'
     +     '<div style="font-size:11px;color:#9ca3af;margin-top:2px">Claude Haiku</div>'
@@ -133,8 +141,14 @@ function buildPipeline(r) {
     +     '<div style="font-size:11px;color:#9ca3af;margin-top:2px">Consolidação (sem LLM)</div>'
     +     '<div style="font-size:22px;font-weight:700;margin-top:6px;color:#064e3b">' + rp_ms + 'ms</div>'
     +   '</div>'
+    +   '<div style="display:flex;align-items:center;color:#d1d5db;font-size:20px;padding:0 6px">→</div>'
+    +   '<div style="flex:1;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px 10px;text-align:center">'
+    +     '<div style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#15803d">✓ Guardrail</div>'
+    +     '<div style="font-size:11px;color:#9ca3af;margin-top:2px">Saída</div>'
+    +     '<div style="font-size:22px;font-weight:700;margin-top:6px;color:#14532d">' + go_ms + 'ms</div>'
+    +   '</div>'
     + '</div>'
-    + ['Triagem,#818cf8,' + t_ms, 'Risco,#fbbf24,' + r_ms, 'Relatório,#34d399,' + rp_ms].map(function(s) {
+    + ['Guardrail entrada,#4ade80,' + gi_ms, 'Triagem,#818cf8,' + t_ms, 'Risco,#fbbf24,' + r_ms, 'Relatório,#34d399,' + rp_ms, 'Guardrail saída,#4ade80,' + go_ms].map(function(s) {
         var p = s.split(','); var label = p[0], color = p[1], ms = parseInt(p[2]);
         return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">'
           + '<span style="font-size:11px;font-weight:600;color:' + color + ';width:72px;text-align:right">' + label + '</span>'
@@ -166,7 +180,7 @@ function _populateModal(r) {
   var timings = r.timings_ms || {};
   document.getElementById('m-meta').textContent =
     'id: ' + (r.id || '-') + ' · trace_id: ' + (r.trace_id || '-') +
-    ' · total ' + ((timings.triage || 0) + (timings.risk || 0) + (timings.report || 0)) + 'ms';
+    ' · total ' + ((timings.guardrail_input || 0) + (timings.triage || 0) + (timings.risk || 0) + (timings.report || 0) + (timings.guardrail_output || 0)) + 'ms';
   document.getElementById('m-texto').textContent        = r.texto_original || '';
   document.getElementById('m-category').textContent     = r.category || '-';
   document.getElementById('m-product').textContent      = r.product || '-';
