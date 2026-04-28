@@ -255,15 +255,15 @@ async def batch(file: UploadFile = File(...)) -> JSONResponse:
             throttle_rate * 100, pass_elapsed, throughput_rpm,
         )
 
-        # AIMD: ajusta workers e delay para o próximo passe
-        if throttle_rate > 0.20:
+        # AIMD: qualquer throttling > 5% já é sinal de congestionamento em contas com quota baixa
+        if throttle_rate > 0.05:
             workers = max(1, workers // 2)
             delay   = round(delay + 1.0, 2)
             logger.info("AIMD ↓ throttle=%.0f%% → workers=%d delay=%.2fs", throttle_rate * 100, workers, delay)
-        elif throttle_rate < 0.05 and throttled_count == 0:
+        elif throttled_count == 0:
             workers = min(settings.BATCH_MAX_WORKERS, workers + 1)
             delay   = round(max(0.0, delay - 0.5), 2)
-            logger.info("AIMD ↑ throttle=%.0f%% → workers=%d delay=%.2fs", throttle_rate * 100, workers, delay)
+            logger.info("AIMD ↑ throttle=0%% → workers=%d delay=%.2fs", workers, delay)
 
         retries = max(0, retries - 1)
         pending = next_pending
