@@ -142,7 +142,8 @@ e `delay -= 0.5s`. O algoritmo persiste entre passes dentro de um batch.
 | GET | `/traces` | Log de execuções + estatísticas |
 | GET | `/output/{filename}` | Serve arquivos de output |
 | GET | `/api/record/{id}` | Retorna registro por ID (usado pelo modal) |
-| POST | `/admin/rebuild-index` | Reconstrói índice FAISS |
+| POST | `/ingest` | Dispara re-ingestão RAG em background |
+| GET  | `/ingest/status` | Estado atual da ingestão |
 
 ### Decisões de arquitetura
 
