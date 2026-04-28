@@ -15,7 +15,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from .graph import analyze, clear_traces, get_traces, inject_trace
+from .graph import analyze, clear_traces, get_traces, inject_trace, sum_timings
 from .helpers import bar_width_px, compute_stats, count_output_files, pill_html, rag_vector_count
 from .models import AnalyzeRequest
 from .profanity import mask as mask_profanity
@@ -465,13 +465,7 @@ def traces_recompose(stem: str) -> JSONResponse:
             "urgency":      item.get("urgency"),
             "risk_level":   item.get("risk_level"),
             "timings_ms":   tm,
-            "total_ms": (
-                (tm.get("guardrail_input") or 0)
-                + (tm.get("triage") or 0)
-                + (tm.get("risk") or 0)
-                + (tm.get("report") or 0)
-                + (tm.get("guardrail_output") or 0)
-            ),
+            "total_ms": sum_timings(tm),
         })
 
     return JSONResponse({"status": "ok", "recomposed": len(items)})

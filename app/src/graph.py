@@ -32,6 +32,16 @@ def _now_ms() -> int:
     return int(time.time() * 1000)
 
 
+def sum_timings(tm: dict) -> int:
+    return (
+        (tm.get("guardrail_input") or 0)
+        + (tm.get("triage") or 0)
+        + (tm.get("risk") or 0)
+        + (tm.get("report") or 0)
+        + (tm.get("guardrail_output") or 0)
+    )
+
+
 # ── Nó 0: Guardrail de entrada ────────────────────────────────────────────────
 
 def _node_guardrail_input(state: AnalysisState) -> AnalysisState:
@@ -174,13 +184,7 @@ def _store_trace(trace_id: str, text: str, result: dict) -> None:
         "urgency":      result.get("urgency"),
         "risk_level":   result.get("risk_level"),
         "timings_ms":   tm,
-        "total_ms": (
-            (tm.get("guardrail_input") or 0)
-            + (tm.get("triage") or 0)
-            + (tm.get("risk") or 0)
-            + (tm.get("report") or 0)
-            + (tm.get("guardrail_output") or 0)
-        ),
+        "total_ms": sum_timings(tm),
     })
 
 
