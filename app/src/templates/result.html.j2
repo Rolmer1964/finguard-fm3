@@ -47,7 +47,8 @@
 </style>
 </head>
 <body>
-<a href="/">&larr; Voltar</a> &nbsp; <a href="/traces">Log de execuções →</a>
+{% set active = 'result' %}
+{% include '_header.html.j2' %}
 <h1>Resultado da análise</h1>
 
 <div class="card">

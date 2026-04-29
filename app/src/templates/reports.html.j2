@@ -17,7 +17,6 @@
   tr:hover td { background:#f0f9ff; }
   a { color:#2563eb; text-decoration:none; }
   a:hover { text-decoration:underline; }
-  nav { display:flex; gap:12px; font-size:13px; margin-bottom:16px; }
   .dl-btn { color:white; padding:3px 10px; border-radius:4px; font-size:12px;
             text-decoration:none; white-space:nowrap; }
   .dl-none { color:#d1d5db; white-space:nowrap; }
@@ -29,11 +28,8 @@
 </style>
 </head>
 <body>
-<nav>
-  <a href="/">← Voltar</a>
-  <a href="/traces">Log de execuções</a>
-  <a href="/admin" style="color:#6b7280">Admin</a>
-</nav>
+{% set active = 'reports' %}
+{% include '_header.html.j2' %}
 <h1>Relatórios gerados</h1>
 <span class="muted">{{ total }} relatório(s) em /output — ordenados do mais recente para o mais antigo.</span>
 <table>

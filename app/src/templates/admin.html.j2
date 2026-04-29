@@ -40,12 +40,8 @@
 </style>
 </head>
 <body>
-<nav style="display:flex;gap:12px;font-size:13px;margin-bottom:16px">
-  <a href="/" style="color:#2563eb;text-decoration:none">← Voltar</a>
-  <a href="/reports" style="color:#2563eb;text-decoration:none">Relatórios</a>
-  <a href="/traces" style="color:#2563eb;text-decoration:none">Log</a>
-  <a href="/adr" style="color:#2563eb;text-decoration:none">ADR</a>
-</nav>
+{% set active = 'admin' %}
+{% include '_header.html.j2' %}
 <h1 style="margin-top:4px">Painel Administrativo</h1>
 <p class="muted">Gerenciamento de estado do FinGuard. Use antes ou após apresentações.</p>
 

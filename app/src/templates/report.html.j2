@@ -31,12 +31,8 @@
 </head>
 <body>
 
-<div style="margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:13px">
-  <a href="/"        style="color:#2563eb;text-decoration:none">← Voltar</a>
-  <a href="/reports" style="color:#2563eb;text-decoration:none">Relatórios</a>
-  <a href="/traces"  style="color:#2563eb;text-decoration:none">Log de execuções</a>
-  <a href="/admin"   style="color:#6b7280;text-decoration:none">Admin</a>
-</div>
+{% set active = 'report' %}
+{% include '_header.html.j2' %}
 
 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
   <div>

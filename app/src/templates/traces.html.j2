@@ -17,7 +17,6 @@
   tr:hover td { background:#f0f9ff; }
   a { color:#2563eb; text-decoration:none; }
   a:hover { text-decoration:underline; }
-  nav { display:flex; gap:12px; font-size:13px; margin-bottom:16px; }
   .legend { display:flex; gap:16px; margin-bottom:12px; font-size:12px; color:#6b7280; }
   .dot { display:inline-block; width:10px; height:10px; border-radius:2px;
          margin-right:4px; vertical-align:middle; }
@@ -27,11 +26,8 @@
 </head>
 <body>
 
-<nav>
-  <a href="/">← Voltar</a>
-  <a href="/reports">Relatórios</a>
-  <a href="/admin" style="color:#6b7280">Admin</a>
-</nav>
+{% set active = 'traces' %}
+{% include '_header.html.j2' %}
 <h1>Log de Execuções — {{ count }} registro(s)</h1>
 <span class="muted">Em memória desde o último restart. Logs completos estão no console (stdout).</span>
 
