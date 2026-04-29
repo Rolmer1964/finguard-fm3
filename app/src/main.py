@@ -382,7 +382,11 @@ def admin_reset(target: str = "all") -> JSONResponse:
 @app.get("/reports", response_class=HTMLResponse)
 def reports_page(request: Request):
     out_dir    = Path(settings.OUTPUT_DIR)
-    html_files = sorted(out_dir.glob("*.html"), reverse=True)
+    json_files = sorted(
+        [f for f in out_dir.glob("report_*.json") if not f.name.endswith(".meta.json")],
+        reverse=True,
+    )
+
     def _read_meta(stem: str) -> dict:
         meta = out_dir / f"{stem}.meta.json"
         if meta.exists():
@@ -393,23 +397,26 @@ def reports_page(request: Request):
         return {}
 
     def _report_entry(f: Path) -> dict:
-        meta = _read_meta(f.stem)
+        meta  = _read_meta(f.stem)
+        html  = out_dir / f"{f.stem}.html"
+        size  = html.stat().st_size if html.exists() else f.stat().st_size
         return {
             "stem":       f.stem,
             "ts_display": f.stem,
-            "size_kb":    round(f.stat().st_size / 1024, 1),
-            "has_json":   (out_dir / f"{f.stem}.json").exists(),
+            "size_kb":    round(size / 1024, 1),
+            "has_html":   html.exists(),
+            "has_json":   True,
             "has_csv":    (out_dir / f"{f.stem}.csv").exists(),
             "has_md":     (out_dir / f"{f.stem}.md").exists(),
             "label":      meta.get("label", ""),
             "filename":   meta.get("filename", ""),
         }
 
-    reports = [_report_entry(f) for f in html_files]
+    reports = [_report_entry(f) for f in json_files]
     return templates.TemplateResponse("reports.html.j2", {
         "request": request,
         "reports": reports,
-        "total":   len(html_files),
+        "total":   len(json_files),
     })
 
 
