@@ -1,0 +1,22 @@
+{
+  "label": "Regex para anonimizar nomes V2",
+  "filename": "teste_sanitizacao_pii.csv",
+  "started_at": "2026-04-28 20:37:36 (UTC-3)",
+  "finished_at": "2026-04-28 20:38:21 (UTC-3)",
+  "elapsed_s": 44.600159883499146,
+  "pass_stats": [
+    {
+      "pass_num": 1,
+      "workers": 2,
+      "delay_s": 1.0,
+      "retries": 2,
+      "total": 8,
+      "success": 8,
+      "throttled": 0,
+      "throttle_rate": 0.0,
+      "throttle_pct": 0.0,
+      "duration_s": 44.6,
+      "throughput_rpm": 10.8
+    }
+  ]
+}
