@@ -8,7 +8,7 @@ import logging
 import threading
 import time
 from contextlib import asynccontextmanager
-from datetime import datetime as _dt, timedelta, timezone
+from datetime import datetime as _dt
 from pathlib import Path
 
 from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, Request, UploadFile
@@ -24,12 +24,11 @@ from .profanity import mask as mask_profanity
 from .rag.ingest import ingest_all
 from .rag.retriever import _store as _rag_store
 from .report_writer import build_report_context, write_outputs
-from .settings import settings
+from .settings import now_brt, settings
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 logger = logging.getLogger("app")
 
-_TZ_BRT = timezone(timedelta(hours=-3))
 
 _LEVEL_STYLE = {
     "crít": "color:#991b1b;font-weight:600", "alt": "color:#9a3412;font-weight:600",
@@ -159,8 +158,8 @@ async def batch(file: UploadFile = File(...), label: str = Form("")) -> JSONResp
         })
 
     t_start    = time.time()
-    started_at = _dt.now(_TZ_BRT).strftime("%Y-%m-%d %H:%M:%S (UTC-3)")
-    stem       = _dt.utcnow().strftime("report_%Y-%m-%d-%H-%M-%S")
+    started_at = now_brt().strftime("%Y-%m-%d %H:%M:%S (UTC-3)")
+    stem       = now_brt().strftime("report_%Y-%m-%d-%H-%M-%S")
     csv_name   = file.filename or None
 
     def _run_batch() -> str:
@@ -290,7 +289,7 @@ async def batch(file: UploadFile = File(...), label: str = Form("")) -> JSONResp
         if failed_path.exists() and not pending:
             failed_path.unlink()
 
-        finished_at = _dt.now(_TZ_BRT).strftime("%Y-%m-%d %H:%M:%S (UTC-3)")
+        finished_at = now_brt().strftime("%Y-%m-%d %H:%M:%S (UTC-3)")
         elapsed_s   = time.time() - t_start
         paths = write_outputs(
             all_results, stem=stem,

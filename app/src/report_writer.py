@@ -1,12 +1,11 @@
 import csv
 import json
 from collections import Counter
-from datetime import datetime
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from .settings import settings
+from .settings import now_brt, settings
 
 _env = Environment(
     loader=FileSystemLoader(str(Path(__file__).parent / "templates")),
@@ -45,7 +44,7 @@ def _render_md(items: list[dict], totals: dict, critical: list, recs: list[str])
     lines = [
         "# FinGuard — Relatório Gerencial (Nível 3)",
         "",
-        f"_Gerado em {datetime.utcnow().isoformat(timespec='seconds')}Z_",
+        f"_Gerado em {now_brt().isoformat(timespec='seconds')}_",
         "",
         "## Resumo",
         f"- Total de reclamações: **{len(items)}**",
@@ -104,7 +103,7 @@ def build_report_context(results: list[dict], meta: dict | None = None) -> dict:
         "by_sentiment": by_sentiment,
         "by_canal": by_canal,
         "recommendations": recs,
-        "generated_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "generated_at": now_brt().isoformat(timespec="seconds"),
         "started_at": meta.get("started_at", "—"),
         "finished_at": meta.get("finished_at", "—"),
         "elapsed_s": elapsed_s,
@@ -126,7 +125,7 @@ def write_outputs(
     """Grava JSON, CSV, MD e HTML com os resultados de uma execução em batch."""
     out_dir = Path(settings.OUTPUT_DIR)
     out_dir.mkdir(parents=True, exist_ok=True)
-    stem = stem or f"relatorio-{datetime.utcnow().strftime('%Y%m%d-%H%M%S')}"
+    stem = stem or f"relatorio-{now_brt().strftime('%Y%m%d-%H%M%S')}"
 
     meta: dict = {}
     if label:

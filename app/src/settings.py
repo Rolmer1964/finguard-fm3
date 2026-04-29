@@ -1,4 +1,12 @@
+from datetime import datetime, timedelta, timezone
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+TZ_BRT = timezone(timedelta(hours=-3))
+
+
+def now_brt() -> datetime:
+    return datetime.now(TZ_BRT)
 
 
 class Settings(BaseSettings):

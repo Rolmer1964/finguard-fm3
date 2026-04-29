@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime
+from .settings import now_brt
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -47,7 +47,7 @@ def _rag_status() -> dict:
 
 def render_adr() -> str:
     return _env.get_template("adr.html.j2").render(
-        generated_at=datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        generated_at=now_brt().isoformat(timespec="seconds"),
         models={
             "triage": settings.BEDROCK_MODEL_TRIAGE,
             "risk": settings.BEDROCK_MODEL_RISK,

@@ -1,4 +1,3 @@
-import datetime
 import logging
 import time
 import uuid
@@ -8,6 +7,7 @@ from typing import TypedDict
 from langgraph.graph import END, StateGraph
 
 from .agents.guardrail import BLOCKED_INPUT_MESSAGE, check_input, sanitize_output
+from .settings import now_brt
 from .agents.report import consolidate
 from .agents.risk import run_risk
 from .agents.triage import run_triage
@@ -182,7 +182,7 @@ def _store_trace(trace_id: str, text: str, result: dict) -> None:
     tm = result.get("timings_ms", {})
     _traces.appendleft({
         "trace_id":     trace_id,
-        "timestamp":    datetime.datetime.now().strftime("%H:%M:%S"),
+        "timestamp":    now_brt().strftime("%H:%M:%S"),
         "text_preview": (text[:70] + "…") if len(text) > 70 else text,
         "blocked":      result.get("blocked", False),
         "category":     result.get("category"),

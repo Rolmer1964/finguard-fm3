@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from ..settings import now_brt
 from pathlib import Path
 
 import faiss
@@ -53,7 +53,7 @@ class VectorStore:
             self.index = faiss.IndexIDMap2(faiss.IndexFlatIP(self.dim))
 
     def save(self) -> None:
-        self.manifest["updated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        self.manifest["updated_at"] = now_brt().isoformat(timespec="seconds")
         self.manifest_path.write_text(json.dumps(self.manifest, ensure_ascii=False, indent=2), encoding="utf-8")
         if self.index is not None:
             faiss.write_index(self.index, str(self.faiss_path))
@@ -82,7 +82,7 @@ class VectorStore:
         self.manifest["files"][relpath] = {
             "hash": file_hash,
             "chunk_ids": ids,
-            "ingested_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "ingested_at": now_brt().isoformat(timespec="seconds"),
         }
         self.manifest["next_id"] = next_id + len(chunks)
         logger.info("adicionados %d chunks de %s (ids %d..%d)", len(chunks), relpath, ids[0], ids[-1])
