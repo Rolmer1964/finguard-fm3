@@ -148,7 +148,6 @@ def write_outputs(
     json_path = out_dir / f"{stem}.json"
     csv_path = out_dir / f"{stem}.csv"
     md_path = out_dir / f"{stem}.md"
-    html_path = out_dir / f"{stem}.html"
 
     json_path.write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -165,7 +164,4 @@ def write_outputs(
 
     md_path.write_text(_render_md(results, totals, ctx["critical"], ctx["recommendations"]), encoding="utf-8")
 
-    html = _env.get_template("report.html.j2").render(stem=stem, **ctx)
-    html_path.write_text(html, encoding="utf-8")
-
-    return {"json": str(json_path), "csv": str(csv_path), "md": str(md_path), "html": str(html_path)}
+    return {"json": str(json_path), "csv": str(csv_path), "md": str(md_path)}

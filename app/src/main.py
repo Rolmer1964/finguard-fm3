@@ -397,14 +397,11 @@ def reports_page(request: Request):
         return {}
 
     def _report_entry(f: Path) -> dict:
-        meta  = _read_meta(f.stem)
-        html  = out_dir / f"{f.stem}.html"
-        size  = html.stat().st_size if html.exists() else f.stat().st_size
+        meta = _read_meta(f.stem)
         return {
             "stem":       f.stem,
             "ts_display": f.stem,
-            "size_kb":    round(size / 1024, 1),
-            "has_html":   html.exists(),
+            "size_kb":    round(f.stat().st_size / 1024, 1),
             "has_json":   True,
             "has_csv":    (out_dir / f"{f.stem}.csv").exists(),
             "has_md":     (out_dir / f"{f.stem}.md").exists(),
