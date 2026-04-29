@@ -331,10 +331,9 @@ async def batch(file: UploadFile = File(...), label: str = Form("")) -> JSONResp
             started_at=started_at, finished_at=finished_at, elapsed_s=elapsed_s,
             pass_stats=pass_stats, label=label or None, filename=csv_name,
         )
-        return Path(paths["html"]).name
+        return Path(paths["json"]).stem
 
-    html_name = await asyncio.to_thread(_run_batch)
-    stem = html_name.removesuffix(".html")
+    stem = await asyncio.to_thread(_run_batch)
     return RedirectResponse(url=f"/report/{stem}", status_code=303)
 
 

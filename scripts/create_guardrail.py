@@ -1,23 +1,35 @@
 """
-Provisiona o Bedrock Guardrail do FinGuard (Nível 3) — execute UMA VEZ.
+Provisiona os Bedrock Guardrails do FinGuard (Nível 3) — dois guardrails separados.
+
+  Guardrail de ENTRADA: bloqueia prompt injection, ameaças e conteúdo fora de escopo. Sem PII.
+  Guardrail de SAÍDA:   anonimiza PII e garante tom neutro nas respostas dos agentes.
 
 Uso:
-    python scripts/create_guardrail.py [--region us-east-1]
-    python scripts/create_guardrail.py --update  <id>
+    python scripts/create_guardrail.py                            # cria AMBOS
+    python scripts/create_guardrail.py --update <id> --target input|output
     python scripts/create_guardrail.py --publish <id>
     python scripts/create_guardrail.py --delete  <id>
     python scripts/create_guardrail.py --list
 
-Copie GUARDRAIL_ID e GUARDRAIL_VERSION para o .env e reinicie o container.
+Após criar, adicione ao .env e reinicie o container:
+    GUARDRAIL_ID=<id-entrada>
+    GUARDRAIL_VERSION=DRAFT
+    GUARDRAIL_ID_OUTPUT=<id-saida>
+    GUARDRAIL_VERSION_OUTPUT=DRAFT
 """
 
 import argparse
 
 import boto3
 
-_NAME        = "finguard-guardrail-v3"
-_DESCRIPTION = "Guardrail do FinGuard — bloqueia prompt injection, conteúdo inválido e dados sensíveis."
-_BLOCKED_INPUT  = (
+# ── Nomes e mensagens ──────────────────────────────────────────────────────────
+
+_NAME_INPUT  = "finguard-guardrail-input"
+_NAME_OUTPUT = "finguard-guardrail-output"
+_DESC_INPUT  = "FinGuard — entrada: bloqueia prompt injection, ameaças e conteúdo inválido."
+_DESC_OUTPUT = "FinGuard — saída: anonimiza PII e garante tom neutro nas respostas."
+
+_BLOCKED_INPUT = (
     "Esta entrada não pode ser processada pelo FinGuard. "
     "O sistema está disponível exclusivamente para análise de reclamações bancárias de clientes. "
     "Por favor, envie o texto de uma reclamação válida."
@@ -28,7 +40,9 @@ _BLOCKED_OUTPUT = (
 )
 
 
-def _topic_policy() -> dict:
+# ── Políticas do guardrail de ENTRADA ─────────────────────────────────────────
+
+def _topic_policy_input() -> dict:
     return {
         "topicsConfig": [
             {
@@ -67,19 +81,35 @@ def _topic_policy() -> dict:
     }
 
 
-def _content_policy() -> dict:
+def _content_policy_input() -> dict:
+    # outputStrength=NONE: este guardrail só é usado com source=INPUT.
+    # VIOLENCE=LOW: frustração hiperbólica ("vou jogar uma bomba") não é bloqueada;
+    # ameaças reais são cobertas pelo tópico negado AmeacasDiretas.
     return {
         "filtersConfig": [
-            {"type": "HATE",       "inputStrength": "HIGH",   "outputStrength": "HIGH"},
-            {"type": "INSULTS",    "inputStrength": "MEDIUM", "outputStrength": "HIGH"},
-            {"type": "SEXUAL",     "inputStrength": "HIGH",   "outputStrength": "HIGH"},
-            {"type": "VIOLENCE",   "inputStrength": "HIGH",   "outputStrength": "HIGH"},
-            {"type": "MISCONDUCT", "inputStrength": "LOW",    "outputStrength": "HIGH"},
+            {"type": "HATE",         "inputStrength": "HIGH",   "outputStrength": "NONE"},
+            {"type": "INSULTS",      "inputStrength": "MEDIUM", "outputStrength": "NONE"},
+            {"type": "SEXUAL",       "inputStrength": "HIGH",   "outputStrength": "NONE"},
+            {"type": "VIOLENCE",     "inputStrength": "LOW",    "outputStrength": "NONE"},
+            {"type": "MISCONDUCT",   "inputStrength": "LOW",    "outputStrength": "NONE"},
+            {"type": "PROMPT_ATTACK","inputStrength": "HIGH",   "outputStrength": "NONE"},
         ]
     }
 
 
-def _sensitive_policy() -> dict:
+# ── Políticas do guardrail de SAÍDA ───────────────────────────────────────────
+
+def _content_policy_output() -> dict:
+    # inputStrength=NONE: este guardrail só é usado com source=OUTPUT
+    return {
+        "filtersConfig": [
+            {"type": "HATE",    "inputStrength": "NONE", "outputStrength": "HIGH"},
+            {"type": "INSULTS", "inputStrength": "NONE", "outputStrength": "HIGH"},
+        ]
+    }
+
+
+def _sensitive_policy_output() -> dict:
     return {
         "piiEntitiesConfig": [
             {"type": "CREDIT_DEBIT_CARD_NUMBER", "action": "ANONYMIZE"},
@@ -104,42 +134,67 @@ def _sensitive_policy() -> dict:
     }
 
 
+# ── Operações ──────────────────────────────────────────────────────────────────
+
 def create(region: str) -> None:
     client = boto3.client("bedrock", region_name=region)
-    resp = client.create_guardrail(
-        name=_NAME,
-        description=_DESCRIPTION,
-        topicPolicyConfig=_topic_policy(),
-        contentPolicyConfig=_content_policy(),
-        sensitiveInformationPolicyConfig=_sensitive_policy(),
+
+    r_in = client.create_guardrail(
+        name=_NAME_INPUT,
+        description=_DESC_INPUT,
+        topicPolicyConfig=_topic_policy_input(),
+        contentPolicyConfig=_content_policy_input(),
         blockedInputMessaging=_BLOCKED_INPUT,
         blockedOutputsMessaging=_BLOCKED_OUTPUT,
     )
-    gid = resp["guardrailId"]
-    print(f"\nGuardrail criado com sucesso!")
-    print(f"  ID:     {gid}")
-    print(f"  ARN:    {resp['guardrailArn']}")
+    gid_in = r_in["guardrailId"]
+
+    r_out = client.create_guardrail(
+        name=_NAME_OUTPUT,
+        description=_DESC_OUTPUT,
+        contentPolicyConfig=_content_policy_output(),
+        sensitiveInformationPolicyConfig=_sensitive_policy_output(),
+        blockedInputMessaging=_BLOCKED_INPUT,
+        blockedOutputsMessaging=_BLOCKED_OUTPUT,
+    )
+    gid_out = r_out["guardrailId"]
+
+    print("\nGuardrails criados com sucesso!")
+    print(f"\n  [INPUT]   ID: {gid_in}")
+    print(f"  [OUTPUT]  ID: {gid_out}")
     print(f"\nAdicione ao .env:")
-    print(f"  GUARDRAIL_ID={gid}")
+    print(f"  GUARDRAIL_ID={gid_in}")
     print(f"  GUARDRAIL_VERSION=DRAFT")
-    print(f"\nPara publicar uma versão:")
-    print(f"  python scripts/create_guardrail.py --publish {gid}")
+    print(f"  GUARDRAIL_ID_OUTPUT={gid_out}")
+    print(f"  GUARDRAIL_VERSION_OUTPUT=DRAFT")
+    print(f"\nPara publicar versões:")
+    print(f"  python scripts/create_guardrail.py --publish {gid_in}")
+    print(f"  python scripts/create_guardrail.py --publish {gid_out}")
 
 
-def update(region: str, guardrail_id: str) -> None:
+def update(region: str, guardrail_id: str, target: str) -> None:
     client = boto3.client("bedrock", region_name=region)
-    client.update_guardrail(
-        guardrailIdentifier=guardrail_id,
-        name=_NAME,
-        description=_DESCRIPTION,
-        topicPolicyConfig=_topic_policy(),
-        contentPolicyConfig=_content_policy(),
-        sensitiveInformationPolicyConfig=_sensitive_policy(),
-        blockedInputMessaging=_BLOCKED_INPUT,
-        blockedOutputsMessaging=_BLOCKED_OUTPUT,
-    )
-    print(f"Guardrail {guardrail_id} atualizado.")
-    print(f"  GUARDRAIL_VERSION=DRAFT  (republique se necessário)")
+    if target == "input":
+        client.update_guardrail(
+            guardrailIdentifier=guardrail_id,
+            name=_NAME_INPUT,
+            description=_DESC_INPUT,
+            topicPolicyConfig=_topic_policy_input(),
+            contentPolicyConfig=_content_policy_input(),
+            blockedInputMessaging=_BLOCKED_INPUT,
+            blockedOutputsMessaging=_BLOCKED_OUTPUT,
+        )
+    else:
+        client.update_guardrail(
+            guardrailIdentifier=guardrail_id,
+            name=_NAME_OUTPUT,
+            description=_DESC_OUTPUT,
+            contentPolicyConfig=_content_policy_output(),
+            sensitiveInformationPolicyConfig=_sensitive_policy_output(),
+            blockedInputMessaging=_BLOCKED_INPUT,
+            blockedOutputsMessaging=_BLOCKED_OUTPUT,
+        )
+    print(f"Guardrail {guardrail_id} ({target}) atualizado. GUARDRAIL_VERSION=DRAFT")
 
 
 def publish(region: str, guardrail_id: str) -> None:
@@ -150,8 +205,7 @@ def publish(region: str, guardrail_id: str) -> None:
     )
     version = resp["version"]
     print(f"\nVersão publicada: {version}")
-    print(f"  GUARDRAIL_ID={guardrail_id}")
-    print(f"  GUARDRAIL_VERSION={version}")
+    print(f"  ID={guardrail_id}  VERSION={version}")
 
 
 def delete(region: str, guardrail_id: str) -> None:
@@ -177,9 +231,11 @@ def list_guardrails(region: str) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Gerencia o Bedrock Guardrail do FinGuard")
+    parser = argparse.ArgumentParser(description="Gerencia os Bedrock Guardrails do FinGuard")
     parser.add_argument("--region",  default="us-east-1")
-    parser.add_argument("--update",  metavar="ID", help="Atualiza o guardrail com a config atual")
+    parser.add_argument("--update",  metavar="ID", help="Atualiza o guardrail pelo ID")
+    parser.add_argument("--target",  choices=["input", "output"], default="input",
+                        help="Qual guardrail atualizar: input ou output (padrão: input)")
     parser.add_argument("--delete",  metavar="ID", help="Remove o guardrail pelo ID")
     parser.add_argument("--publish", metavar="ID", help="Publica uma versão do guardrail")
     parser.add_argument("--list",    action="store_true", help="Lista guardrails existentes")
@@ -192,6 +248,6 @@ if __name__ == "__main__":
     elif args.publish:
         publish(args.region, args.publish)
     elif args.update:
-        update(args.region, args.update)
+        update(args.region, args.update, args.target)
     else:
         create(args.region)

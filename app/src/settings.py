@@ -28,8 +28,10 @@ class Settings(BaseSettings):
     OUTPUT_DIR: str = "/app/output"
 
     # ---- Bedrock Guardrails (Nível 3) ----
-    GUARDRAIL_ID: str | None = None
+    GUARDRAIL_ID: str | None = None           # guardrail de entrada (injection, ameaças)
     GUARDRAIL_VERSION: str = "DRAFT"
+    GUARDRAIL_ID_OUTPUT: str | None = None    # guardrail de saída (PII + tom)
+    GUARDRAIL_VERSION_OUTPUT: str = "DRAFT"
 
     # ---- Batch paralelo ----
     BATCH_MAX_WORKERS: int = 5

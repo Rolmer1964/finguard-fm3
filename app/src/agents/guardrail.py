@@ -63,11 +63,19 @@ def _bedrock_runtime():
 
 
 def _apply(source: str, text: str) -> dict:
-    """Chama Bedrock apply_guardrail e devolve {"action", "outputs", "assessments"}."""
+    """Chama Bedrock apply_guardrail e devolve {"action", "outputs", "assessments"}.
+    source=INPUT usa GUARDRAIL_ID; source=OUTPUT usa GUARDRAIL_ID_OUTPUT (fallback para GUARDRAIL_ID).
+    """
+    if source == "OUTPUT" and settings.GUARDRAIL_ID_OUTPUT:
+        gid     = settings.GUARDRAIL_ID_OUTPUT
+        gver    = settings.GUARDRAIL_VERSION_OUTPUT
+    else:
+        gid     = settings.GUARDRAIL_ID
+        gver    = settings.GUARDRAIL_VERSION
     client = _bedrock_runtime()
     resp = client.apply_guardrail(
-        guardrailIdentifier=settings.GUARDRAIL_ID,
-        guardrailVersion=settings.GUARDRAIL_VERSION,
+        guardrailIdentifier=gid,
+        guardrailVersion=gver,
         source=source,
         content=[{"text": {"text": text}}],
     )
@@ -97,8 +105,8 @@ def check_input(text: str) -> dict:
     """
     Valida o texto de entrada antes de entrar no pipeline.
     Retorna {"blocked": bool, "reason": str | None, "sanitized_text": str}.
+    Não sanitiza PII — isso é responsabilidade do guardrail de saída.
     """
-    text = _regex_sanitize(text)
     if settings.GUARDRAIL_ID:
         try:
             r = _apply("INPUT", text)
@@ -106,9 +114,7 @@ def check_input(text: str) -> dict:
             if r["action"] == "GUARDRAIL_INTERVENED":
                 reason = _extract_block_reason(r["assessments"])
                 return {"blocked": True, "reason": "bedrock_guardrail", "block_reason": reason, "sanitized_text": text}
-            outputs = r["outputs"]
-            sanitized = outputs[0].get("text", text) if outputs else text
-            return {"blocked": False, "reason": None, "sanitized_text": sanitized}
+            return {"blocked": False, "reason": None, "sanitized_text": text}
         except Exception:
             logger.exception("erro Bedrock guardrail INPUT — fallback local")
 
@@ -136,7 +142,7 @@ def sanitize_output(text: str, field: str = "") -> str:
     if not text:
         return text
 
-    if settings.GUARDRAIL_ID:
+    if settings.GUARDRAIL_ID_OUTPUT or settings.GUARDRAIL_ID:
         try:
             r = _apply("OUTPUT", text)
             if r["action"] == "GUARDRAIL_INTERVENED":
