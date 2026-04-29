@@ -59,6 +59,7 @@
           <p id="m-risk_justification" style="white-space:pre-wrap;margin:0"></p>
         </div>
       </div>
+      <div class="m-card" id="m-security-card" style="margin-top:16px"></div>
       <div class="m-card" id="m-pipeline-card" style="margin-top:16px"></div>
       <div class="m-card">
         <h3 style="margin-top:0">JSON bruto</h3>
@@ -175,6 +176,59 @@ function buildPipeline(r) {
     + '</div>';
 }
 
+function buildSecurity(r) {
+  var isBlocked = r.category === 'Bloqueado';
+  var tm = r.timings_ms || {};
+  var gi_ms = tm.guardrail_input  || 0;
+  var go_ms = tm.guardrail_output || 0;
+  var cat   = (r.category   || '').toLowerCase();
+  var risk  = (r.risk_level || '').toLowerCase();
+  var isOutrosCritico = cat === 'outros' && (risk.startsWith('crít') || risk.startsWith('crit'));
+
+  var html = '<h3 style="margin-top:0;font-size:11px;font-weight:700;text-transform:uppercase;'
+    + 'letter-spacing:.08em;color:#6b7280;margin-bottom:12px">Fator de Segurança</h3>';
+
+  // Status do guardrail de entrada
+  if (isBlocked) {
+    html += '<div style="margin-bottom:10px">'
+      + '<span style="background:#fee2e2;color:#991b1b;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700">✗ Bloqueado pelo guardrail de entrada</span>'
+      + '</div>';
+    if (r.block_reason) {
+      var reasons = r.block_reason.split('; ');
+      html += '<div style="margin-bottom:4px;font-size:12px;color:#6b7280">Motivo:</div>'
+        + '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px">'
+        + reasons.map(function(m) {
+            return '<span style="background:#fef2f2;color:#991b1b;border:1px solid #fca5a5;'
+              + 'padding:2px 9px;border-radius:4px;font-size:12px;font-family:monospace">' + m + '</span>';
+          }).join('')
+        + '</div>';
+    }
+  } else {
+    html += '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:10px">'
+      + '<span style="background:#d1fae5;color:#065f46;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700">✓ Passou pelo guardrail</span>'
+      + '<div style="display:flex;gap:10px">'
+      + '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:5px 12px;text-align:center">'
+      + '<div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">Entrada</div>'
+      + '<div style="font-weight:700;font-size:13px;color:#374151">' + gi_ms + 'ms</div></div>'
+      + '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:5px 12px;text-align:center">'
+      + '<div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">Saída</div>'
+      + '<div style="font-weight:700;font-size:13px;color:#374151">' + go_ms + 'ms</div></div>'
+      + '</div></div>';
+  }
+
+  // Sinal Outros + Crítico
+  if (isOutrosCritico) {
+    html += '<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;'
+      + 'padding:9px 12px;font-size:13px;margin-top:4px">'
+      + '<strong style="color:#b45309">⚠ Revisar:</strong> padrão <code style="font-size:12px">Outros + risco Crítico</code> '
+      + '— o Sonnet não enquadrou o texto em nenhuma categoria bancária e escalou o risco ao máximo. '
+      + 'Indicativo de possível ataque que passou pelo guardrail e foi capturado como segunda linha de defesa.'
+      + '</div>';
+  }
+
+  return html;
+}
+
 function _populateModal(r) {
   document.getElementById('m-title').textContent = 'Detalhe — ' + r.id;
   var timings = r.timings_ms || {};
@@ -189,6 +243,7 @@ function _populateModal(r) {
   document.getElementById('m-summary').textContent      = r.summary || '-';
   document.getElementById('m-risk_level').innerHTML     = pill(r.risk_level);
   document.getElementById('m-risk_justification').textContent = r.risk_justification || '-';
+  document.getElementById('m-security-card').innerHTML  = buildSecurity(r);
   document.getElementById('m-pipeline-card').innerHTML  = buildPipeline(r);
   document.getElementById('m-json').textContent         = JSON.stringify(r, null, 2);
 }

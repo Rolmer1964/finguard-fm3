@@ -8,8 +8,10 @@ services:
     volumes:
       - ./assets/adr.html:/app/assets/adr.html:ro
       - ./assets/hackathon:/app/assets/hackathon:ro
+      - ./assets/images:/app/assets/images:ro
+      - ./assets/presentation:/app/assets/presentation:ro
       - ./assets/docs:/app/assets/docs:ro  # política interna — somente leitura no container
       - ./assets/index:/app/assets/index   # índice FAISS — persiste entre restarts
       - ./output:/app/output               # relatórios gerados — persiste entre restarts
-      - ./data:/app/data:ro
+
     restart: unless-stopped

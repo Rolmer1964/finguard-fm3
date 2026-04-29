@@ -76,7 +76,7 @@
 <table>
   <thead>
     <tr>
-      <th>ID</th><th>Hora</th><th>Texto (preview)</th>
+      <th>ID</th><th>Texto (preview)</th>
       <th>Categoria</th><th>Urgência</th><th>Risco</th>
       <th>Tempo por Agente</th><th>Total</th>
     </tr>
@@ -86,7 +86,6 @@
       {% for t in traces %}
       <tr class="clickable" onclick="openDetail('{{ t.trace_id }}')"{% if t.blocked %} style="background:#fff5f5"{% endif %}>
         <td><code>{{ t.trace_id }}</code></td>
-        <td>{{ t.timestamp }}</td>
         <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">
           {% if t.blocked %}
             <span style="background:#dc2626;color:white;font-size:10px;padding:2px 6px;
@@ -127,7 +126,7 @@
       {% endfor %}
     {% else %}
       <tr>
-        <td colspan="8" style="text-align:center;padding:32px;color:#9ca3af">
+        <td colspan="7" style="text-align:center;padding:32px;color:#9ca3af">
           Nenhuma execução ainda. Analise uma reclamação para ver o log.
         </td>
       </tr>

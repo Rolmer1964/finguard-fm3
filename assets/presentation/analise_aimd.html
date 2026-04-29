@@ -61,6 +61,13 @@
 </head>
 <body>
 
+<a href="/adr#throttle-adaptivo"
+   style="display:inline-flex;align-items:center;gap:6px;margin-bottom:16px;font-size:13px;
+          color:#1e40af;text-decoration:none;padding:5px 12px;border:1px solid #bfdbfe;
+          border-radius:6px;background:#eff6ff">
+  ← ADR-001 · seção Throttle Adaptivo
+</a>
+
 <h1>FinGuard — Controle Adaptivo de Throttling (AIMD)</h1>
 <div class="meta">
   Future Minds 3 · Nível 3 · Grupo 23TB · Abril 2026 &nbsp;·&nbsp;
@@ -224,10 +231,8 @@
   </tbody>
 </table>
 
-<div class="screenshot-box">
-  📸 <strong>INSERIR AQUI:</strong> print do gráfico de passes do Batch 0<br>
-  <span style="font-size:12px">(workers=5 constante nos 3 passes · throttle 13%→15%→0% sem ajuste)</span>
-</div>
+<img src="/assets/images/graph-batch-0.png" alt="Batch 0 — 3 passes, workers fixos em 5"
+     style="max-width:100%;display:block;margin:0 auto;border-radius:6px;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.08)">
 
 <h3>Latência por etapa — registros processados (74 desbloqueados)</h3>
 <table>
@@ -300,10 +305,8 @@
   </tbody>
 </table>
 
-<div class="screenshot-box">
-  📸 <strong>INSERIR AQUI:</strong> print do gráfico de passes do Batch 1<br>
-  <span style="font-size:12px">(barras: sucesso/throttled por passe · linhas: taxa de throttle % e workers)</span>
-</div>
+<img src="/assets/images/graph-batch-1.png" alt="Batch 1 — 2 passes, convergência 5→2 workers"
+     style="max-width:100%;display:block;margin:0 auto;border-radius:6px;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.08)">
 
 <h3>Latência por etapa — registros processados com sucesso</h3>
 <table>
@@ -370,10 +373,8 @@
   </tbody>
 </table>
 
-<div class="screenshot-box">
-  📸 <strong>INSERIR AQUI:</strong> print do gráfico de passes do Batch 2<br>
-  <span style="font-size:12px">(passe único · throttle 0% · workers estável em 2)</span>
-</div>
+<img src="/assets/images/graph-batch-2.png" alt="Batch 2 — passe único, 0% throttle"
+     style="max-width:100%;display:block;margin:0 auto;border-radius:6px;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.08)">
 
 <h3>Latência por etapa — registros processados com sucesso</h3>
 <table>
@@ -465,9 +466,25 @@
   é o "preço" de zero throttling, zero retries e latência previsível.
 </p>
 
-<div class="screenshot-box">
-  📸 <strong>INSERIR AQUI:</strong> print comparativo — relatório Batch 0 e/ou Batch 1 lado a lado com Batch 2<br>
-  <span style="font-size:12px">(foco no card de KPIs e na seção de passes de cada relatório)</span>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0">
+  <div style="text-align:center">
+    <img src="/assets/images/graph-batch-0.png" alt="Batch 0"
+         style="max-width:100%;border-radius:6px;border:1px solid #fca5a5;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+    <div style="font-size:11px;font-weight:700;color:#991b1b;margin-top:6px">Batch 0 — sem ajuste</div>
+    <div style="font-size:11px;color:var(--muted)">3 passes · workers fixos em 5</div>
+  </div>
+  <div style="text-align:center">
+    <img src="/assets/images/graph-batch-1.png" alt="Batch 1"
+         style="max-width:100%;border-radius:6px;border:1px solid #fcd34d;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+    <div style="font-size:11px;font-weight:700;color:#b45309;margin-top:6px">Batch 1 — convergência</div>
+    <div style="font-size:11px;color:var(--muted)">2 passes · 5→2 workers</div>
+  </div>
+  <div style="text-align:center">
+    <img src="/assets/images/graph-batch-2.png" alt="Batch 2"
+         style="max-width:100%;border-radius:6px;border:1px solid #86efac;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+    <div style="font-size:11px;font-weight:700;color:#065f46;margin-top:6px">Batch 2 — regime estável</div>
+    <div style="font-size:11px;color:var(--muted)">1 passe · 0% throttle</div>
+  </div>
 </div>
 
 <!-- ══ INSIGHT ══ -->
@@ -525,7 +542,16 @@
   sem necessidade de reconfiguração manual.
 </p>
 
-<div style="margin-top:40px;padding-top:20px;border-top:1px solid #e5e7eb;
+<div style="margin-top:24px;text-align:center">
+  <a href="/adr#throttle-adaptivo"
+     style="display:inline-flex;align-items:center;gap:6px;font-size:13px;
+            color:#1e40af;text-decoration:none;padding:5px 12px;border:1px solid #bfdbfe;
+            border-radius:6px;background:#eff6ff">
+    ← ADR-001 · seção Throttle Adaptivo
+  </a>
+</div>
+
+<div style="margin-top:24px;padding-top:20px;border-top:1px solid #e5e7eb;
             font-size:12px;color:var(--muted);text-align:center">
   FinGuard · Future Minds 3 · Nível 3 — Arquiteto da Solução · Grupo 23TB · Abril 2026
 </div>

@@ -58,9 +58,42 @@ def _run_ingest() -> None:
         logger.exception("RAG: falha na ingestão")
 
 
+def _recompose_all_traces() -> None:
+    """Reconstrói o log de execução a partir de todos os relatórios JSON salvos."""
+    out_dir = Path(settings.OUTPUT_DIR)
+    json_files = sorted(
+        [f for f in out_dir.glob("report_*.json") if not f.name.endswith(".meta.json")]
+    )  # mais antigo primeiro → mais recente termina no topo do deque
+    total = 0
+    for json_file in json_files:
+        try:
+            items = _json.loads(json_file.read_text(encoding="utf-8"))
+            if not isinstance(items, list):
+                continue
+            for item in reversed(items):
+                texto = item.get("texto_original", "")
+                tm = item.get("timings_ms", {})
+                inject_trace({
+                    "trace_id":     item.get("id", "?"),
+                    "timestamp":    item.get("timestamp", json_file.stem),
+                    "text_preview": (texto[:70] + "…") if len(texto) > 70 else texto,
+                    "blocked":      item.get("blocked", False),
+                    "category":     item.get("category"),
+                    "urgency":      item.get("urgency"),
+                    "risk_level":   item.get("risk_level"),
+                    "timings_ms":   tm,
+                    "total_ms":     sum_timings(tm),
+                })
+            total += len(items)
+        except Exception:
+            logger.exception("traces: falha ao recompor %s", json_file.name)
+    logger.info("traces: recomposição automática — %d registros de %d arquivo(s)", total, len(json_files))
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     threading.Thread(target=_run_ingest, daemon=True, name="rag-startup").start()
+    _recompose_all_traces()
     yield
 
 
@@ -73,6 +106,8 @@ templates = Jinja2Templates(directory=str(BASE / "templates"))
 templates.env.filters["tojson"] = lambda v, indent=None: Markup(_json.dumps(v, ensure_ascii=False, indent=indent))
 app.mount("/output", StaticFiles(directory=settings.OUTPUT_DIR, check_dir=False), name="output")
 app.mount("/assets/hackathon", StaticFiles(directory=str(BASE.parent / "assets" / "hackathon"), check_dir=False), name="hackathon")
+app.mount("/assets/images",        StaticFiles(directory=str(BASE.parent / "assets" / "images"),        check_dir=False), name="images")
+app.mount("/assets/presentation",  StaticFiles(directory=str(BASE.parent / "assets" / "presentation"), check_dir=False), name="presentation")
 
 _ADR_PATH = BASE.parent / "assets" / "adr.html"
 
