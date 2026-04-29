@@ -19,10 +19,12 @@ _NOME_SEQ = (
     r'[A-ZÁÉÍÓÚÂÊÎÔÛÃÕÀÈÌÒÙÇ][a-záéíóúâêîôûãõàèìòùç]+){1,5}'
 )
 _NOME_RE = re.compile(
-    rf'(?i)'
-    rf'(meu nome é\s+|nome\s*[eé:]?\s+|sou (?:o|a)\s+|'
-    rf'titular[:\s]+|portador[a]?\s+do\s+cpf\b[^,]*,\s*)'
-    rf'({_NOME_SEQ})',
+    # marcadores em grupo capturável (group 1) com flag case-insensitive;
+    # \b em "sou" evita casar dentro de palavras como "recusou"
+    r'((?i:meu nome é\s+|nome\s*[eé:]?\s+|\bsou (?:o|a)\s+|'
+    r'titular[:\s]+|portador[a]?\s+do\s+cpf\b[^,]*,\s*))'
+    # sequência do nome (group 2): case-sensitive — exige inicial maiúscula
+    + rf'({_NOME_SEQ})',
     re.UNICODE,
 )
 
