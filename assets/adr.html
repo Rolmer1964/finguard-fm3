@@ -831,6 +831,28 @@
   não são salvos em JSON e portanto não aparecem no log após restart. O modal exibe mensagem
   de orientação nesses casos.
 </div>
+
+<div class="card ok" style="margin-top:12px">
+  <strong>Evolução — navegação contextual por setas:</strong> o modal ganhou setas
+  <code>‹ ›</code> fixas nas bordas laterais (<code>position:absolute; left/right:5px</code>
+  relativo ao <code>#modal-box</code>, fora do container de scroll). A função
+  <code>openDetail(id, list)</code> aceita um segundo argumento de contexto — a tabela de
+  "Reclamações críticas" passa <code>CRITICAL</code>, a tabela completa passa <code>RECORDS</code>.
+  Teclado <code>←/→</code> também navegam. Cabeçalho (título + meta) é fixo via
+  <code>flex-shrink:0</code>; o scroll ocorre no <code>#modal-scroll</code> interno.
+</div>
+
+<div class="card ok" style="margin-top:12px">
+  <strong>Evolução — matrix Risco × Urgência no header:</strong> a cor de fundo do cabeçalho
+  do modal é derivada da soma dos scores de urgência e risco (Baixo/a=1 … Crítico/a=4),
+  produzindo uma escala de verde claro (<code>#ecfdf5</code>, score 2) a vermelho
+  (<code>#fca5a5</code>, score 8). Dois casos especiais fora da escala:
+  <ul style="margin-top:8px">
+    <li><strong>Bloqueado pelo guardrail</strong> → bg âmbar (<code>#fff7ed</code>) em todo o modal</li>
+    <li><strong>Paradoxo Baixa+Crítico</strong> → header <code>#f87171</code> + bg <code>#fee2e2</code>;
+      sinaliza que o Sonnet foi a única barreira de contenção (triage e guardrail não capturaram)</li>
+  </ul>
+</div>
 </section>
 
 <!-- ═══ POLÍTICA INTERNA ═══ -->
