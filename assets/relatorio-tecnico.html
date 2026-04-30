@@ -517,9 +517,13 @@
   </tbody>
 </table>
 <p style="font-size:13px;color:var(--muted)">
-  Quando o guardrail Bedrock retorna <code>GUARDRAIL_INTERVENED</code> em campo legítimo (falso
-  positivo de content policy), o sistema aplica apenas o regex local como fallback — garantindo
-  que CPF, conta e cartão sejam sempre mascarados independente do Bedrock.
+  Fluxo de sanitização por campo: <strong>(1)</strong> Bedrock processa e devolve
+  <code>outputs[0]["text"]</code> — texto já modificado com tokens próprios
+  (<code>{NAME}</code>, <code>{CPF_Brasileiro}</code>, <code>***</code> para profanity);
+  <strong>(2)</strong> regex local roda sobre o resultado Bedrock como camada extra;
+  <strong>(3)</strong> <code>mask_profanity()</code> aplicado em <code>texto_original</code>
+  como última defesa. Quando Bedrock intervém (<code>GUARDRAIL_INTERVENED</code>), o modal exibe
+  badge "Bedrock: &lt;campo&gt;" — indicativo de que o guardrail sanitizou ativamente aquele campo.
 </p>
 
 <h3>Defesa em Profundidade — Guardrail + Sonnet em Cascata</h3>
