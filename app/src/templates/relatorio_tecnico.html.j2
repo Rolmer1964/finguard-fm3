@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>FinGuard — Relatório Técnico de Entrega</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; color: #1f2937; line-height: 1.55; background: #f9fafb; }
+  nav { position: sticky; top: 0; background: white; border-bottom: 1px solid #e5e7eb; padding: 8px 24px; z-index: 10; }
+  nav a { margin-right: 16px; color: #2563eb; text-decoration: none; font-size: 14px; }
+  nav a:hover { text-decoration: underline; }
+  .container { max-width: 980px; margin: 0 auto; padding: 32px 24px; }
+  h1 { margin: 0 0 4px 0; }
+  .meta { color: #6b7280; margin-bottom: 24px; }
+  section { margin-bottom: 36px; }
+  h2 { border-bottom: 2px solid #2563eb; padding-bottom: 4px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { padding: 8px; border: 1px solid #e5e7eb; text-align: left; vertical-align: top; font-size: 14px; }
+  th { background: #f3f4f6; }
+  code { background: #f3f4f6; padding: 1px 6px; border-radius: 4px; font-size: 13px; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .badge.ok { background: #d1fae5; color: #065f46; }
+  .badge.warn { background: #fef3c7; color: #92400e; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .card { background: white; padding: 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  ul li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<nav>
+  <a href="#contexto">1. Contexto</a>
+  <a href="#alternativas">2. Alternativas</a>
+  <a href="#decisao">3. Decisão</a>
+  <a href="#consequencias">4. Consequências</a>
+  <a href="#custos">5. Custos</a>
+  <a href="#seguranca">6. Segurança</a>
+  <a href="#runtime">7. Runtime</a>
+</nav>
+
+<div class="container">
+<h1>Relatório Técnico de Entrega — FinGuard</h1>
+<div class="meta">Versão gerada em {{ generated_at }}</div>
+
+<section id="contexto">
+<h2>1. Contexto</h2>
+<p>Instituições financeiras processam milhares de reclamações por canais como SAC, Ouvidoria, Banco Central, Procon e redes sociais. O texto chega não-padronizado, com erros e diferentes níveis de urgência. A triagem manual é lenta, inconsistente e propensa a erros nos picos de volume.</p>
+<p>O <strong>FinGuard</strong> automatiza esse fluxo: recebe a reclamação em texto livre, valida via guardrail de entrada, classifica, avalia risco/conformidade contra a política interna (RAG) e emite payload estruturado com PII redactada.</p>
+</section>
+
+<section id="alternativas">
+<h2>2. Alternativas consideradas</h2>
+<table>
+  <thead><tr><th>Opção</th><th>Prós</th><th>Contras</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>A. LangGraph + Bedrock Runtime</strong> (escolhida)</td>
+      <td>Pipeline explícito e auditável; controle total; portável; debug local fácil; lock-in mínimo (uma camada de cliente).</td>
+      <td>Você é responsável pela orquestração e logs; precisa cuidar de retry/erros.</td>
+    </tr>
+    <tr>
+      <td><strong>B. Bedrock Agents</strong> (gerenciado AWS)</td>
+      <td>Orquestração e memória gerenciadas; integra Knowledge Bases; trace nativo no console.</td>
+      <td>Lock-in AWS; raciocínio dinâmico do LLM pode pular passos (ruim para auditoria); Action Groups exigem Lambdas.</td>
+    </tr>
+    <tr>
+      <td><strong>C. Pipeline ad-hoc (script linear sem framework)</strong></td>
+      <td>Zero deps externas além do boto3; mais simples ainda.</td>
+      <td>Sem state machine, sem rotas condicionais (guardrail), difícil evoluir; retrabalho para um produto sério.</td>
+    </tr>
+  </tbody>
+</table>
+</section>
+
+<section id="decisao">
+<h2>3. Decisão</h2>
+<p>Adotada a <strong>opção A</strong>: <strong>LangGraph + Bedrock Runtime</strong>, com pipeline de 5 nós em sequência fixa:</p>
+<pre><code>input_guard → triage → risk → report → output_guard</code></pre>
+<ul>
+  <li><strong>input_guard</strong>: Bedrock Guardrail (apply_guardrail, source=INPUT) — bloqueia prompt injection, conteúdo fora de escopo e ameaças.</li>
+  <li><strong>triage</strong>: Claude 3 Haiku — classifica em 5 dimensões (categoria, produto, sentimento, urgência, resumo).</li>
+  <li><strong>risk</strong>: Claude 3.5 Sonnet + RAG semântico (Titan v2 + FAISS) — avalia risco contra a política interna.</li>
+  <li><strong>report</strong>: consolidação determinística (sem LLM extra) do payload final.</li>
+  <li><strong>output_guard</strong>: regex local de PII (CPF, conta, cartão) + checagem secundária com Bedrock Guardrail (source=OUTPUT).</li>
+</ul>
+</section>
+
+<section id="consequencias">
+<h2>4. Consequências (trade-offs)</h2>
+<ul>
+  <li><strong>Positivo:</strong> ordem dos passos é determinística e auditável; cada nó loga entrada/saída/tempo com <code>trace_id</code>.</li>
+  <li><strong>Positivo:</strong> trocar provedor de LLM (Bedrock → OpenAI/Ollama) exige mexer em um arquivo (<code>llm.py</code>); RAG e guardrails são pluggable.</li>
+  <li><strong>Negativo:</strong> sem memória entre execuções (cada análise é stateless); para análise contínua (chatbot) precisaria persistir contexto.</li>
+  <li><strong>Negativo:</strong> latência síncrona — 1 reclamação leva 5-15s. Aceitável para batch e demo; em produção, mover para fila assíncrona.</li>
+</ul>
+</section>
+
+<section id="custos">
+<h2>5. Análise de custos (Bedrock)</h2>
+<p>Combinação estratégica de modelos para minimizar gasto sem sacrificar qualidade na etapa crítica (risco):</p>
+<table>
+  <thead><tr><th>Etapa</th><th>Modelo</th><th>Preço aproximado*</th><th>Justificativa</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Triagem</td>
+      <td><code>{{ models.triage }}</code></td>
+      <td>$0.25 / $1.25 por 1M tokens (in/out)</td>
+      <td>Classificação determinística com prompt curto. Haiku oferece >95% da qualidade do Sonnet a 1/12 do custo.</td>
+    </tr>
+    <tr>
+      <td>Risco / conformidade</td>
+      <td><code>{{ models.risk }}</code></td>
+      <td>$3.00 / $15.00 por 1M tokens (in/out)</td>
+      <td>Requer raciocínio sobre política interna e detecção sutil de fraude/LGPD. Sonnet justifica o custo extra apenas onde o Haiku erraria.</td>
+    </tr>
+    <tr>
+      <td>Embeddings (RAG)</td>
+      <td><code>{{ models.embed }}</code></td>
+      <td>$0.02 por 1M tokens</td>
+      <td>Titan v2 a 1024 dim cobre o caso com latência baixa (~100ms/chunk) e custo desprezível na ingestão.</td>
+    </tr>
+    <tr>
+      <td>Consolidação relatório</td>
+      <td>(sem LLM)</td>
+      <td>$0</td>
+      <td>Agregação JSON em código Python. Não há ganho em rodar LLM aqui.</td>
+    </tr>
+    <tr>
+      <td>Guardrail</td>
+      <td>Bedrock Guardrails</td>
+      <td>$0.75 por 1k policy units</td>
+      <td>Validação obrigatória de entrada. Cobrança proporcional ao tamanho do input.</td>
+    </tr>
+  </tbody>
+</table>
+<p class="meta">* Preços us-east-1 em jan/2026; consulte a tabela oficial do Bedrock para valores correntes.</p>
+<p><strong>Resultado esperado:</strong> ~80% das chamadas no modelo barato (Haiku), ~20% no caro (Sonnet). Custo médio por reclamação: ~$0.005 (~R$ 0,025 no câmbio atual).</p>
+</section>
+
+<section id="seguranca">
+<h2>6. Recomendações de segurança</h2>
+<ul>
+  <li><strong>Guardrail de entrada (Bedrock):</strong> bloqueia prompt injection, jailbreak, exfiltração e conteúdo fora de escopo. Resposta de bloqueio educada em PT-BR sem expor internals do sistema.</li>
+  <li><strong>Guardrail de saída (regex + Bedrock):</strong> redaction local de CPF/conta/cartão (defesa primária) + checagem com Sensitive Information Filters do Bedrock (defesa em profundidade).</li>
+  <li><strong>RAG isolado:</strong> índice FAISS em volume local; nenhum dado de cliente sai do container.</li>
+  <li><strong>Sem persistência sensível:</strong> não há banco de dados; tudo é stateless.</li>
+  <li><strong>Sem credenciais hard-coded:</strong> AWS via .env (ou IAM role em produção).</li>
+  <li><strong>Logs estruturados:</strong> cada nó loga com <code>trace_id</code>, sem dados pessoais (resumo já passa pelo output_guard antes de qualquer log de payload).</li>
+</ul>
+</section>
+
+<section id="runtime">
+<h2>7. Configuração observada em runtime</h2>
+<div class="grid">
+  <div class="card">
+    <h3 style="margin-top:0">Modelos Bedrock</h3>
+    <ul>
+      <li>Triagem: <code>{{ models.triage }}</code></li>
+      <li>Risco: <code>{{ models.risk }}</code></li>
+      <li>Embeddings: <code>{{ models.embed }}</code></li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Guardrail</h3>
+    {% if guardrail.configured %}
+      <p><span class="badge ok">configurado</span> ID: <code>{{ guardrail.id_short }}</code> · versão: <code>{{ guardrail.version }}</code></p>
+      <p class="meta">Ativo nos nós de input_guard e output_guard.</p>
+    {% else %}
+      <p><span class="badge warn">não configurado</span></p>
+      <p class="meta">Os nós de guardrail estão em modo no-op. Configure <code>BEDROCK_GUARDRAIL_ID</code> no <code>.env</code>.</p>
+    {% endif %}
+  </div>
+</div>
+<div class="card" style="margin-top: 16px">
+  <h3 style="margin-top:0">Índice RAG</h3>
+  {% if rag.available %}
+    <p>{{ rag.vectors }} vetores indexados em {{ rag.files|length }} arquivo(s) · atualizado em {{ rag.updated_at }}</p>
+    <table>
+      <thead><tr><th>Arquivo</th><th>Chunks</th><th>SHA-256 (curto)</th></tr></thead>
+      <tbody>
+        {% for f in rag.files %}
+        <tr><td>{{ f.path }}</td><td>{{ f.chunks }}</td><td><code>{{ f.hash }}</code></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p><span class="badge warn">vazio</span> Rode <code>make rag-ingest</code> para popular.</p>
+  {% endif %}
+</div>
+</section>
+
+</div>
+</body>
+</html>

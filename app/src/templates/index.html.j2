@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>FinGuard — Arquiteto da Solução (Nível 3)</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 760px; margin: 32px auto; padding: 0 16px; color: #1f2937; background: #f9fafb; }
+  h1 { margin-bottom: 4px; }
+  .muted { color: #6b7280; font-size: 14px; }
+  .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-top: 16px; }
+  label { display: block; font-size: 13px; font-weight: 500; margin-top: 12px; }
+  input, textarea { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-family: inherit; font-size: 14px; box-sizing: border-box; }
+  button { margin-top: 16px; padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; }
+  button:hover { background: #1d4ed8; }
+  pre { background: #f3f4f6; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
+  code { background: #f3f4f6; padding: 1px 6px; border-radius: 4px; }
+  .pipeline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; font-size: 13px; }
+  .pipeline .step { background: #dbeafe; padding: 4px 12px; border-radius: 999px; color: #1e40af; }
+  .pipeline .arrow { color: #6b7280; }
+  .campo {
+    margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+  <div>
+    <h1 style="margin-bottom:4px">FinGuard — Arquiteto da Solução</h1>
+    <div class="muted">Nível 3 · Future Minds 3 · Pipeline multi-agente com Guardrails, LangGraph + AWS Bedrock</div>
+  </div>
+  <div style="display:flex;gap:8px;align-self:center">
+    <a href="/reports" style="background:#1e40af;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">Relatórios</a>
+    <a href="/traces"  style="background:#1e40af;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">Log</a>
+    <a href="/politica-decisoria" style="background:#7c3aed;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">Dados Decisórios</a>
+    <a href="#" onclick="openAdrModal();return false;" style="background:#065f46;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">ADR</a>
+    <a href="/admin"   style="background:#6b7280;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">Admin</a>
+  </div>
+</div>
+<div class="pipeline" style="margin-top:10px">
+  <span class="step" style="background:#d1fae5;color:#065f46">✓ guardrail entrada</span>
+  <span class="arrow">→</span>
+  <span class="step">① triagem (Haiku)</span>
+  <span class="arrow">→</span>
+  <span class="step">② risco (Sonnet + RAG)</span>
+  <span class="arrow">→</span>
+  <span class="step">③ relatório</span>
+  <span class="arrow">→</span>
+  <span class="step" style="background:#d1fae5;color:#065f46">✓ guardrail saída</span>
+</div>
+
+<form action="/analyze-form" method="post" class="card">
+  <label>Texto da reclamação</label>
+  <textarea name="text" rows="6" required placeholder="Ex.: Já é a terceira vez que ligo pedindo o estorno..."></textarea>
+  <label>Produto (opcional)</label>
+  <input name="product_hint" placeholder="Ex.: Cartão de Crédito" />
+  <button type="submit">Executar pipeline</button>
+</form>
+
+<div class="card">
+  <h3 style="margin-top:0">Processamento em lote</h3>
+  <p class="muted">CSV com colunas <code>id, texto_reclamacao, produto</code>. Gera <code>.json</code>, <code>.csv</code>, <code>.md</code> e <code>.html</code> em <code>output/</code>.</p>
+  <form action="/batch" method="post" enctype="multipart/form-data">
+    <div class="campo">
+      <label>Identificação do batch (opcional)</label>
+      <input type="text" name="label" placeholder="Ex.: Reprocessamento PII" maxlength="80" />
+    </div>
+    <div class="campo">
+      <input type="file" name="file" accept=".csv" required />
+    </div>
+    <button type="submit">Processar lote</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">API</h3>
+  <pre>curl -X POST http://localhost:8000/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Já é a terceira vez..."}'</pre>
+</div>
+
+
+<!-- ── Overlay de processamento batch ───────────────────────────────────────── -->
+<div id="batch-overlay" style="display:none;position:fixed;inset:0;background:rgba(10,15,30,0.97);
+     z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+  <div style="color:#f1f5f9;font-size:20px;font-weight:700">⚙️ Processando batch…</div>
+  <div id="ov-stats" style="color:#94a3b8;font-size:13px;text-align:center;min-height:18px"></div>
+  <canvas id="snake-canvas" width="360" height="360"
+          style="border:2px solid #1e3a5f;border-radius:8px;background:#0f172a"></canvas>
+  <div style="color:#475569;font-size:12px">← ↑ ↓ → ou WASD para jogar enquanto aguarda</div>
+  <div id="ov-timer" style="color:#38bdf8;font-size:20px;font-family:monospace;min-height:28px"></div>
+</div>
+
+{% raw %}
+<script>
+// ── Snake ──────────────────────────────────────────────────────────────────────
+const CELL = 18, COLS = 20, ROWS = 20;
+let snake, dir, nextDir, food, score, loopId;
+
+function snakeInit() {
+  snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+  dir = {x:1,y:0}; nextDir = {x:1,y:0}; score = 0;
+  foodPlace();
+}
+
+function foodPlace() {
+  do { food = {x:Math.floor(Math.random()*COLS), y:Math.floor(Math.random()*ROWS)}; }
+  while (snake.some(s => s.x===food.x && s.y===food.y));
+}
+
+function snakeStep() {
+  dir = nextDir;
+  const head = {x:(snake[0].x+dir.x+COLS)%COLS, y:(snake[0].y+dir.y+ROWS)%ROWS};
+  if (snake.some(s => s.x===head.x && s.y===head.y)) { snakeInit(); return; }
+  snake.unshift(head);
+  if (head.x===food.x && head.y===food.y) { score++; foodPlace(); } else { snake.pop(); }
+}
+
+function snakeDraw() {
+  const cv = document.getElementById('snake-canvas');
+  const cx = cv.getContext('2d');
+  cx.fillStyle = '#0f172a'; cx.fillRect(0,0,cv.width,cv.height);
+  cx.fillStyle = '#f43f5e';
+  cx.fillRect(food.x*CELL+2, food.y*CELL+2, CELL-4, CELL-4);
+  snake.forEach((s,i) => {
+    cx.fillStyle = i===0 ? '#34d399' : '#10b981';
+    cx.fillRect(s.x*CELL+1, s.y*CELL+1, CELL-2, CELL-2);
+  });
+  cx.fillStyle = '#334155'; cx.font = '11px monospace';
+  cx.fillText('score: '+score, 5, 13);
+}
+
+function snakeStart() {
+  if (loopId) clearInterval(loopId);
+  snakeInit();
+  loopId = setInterval(() => { snakeStep(); snakeDraw(); }, 110);
+}
+
+document.addEventListener('keydown', e => {
+  const map = {
+    ArrowUp:{x:0,y:-1}, ArrowDown:{x:0,y:1},
+    ArrowLeft:{x:-1,y:0}, ArrowRight:{x:1,y:0},
+    w:{x:0,y:-1}, s:{x:0,y:1}, a:{x:-1,y:0}, d:{x:1,y:0}
+  };
+  const nd = map[e.key];
+  if (nd && !(nd.x===-dir.x && nd.y===-dir.y)) { nextDir=nd; e.preventDefault(); }
+});
+
+// ── Countdown ─────────────────────────────────────────────────────────────────
+let timerEl, timerInterval, startTs, estSecs;
+
+const _overtime = [
+  [ 30, '😅 Ah, não acredito que não terminou ainda…'],
+  [ 75, '🦗 Ok, AWS, tô aqui esperando…'],
+  [135, '☕ Já deu pra buscar um café e voltar.'],
+  [195, '🤔 Acho que o Haiku foi escrever um poema.'],
+  [255, '😴 Tô pensando em cobrar hora extra do Bedrock.'],
+  [300, '🏳️ Considerei montar uma barraca aqui.'],
+];
+
+function timerStart(secs) {
+  estSecs = secs; startTs = Date.now();
+  timerEl = document.getElementById('ov-timer');
+  function tick() {
+    const elapsed = (Date.now()-startTs)/1000;
+    const rem = estSecs - elapsed;
+    if (rem > 3) {
+      const m = Math.floor(rem/60), s = Math.floor(rem%60);
+      timerEl.textContent = '⏱ ~' + m + 'min ' + String(s).padStart(2,'0') + 's restantes';
+      timerEl.style.color = '#38bdf8';
+    } else {
+      const over = elapsed - estSecs;
+      const msg = _overtime.slice().reverse().find(([t]) => over >= t);
+      if (msg) {
+        timerEl.textContent = msg[1];
+        timerEl.style.color = '#f59e0b';
+      } else {
+        timerEl.textContent = '⏳ Finalizando…';
+        timerEl.style.color = '#38bdf8';
+      }
+    }
+  }
+  tick();
+  timerInterval = setInterval(tick, 1000);
+}
+
+// ── Intercepta submit ─────────────────────────────────────────────────────────
+document.querySelector('form[action="/batch"]').addEventListener('submit', function() {
+  const file = this.querySelector('input[type="file"]').files[0];
+  const overlay = document.getElementById('batch-overlay');
+  overlay.style.display = 'flex';
+  snakeStart();
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const rows = Math.max(1, (ev.target.result.match(/\n/g)||[]).length - 1);
+      const est  = Math.max(37, Math.ceil(rows * 5.5) - 300);
+      document.getElementById('ov-stats').textContent =
+        rows + ' registro(s) · estimativa: ~' + Math.ceil(est/60) + ' min';
+      timerStart(est);
+    };
+    reader.readAsText(file);
+  }
+});
+</script>
+{% endraw %}
+
+<div id="adr-modal" onclick="if(event.target===this)closeAdrModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:10px;width:92%;max-width:1020px;height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.3)">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #e5e7eb;flex-shrink:0">
+      <span style="font-weight:600;font-size:14px;color:#1f2937">ADR-001 — Arquitetura de Triagem Automatizada de Reclamações Bancárias</span>
+      <button onclick="closeAdrModal()" style="background:none;border:none;cursor:pointer;font-size:20px;color:#6b7280;padding:2px 8px;border-radius:4px;line-height:1" title="Fechar (Esc)">✕</button>
+    </div>
+    <iframe src="/adr" style="flex:1;border:none;width:100%"></iframe>
+  </div>
+</div>
+<script>
+function openAdrModal(){document.getElementById('adr-modal').style.display='flex';}
+function closeAdrModal(){document.getElementById('adr-modal').style.display='none';}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAdrModal();});
+</script>
+</body>
+</html>

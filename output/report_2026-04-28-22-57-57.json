@@ -1,0 +1,266 @@
+[
+  {
+    "id": "REC-00036",
+    "canal": "Redes Sociais",
+    "texto_original": "Já é a quinta vez que solicito o cancelamento da minha aplicação em um fundo de investimento e o banco simplesmente ignora. Minha conta é 34821-7 e meu nome é Roberto Aparecido Mendonça, CPF 418.293.056-71. Cada vez que ligo, dizem que o pedido foi registrado e que vou receber o resgate em até cinco dias úteis. Adivinha? Nunca cai nada. É impressionante a capacidade desse banco de fingir que está resolvendo algo. Já protocolei reclamação no Banco Central na semana passada e se não tiver resposta até sexta-feira, meu advogado vai entrar com ação judicial e vou procurar a imprensa. Estão retendo meu dinheiro ilegalmente e acham que vou ficar quieto. Esse descaso é criminoso.",
+    "trace_id": "REC-00036",
+    "blocked": false,
+    "triage": {
+      "category": "Cancelamento",
+      "product": "Investimentos",
+      "sentiment": "Crítico",
+      "urgency": "Crítica",
+      "summary": "Cliente solicita pela quinta vez o cancelamento de aplicação em fundo de investimento. Banco não processa o pedido e não efetua o resgate conforme prometido. Cliente já registrou reclamação no Banco Central e ameaça ação judicial."
+    },
+    "risk": {
+      "risk_level": "Crítico",
+      "risk_justification": "Caso enquadra-se em urgência crítica conforme política: menção explícita a Banco Central com reclamação já registrada, ameaça de ação judicial e possível exposição na imprensa. Há retenção de valores do cliente sem justificativa após múltiplas solicitações, configurando potencial violação regulatória e alto risco reputacional. Requer acionamento imediato de Compliance, jurídico e desbloqueio do resgate conforme procedimento de investimentos.",
+      "rag_chunks_used": 4
+    },
+    "category": "Cancelamento",
+    "product": "Investimentos",
+    "sentiment": "Crítico",
+    "urgency": "Crítica",
+    "summary": "Cliente solicita pela quinta vez o cancelamento de aplicação em fundo de investimento. Banco não processa o pedido e não efetua o resgate conforme prometido. Cliente já registrou reclamação no Banco Central e ameaça ação judicial.",
+    "risk_level": "Crítico",
+    "risk_justification": "Caso enquadra-se em urgência crítica conforme política: menção explícita a Banco Central com reclamação já registrada, ameaça de ação judicial e possível exposição na imprensa. Há retenção de valores do cliente sem justificativa após múltiplas solicitações, configurando potencial violação regulatória e alto risco reputacional. Requer acionamento imediato de Compliance, jurídico e desbloqueio do resgate conforme procedimento de investimentos.",
+    "timings_ms": {
+      "guardrail_input": 895,
+      "triage": 1889,
+      "risk": 5256,
+      "report": 0,
+      "guardrail_output": 1224
+    }
+  },
+  {
+    "id": "REC-00050",
+    "canal": "SAC",
+    "texto_original": "Preciso registrar uma reclamação sobre o atendimento recebido na agência central. Meu nome é Fernando Augusto Ribeiro da Silva, CPF 438.291.076-54, conta 78432-1. Fui ao banco para tratar de uma questão relacionada aos meus investimentos em renda fixa e o gerente simplesmente se recusou a me fornecer o extrato detalhado da rentabilidade. Disse que eu deveria consultar pelo aplicativo, mas o app não mostra o detalhamento que preciso. Exijo atendimento presencial adequado conforme meu direito como correntista. Caso não seja resolvido, encaminharei reclamação ao Banco Central e ao Procon da minha cidade. Aguardo retorno urgente.",
+    "trace_id": "REC-00050",
+    "blocked": false,
+    "triage": {
+      "category": "Atendimento",
+      "product": "Investimentos",
+      "sentiment": "Crítico",
+      "urgency": "Alta",
+      "summary": "Cliente relata recusa de gerente em fornecer extrato detalhado de rentabilidade de investimentos em renda fixa na agência central. Solicitação de atendimento presencial adequado com ameaça de escalação para Banco Central e Procon."
+    },
+    "risk": {
+      "risk_level": "Alto",
+      "risk_justification": "A reclamação apresenta menção explícita a escalação para Banco Central e Procon, o que configura urgência crítica conforme a política interna. Embora não haja indícios diretos de fraude, a recusa de fornecimento de informações sobre rentabilidade de investimentos pode caracterizar falha no dever de transparência e gerar risco regulatório. A situação demanda acionamento imediato do protocolo de ouvidoria, notificação ao jurídico e contato ativo com o cliente em até 2 horas.",
+      "rag_chunks_used": 4
+    },
+    "category": "Atendimento",
+    "product": "Investimentos",
+    "sentiment": "Crítico",
+    "urgency": "Alta",
+    "summary": "Cliente relata recusa de gerente em fornecer extrato detalhado de rentabilidade de investimentos em renda fixa na agência central. Solicitação de atendimento presencial adequado com ameaça de escalação para Banco Central e Procon.",
+    "risk_level": "Alto",
+    "risk_justification": "A reclamação apresenta menção explícita a escalação para Banco Central e Procon, o que configura urgência crítica conforme a política interna. Embora não haja indícios diretos de fraude, a recusa de fornecimento de informações sobre rentabilidade de investimentos pode caracterizar falha no dever de transparência e gerar risco regulatório. A situação demanda acionamento imediato do protocolo de ouvidoria, notificação ao jurídico e contato ativo com o cliente em até 2 horas.",
+    "timings_ms": {
+      "guardrail_input": 881,
+      "triage": 1938,
+      "risk": 4669,
+      "report": 0,
+      "guardrail_output": 1258
+    }
+  },
+  {
+    "id": "REC-00069",
+    "canal": "Banco Central",
+    "texto_original": "URGENTE! Fui vítima de fraude na minha conta de investimentos do Banco Netuno! No dia 16/03/2026 recebi uma notificação de resgate de R$ 23.400,00 do meu fundo de renda fixa que EU NÃO AUTORIZEI. Alguém acessou minha conta e transferiu todo o valor para uma conta desconhecida. Meu CPF é 341.876.209-54 e estou registrando esta reclamação para que fique documentado. Já fiz boletim de ocorrência e liguei para o banco, mas me disseram que a análise pode levar até 30 dias. TRINTA DIAS?! Estou desesperado, esse era o dinheiro da faculdade da minha filha! Exijo que o banco assuma a responsabilidade pela falha de segurança. Vou registrar reclamação no Banco Central e no Reclame Aqui ainda hoje.",
+    "trace_id": "REC-00069",
+    "blocked": false,
+    "triage": {
+      "category": "Fraude/Segurança",
+      "product": "Investimentos",
+      "sentiment": "Crítico",
+      "urgency": "Crítica",
+      "summary": "Cliente relata acesso não autorizado à conta de investimentos com resgate de R$ 23.400,00 transferido para conta desconhecida em 16/03/2026. Solicitação de investigação urgente e assunção de responsabilidade pela falha de segurança, com ameaça de escalação para Banco Central e Reclame Aqui."
+    },
+    "risk": {
+      "risk_level": "Crítico",
+      "risk_justification": "Caso enquadra-se em urgência crítica conforme política: indícios claros de fraude com transação não autorizada de valor expressivo, menção explícita a escalação para Banco Central, e vulnerabilidade financeira extrema do cliente. Requer acionamento imediato de Prevenção a Fraudes, Compliance e jurídico, com contato ativo em até 2h e bloqueio de transações suspeitas.",
+      "rag_chunks_used": 4
+    },
+    "category": "Fraude/Segurança",
+    "product": "Investimentos",
+    "sentiment": "Crítico",
+    "urgency": "Crítica",
+    "summary": "Cliente relata acesso não autorizado à conta de investimentos com resgate de R$ 23.400,00 transferido para conta desconhecida em 16/03/2026. Solicitação de investigação urgente e assunção de responsabilidade pela falha de segurança, com ameaça de escalação para Banco Central e Reclame Aqui.",
+    "risk_level": "Crítico",
+    "risk_justification": "Caso enquadra-se em urgência crítica conforme política: indícios claros de fraude com transação não autorizada de valor expressivo, menção explícita a escalação para Banco Central, e vulnerabilidade financeira extrema do cliente. Requer acionamento imediato de Prevenção a Fraudes, Compliance e jurídico, com contato ativo em até 2h e bloqueio de transações suspeitas.",
+    "timings_ms": {
+      "guardrail_input": 536,
+      "triage": 1893,
+      "risk": 4563,
+      "report": 0,
+      "guardrail_output": 1232
+    }
+  },
+  {
+    "id": "REC-00081",
+    "canal": "Ouvidoria",
+    "texto_original": "Venho por meio desta registrar uma reclamação referente aos meus investimentos. Sou cliente há mais de seis anos e recentemente percebi que as aplicações em CDB que contratei não estão rendendo conforme o combinado no momento da contratação. Entrei em contato com o gerente e fui informado de que houve uma alteração nas taxas, porém em nenhum momento fui notificado sobre isso. Meu CPF é 341.892.567-04, conta 58723-1, nome Renato de Souza Figueiredo. Solicito que revisem urgentemente os valores e recomponham os rendimentos conforme o contrato original. Caso não haja solução em até cinco dias úteis, pretendo acionar o Banco Central para intermediar a questão, pois considero essa prática abusiva e contrária ao que foi acordado.",
+    "trace_id": "REC-00081",
+    "blocked": false,
+    "triage": {
+      "category": "Produto/Serviço",
+      "product": "Investimentos",
+      "sentiment": "Negativo",
+      "urgency": "Alta",
+      "summary": "Cliente relata alteração não comunicada nas taxas de rendimento de aplicações em CDB, resultando em ganhos inferiores ao contratado. Solicita revisão dos valores e recomposição dos rendimentos conforme acordo original, com ameaça de acionamento ao Banco Central em caso de não resolução."
+    },
+    "risk": {
+      "risk_level": "Alto",
+      "risk_justification": "A reclamação apresenta múltiplos fatores de risco elevado: menção explícita ao acionamento do Banco Central (indicador de urgência crítica conforme política), alegação de alteração unilateral de taxas sem notificação prévia (possível violação de transparência e LGPD), e cliente de longa data insatisfeito (risco reputacional). A política exige notificação imediata ao jurídico e Compliance em casos de menção a órgãos reguladores, além de ações corretivas em até 72h para divergências de rentabilidade.",
+      "rag_chunks_used": 4
+    },
+    "category": "Produto/Serviço",
+    "product": "Investimentos",
+    "sentiment": "Negativo",
+    "urgency": "Alta",
+    "summary": "Cliente relata alteração não comunicada nas taxas de rendimento de aplicações em CDB, resultando em ganhos inferiores ao contratado. Solicita revisão dos valores e recomposição dos rendimentos conforme acordo original, com ameaça de acionamento ao Banco Central em caso de não resolução.",
+    "risk_level": "Alto",
+    "risk_justification": "A reclamação apresenta múltiplos fatores de risco elevado: menção explícita ao acionamento do Banco Central (indicador de urgência crítica conforme política), alegação de alteração unilateral de taxas sem notificação prévia (possível violação de transparência e LGPD), e cliente de longa data insatisfeito (risco reputacional). A política exige notificação imediata ao jurídico e Compliance em casos de menção a órgãos reguladores, além de ações corretivas em até 72h para divergências de rentabilidade.",
+    "timings_ms": {
+      "guardrail_input": 567,
+      "triage": 2011,
+      "risk": 5485,
+      "report": 0,
+      "guardrail_output": 1213
+    }
+  },
+  {
+    "id": "REC-00082",
+    "canal": "Redes Sociais",
+    "texto_original": "Meu nome é Ricardo Fernandes de Oliveira, CPF 341.876.529-04, conta 58234-7, e to fazendo essa reclamação pq ja n aguento mais essa situação 😡 Faz 3 meses q to tentando cancelar um serviço de assessoria financeira q apareceu do nada na minha conta e tão cobrando R$ 149,90 por mes. Nunca contratei essa porcaria!! Ja liguei, ja fui na agencia, ja mandei email e ngm resolve. Vou meter no Procon e no Banco Central se n resolverem ate sexta pq isso é roubo na cara dura. Ja to juntando todos os comprovantes e print das conversas no chat. Vou tb procurar a imprensa local pq tem q expor esse tipo de abuso 📢 Quero meu dinheiro de volta, os 3 meses q cobraram indevido",
+    "trace_id": "REC-00082",
+    "blocked": false,
+    "triage": {
+      "category": "Cobrança Indevida",
+      "product": "Não Identificado",
+      "sentiment": "Crítico",
+      "urgency": "Crítica",
+      "summary": "Cliente relata cobrança recorrente de R$ 149,90 mensais por serviço de assessoria financeira não contratado há 3 meses. Afirma ter realizado múltiplas tentativas de cancelamento sem sucesso e ameaça escalação para órgãos reguladores e imprensa. Solicita reembolso dos valores cobrados indevidamente."
+    },
+    "risk": {
+      "risk_level": "Crítico",
+      "risk_justification": "A reclamação apresenta múltiplos fatores de risco crítico conforme política interna: cobrança recorrente não autorizada por 3 meses caracteriza indício de fraude ou falha sistêmica grave; menção explícita a escalação para Procon e Banco Central aciona automaticamente urgência crítica; ameaça de exposição na imprensa representa alto risco reputacional. Requer acionamento imediato de Compliance, Prevenção a Fraudes e contato ativo com cliente em até 2 horas.",
+      "rag_chunks_used": 4
+    },
+    "category": "Cobrança Indevida",
+    "product": "Não Identificado",
+    "sentiment": "Crítico",
+    "urgency": "Crítica",
+    "summary": "Cliente relata cobrança recorrente de R$ 149,90 mensais por serviço de assessoria financeira não contratado há 3 meses. Afirma ter realizado múltiplas tentativas de cancelamento sem sucesso e ameaça escalação para órgãos reguladores e imprensa. Solicita reembolso dos valores cobrados indevidamente.",
+    "risk_level": "Crítico",
+    "risk_justification": "A reclamação apresenta múltiplos fatores de risco crítico conforme política interna: cobrança recorrente não autorizada por 3 meses caracteriza indício de fraude ou falha sistêmica grave; menção explícita a escalação para Procon e Banco Central aciona automaticamente urgência crítica; ameaça de exposição na imprensa representa alto risco reputacional. Requer acionamento imediato de Compliance, Prevenção a Fraudes e contato ativo com cliente em até 2 horas.",
+    "timings_ms": {
+      "guardrail_input": 583,
+      "triage": 2064,
+      "risk": 4701,
+      "report": 1,
+      "guardrail_output": 1191
+    }
+  },
+  {
+    "id": "REC-00085",
+    "canal": "SAC",
+    "texto_original": "Ah, que beleza! Entrei no app do banco hoje cedo e descobri que alguém fez um PIX de R$ 1.200,00 da minha conta corrente às 2 da manhã. Eu, dormindo feito um anjo, e meu dinheiro passeando por aí. Muito obrigado pela segurança de ponta, viu? O mais engraçado é que eu tenho reconhecimento facial, biometria, senha de 8 dígitos e token, mas pelo visto qualquer um entra na minha conta mesmo assim. Sou eu, portador do CPF 847.293.156-02, e garanto que não fiz essa transferência. Mas relaxa, né, vou só esperar os 10 dias úteis que vocês pedem pra analisar enquanto meu dinheiro some. Que eficiência.",
+    "trace_id": "REC-00085",
+    "blocked": false,
+    "triage": {
+      "category": "Fraude/Segurança",
+      "product": "Conta Corrente",
+      "sentiment": "Crítico",
+      "urgency": "Crítica",
+      "summary": "Cliente relata transferência PIX não autorizada de R$ 1.200,00 realizada às 2 da manhã em sua conta corrente. Afirma possuir múltiplas camadas de segurança ativadas e nega ter realizado a operação. Solicita investigação imediata da transação fraudulenta."
+    },
+    "risk": {
+      "risk_level": "Crítico",
+      "risk_justification": "Caso enquadra-se em urgência crítica conforme política: indícios claros de fraude com transação não autorizada em horário atípico, apesar de múltiplas camadas de segurança ativas, sugerindo possível vulnerabilidade sistêmica ou vazamento de credenciais. Requer acionamento imediato da equipe de Prevenção a Fraudes, bloqueio preventivo de transações suspeitas e contato ativo com cliente em até 2 horas, conforme protocolo de fraude estabelecido.",
+      "rag_chunks_used": 4
+    },
+    "category": "Fraude/Segurança",
+    "product": "Conta Corrente",
+    "sentiment": "Crítico",
+    "urgency": "Crítica",
+    "summary": "Cliente relata transferência PIX não autorizada de R$ 1.200,00 realizada às 2 da manhã em sua conta corrente. Afirma possuir múltiplas camadas de segurança ativadas e nega ter realizado a operação. Solicita investigação imediata da transação fraudulenta.",
+    "risk_level": "Crítico",
+    "risk_justification": "Caso enquadra-se em urgência crítica conforme política: indícios claros de fraude com transação não autorizada em horário atípico, apesar de múltiplas camadas de segurança ativas, sugerindo possível vulnerabilidade sistêmica ou vazamento de credenciais. Requer acionamento imediato da equipe de Prevenção a Fraudes, bloqueio preventivo de transações suspeitas e contato ativo com cliente em até 2 horas, conforme protocolo de fraude estabelecido.",
+    "timings_ms": {
+      "guardrail_input": 586,
+      "triage": 2055,
+      "risk": 4834,
+      "report": 0,
+      "guardrail_output": 1483
+    }
+  },
+  {
+    "id": "REC-00130",
+    "canal": "SAC",
+    "texto_original": "Que maravilha, hein? Mais uma vez o banco decidiu, por conta própria, que eu deveria pagar por algo que não comprei. Apareceu na fatura do meu cartão de crédito uma cobrança de R$ 1.247,00 de uma loja de eletrônicos em São Paulo. Detalhe: eu moro no Recife e não viajo há meses. Meu CPF é 831.472.659-04 e já contestei essa cobrança três vezes. Parabéns pela eficiência, porque até agora nada foi resolvido. É reconfortante saber que posso ser cobrado por compras que não fiz e que o banco simplesmente não se importa. Já protocolei reclamação no Banco Central, número 20260187432, e se não resolverem em 5 dias úteis, meu advogado vai adorar essa história. Mas claro, o banco deve achar que eu tenho todo o tempo do mundo para ficar correndo atrás de erro alheio.",
+    "trace_id": "REC-00130",
+    "blocked": false,
+    "triage": {
+      "category": "Cobrança Indevida",
+      "product": "Cartão de Crédito",
+      "sentiment": "Crítico",
+      "urgency": "Crítica",
+      "summary": "Cliente relata cobrança indevida de R$ 1.247,00 em cartão de crédito referente a compra em loja de eletrônicos que nega ter realizado. Reclamação já contestada três vezes sem resolução e escalada ao Banco Central."
+    },
+    "risk": {
+      "risk_level": "Crítico",
+      "risk_justification": "Caso apresenta múltiplos indicadores de risco máximo: forte indício de fraude em transação não reconhecida com valor significativo, falha recorrente no processo de contestação após três tentativas, e escalação formal ao Banco Central com menção a prazo e possível judicialização. A política classifica automaticamente como urgência crítica qualquer menção a órgão regulador, exigindo acionamento imediato de Compliance, jurídico e equipe de Prevenção a Fraudes.",
+      "rag_chunks_used": 4
+    },
+    "category": "Cobrança Indevida",
+    "product": "Cartão de Crédito",
+    "sentiment": "Crítico",
+    "urgency": "Crítica",
+    "summary": "Cliente relata cobrança indevida de R$ 1.247,00 em cartão de crédito referente a compra em loja de eletrônicos que nega ter realizado. Reclamação já contestada três vezes sem resolução e escalada ao Banco Central.",
+    "risk_level": "Crítico",
+    "risk_justification": "Caso apresenta múltiplos indicadores de risco máximo: forte indício de fraude em transação não reconhecida com valor significativo, falha recorrente no processo de contestação após três tentativas, e escalação formal ao Banco Central com menção a prazo e possível judicialização. A política classifica automaticamente como urgência crítica qualquer menção a órgão regulador, exigindo acionamento imediato de Compliance, jurídico e equipe de Prevenção a Fraudes.",
+    "timings_ms": {
+      "guardrail_input": 755,
+      "triage": 2036,
+      "risk": 4939,
+      "report": 0,
+      "guardrail_output": 1202
+    }
+  },
+  {
+    "id": "REC-00152",
+    "canal": "Ouvidoria",
+    "texto_original": "Meu nome é Roberto Carlos Mendonça, CPF 782.143.609-31, conta 45872-3. Há dois meses venho tentando cancelar uma aplicação em fundo de investimento que fiz por orientação do gerente, que jurou que o rendimento seria de no mínimo 1,2% ao mês. Resultado? Perdi dinheiro. E agora que quero resgatar, me dizem que tem carência de 360 dias e taxa de saída de 3%. Ninguém me informou essas condições na hora de aplicar, isso é sacanagem! Quero o resgate total sem essa taxa abusiva. Se não cancelarem, vou entrar com reclamação formal e exigir ressarcimento por informação enganosa. Tô de saco cheio desse banco que só quer empurrar produto e dane-se o cliente.",
+    "trace_id": "REC-00152",
+    "blocked": false,
+    "triage": {
+      "category": "Produto/Serviço",
+      "product": "Investimentos",
+      "sentiment": "Crítico",
+      "urgency": "Alta",
+      "summary": "Cliente solicita cancelamento de aplicação em fundo de investimento, alegando falta de informação sobre carência de 360 dias e taxa de saída de 3% no momento da contratação. Relata perda financeira e insatisfação com orientação recebida do gerente."
+    },
+    "risk": {
+      "risk_level": "Alto",
+      "risk_justification": "A reclamação apresenta alegação de falha na prestação de informações sobre taxas e carências no momento da contratação, o que pode configurar violação ao dever de transparência e às normas de proteção ao consumidor. O cliente menciona explicitamente a intenção de formalizar reclamação em órgãos externos e exigir ressarcimento, elevando o risco reputacional e regulatório. Conforme a política interna, casos de investimentos com taxas não informadas requerem revisão contratual e possível estorno, demandando tratamento prioritário pela Gerência de Investimentos.",
+      "rag_chunks_used": 4
+    },
+    "category": "Produto/Serviço",
+    "product": "Investimentos",
+    "sentiment": "Crítico",
+    "urgency": "Alta",
+    "summary": "Cliente solicita cancelamento de aplicação em fundo de investimento, alegando falta de informação sobre carência de 360 dias e taxa de saída de 3% no momento da contratação. Relata perda financeira e insatisfação com orientação recebida do gerente.",
+    "risk_level": "Alto",
+    "risk_justification": "A reclamação apresenta alegação de falha na prestação de informações sobre taxas e carências no momento da contratação, o que pode configurar violação ao dever de transparência e às normas de proteção ao consumidor. O cliente menciona explicitamente a intenção de formalizar reclamação em órgãos externos e exigir ressarcimento, elevando o risco reputacional e regulatório. Conforme a política interna, casos de investimentos com taxas não informadas requerem revisão contratual e possível estorno, demandando tratamento prioritário pela Gerência de Investimentos.",
+    "timings_ms": {
+      "guardrail_input": 626,
+      "triage": 1862,
+      "risk": 5112,
+      "report": 1,
+      "guardrail_output": 1173
+    }
+  }
+]

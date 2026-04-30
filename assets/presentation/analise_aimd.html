@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FinGuard — Análise AIMD · Convergência de Throttling</title>
+<style>
+  :root {
+    --blue: #1e40af; --blue-light: #dbeafe; --green: #065f46; --green-light: #d1fae5;
+    --amber: #92400e; --amber-light: #fef3c7; --red: #991b1b; --red-light: #fee2e2;
+    --gray: #374151; --muted: #6b7280; --bg: #f9fafb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         background: var(--bg); color: var(--gray); line-height: 1.65; padding: 40px 32px;
+         max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 26px; color: var(--blue); margin-bottom: 6px; }
+  h2 { font-size: 18px; color: var(--blue); margin: 36px 0 12px;
+       padding-bottom: 8px; border-bottom: 2px solid var(--blue-light); }
+  h3 { font-size: 14px; color: var(--gray); margin: 20px 0 8px; text-transform: uppercase;
+       letter-spacing: .05em; }
+  p  { margin-bottom: 10px; font-size: 14px; }
+  .meta { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
+  .card { background: white; border-radius: 8px; padding: 20px;
+          box-shadow: 0 1px 3px rgba(0,0,0,.08); margin-bottom: 16px; }
+  .card.ok   { border-left: 4px solid #059669; }
+  .card.warn { border-left: 4px solid #d97706; }
+  .card.err  { border-left: 4px solid #dc2626; }
+  .card.info { border-left: 4px solid var(--blue); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }
+  th { background: var(--blue); color: white; padding: 9px 12px; text-align: left; font-size: 12px; }
+  td { padding: 9px 12px; border-bottom: 1px solid #e5e7eb; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f0f9ff; }
+  .num { text-align: right; font-family: monospace; }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 999px;
+          font-size: 11px; font-weight: 700; }
+  .pill.green { background: var(--green-light); color: var(--green); }
+  .pill.red   { background: var(--red-light);   color: var(--red); }
+  .pill.amber { background: var(--amber-light);  color: var(--amber); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+  .kpi { text-align: center; }
+  .kpi .v { font-size: 28px; font-weight: 700; color: var(--blue); }
+  .kpi .l { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .screenshot-box {
+    border: 2px dashed #d1d5db; border-radius: 8px; padding: 32px;
+    text-align: center; color: var(--muted); font-size: 13px;
+    background: #f9fafb; margin: 12px 0;
+  }
+  .delta-up   { color: #059669; font-weight: 700; }
+  .delta-down { color: #dc2626; font-weight: 700; }
+  .delta-neu  { color: var(--muted); font-weight: 700; }
+  code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px;
+         font-family: "SF Mono", Consolas, monospace; font-size: 12px; }
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 32px 0; }
+  .badge-b0 { display:inline-block;background:#fee2e2;color:#991b1b;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin-left:8px; }
+  .badge-b1 { display:inline-block;background:#fef3c7;color:#92400e;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin-left:8px; }
+  .badge-b2 { display:inline-block;background:#d1fae5;color:#065f46;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;margin-left:8px; }
+</style>
+</head>
+<body>
+
+<a href="/adr#throttle-adaptivo"
+   style="display:inline-flex;align-items:center;gap:6px;margin-bottom:16px;font-size:13px;
+          color:#1e40af;text-decoration:none;padding:5px 12px;border:1px solid #bfdbfe;
+          border-radius:6px;background:#eff6ff">
+  ← ADR-001 · seção Throttle Adaptivo
+</a>
+
+<h1>FinGuard — Controle Adaptivo de Throttling (AIMD)</h1>
+<div class="meta">
+  Future Minds 3 · Nível 3 · Grupo 23TB · Abril 2026 &nbsp;·&nbsp;
+  Análise empírica de convergência de parâmetros de batch em conta AWS gratuita
+</div>
+
+<!-- ══ CONTEXTO ══ -->
+<h2>Contexto</h2>
+<p>
+  O FinGuard processa reclamações bancárias em lote via AWS Bedrock (Claude Haiku + Sonnet).
+  Contas AWS gratuitas têm quota padrão de <strong>~5 RPM por modelo</strong>. Com processamento
+  paralelo de 5 workers e 2 chamadas Bedrock por registro, o sistema excede o limite em segundos,
+  gerando <code>ThrottlingException</code>.
+</p>
+<p>
+  Para resolver isso sem configuração manual, implementamos um mecanismo de controle adaptivo
+  baseado em <strong>AIMD (Additive Increase / Multiplicative Decrease)</strong> — o mesmo algoritmo
+  de controle de congestionamento do TCP — que aprende empiricamente os parâmetros ideais a cada execução.
+</p>
+
+<!-- ══ ALGORITMO ══ -->
+<h2>Algoritmo AIMD implementado</h2>
+<div class="grid-2">
+  <div class="card warn">
+    <h3>↓ Multiplicative Decrease</h3>
+    <p>Quando <code>throttle_rate &gt; 5%</code>:</p>
+    <p><code>workers = max(1, workers // 2)</code><br>
+       <code>delay += 1.0s</code></p>
+    <p style="font-size:12px;color:var(--muted);margin-top:8px">
+      Recuo agressivo ao detectar congestionamento — mesmo comportamento do TCP ao detectar perda de pacote.
+    </p>
+  </div>
+  <div class="card ok">
+    <h3>↑ Additive Increase</h3>
+    <p>Quando <code>throttled == 0</code>:</p>
+    <p><code>workers = min(MAX, workers + 1)</code><br>
+       <code>delay = max(0, delay - 0.5s)</code></p>
+    <p style="font-size:12px;color:var(--muted);margin-top:8px">
+      Crescimento cauteloso na zona estável — explora capacidade disponível sem arriscar throttling.
+    </p>
+  </div>
+</div>
+<div class="card info">
+  <strong>Espera adaptiva entre passes:</strong>
+  <code>wait = BATCH_RETRY_DELAY × (1 + throttle_rate)</code> — quanto maior o congestionamento,
+  maior o tempo de espera antes do próximo passe, dando ao rate limiter da AWS tempo para resetar.
+</div>
+
+<div class="card err">
+  <strong>Bug inicial — limiar frouxo (>20%):</strong> na primeira implementação o limiar de
+  Multiplicative Decrease era <code>throttle_rate > 20%</code>. Com taxa de 13%, o sistema
+  ficava na "zona estável" e <em>não ajustava nada</em> — workers e delay permaneciam constantes
+  em todos os passes. Corrigido para <code>> 5%</code> antes do Batch 1.
+</div>
+
+<hr>
+
+<!-- ══ LINHA DO TEMPO ══ -->
+<h2>Linha do tempo dos experimentos</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Batch</th><th>Horário (UTC-3)</th><th>Workers/Delay iniciais</th>
+      <th>Passes</th><th>Throttle máx.</th><th>AIMD agiu?</th><th>Resultado</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Batch 0</strong> <span class="badge-b0">limiar frouxo</span></td>
+      <td>03:19–03:26</td>
+      <td class="num">5 workers · 0.0s</td>
+      <td class="num">3</td>
+      <td><span class="pill red">13%→15%→0%</span></td>
+      <td style="color:#dc2626;font-weight:700">Não (limiar >20%)</td>
+      <td style="font-size:12px">Convergiu por sorte no passe 3, não por controle</td>
+    </tr>
+    <tr>
+      <td><strong>Batch 1</strong> <span class="badge-b1">AIMD corrigido</span></td>
+      <td>03:40–03:48</td>
+      <td class="num">5 workers · 0.0s</td>
+      <td class="num">2</td>
+      <td><span class="pill amber">17%→0%</span></td>
+      <td style="color:#059669;font-weight:700">Sim (5→2w, 0→1s)</td>
+      <td style="font-size:12px">Convergência real em 1 ajuste</td>
+    </tr>
+    <tr>
+      <td><strong>Batch 2</strong> <span class="badge-b2">convergido</span></td>
+      <td>03:55–04:03</td>
+      <td class="num">2 workers · 1.0s</td>
+      <td class="num">1</td>
+      <td><span class="pill green">0%</span></td>
+      <td style="color:var(--muted)">—</td>
+      <td style="font-size:12px">Parâmetros descobertos aplicados — zero throttling</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<!-- ══ BATCH 0 ══ -->
+<h2>Batch 0 — AIMD sem efeito (limiar frouxo) <span class="badge-b0">bug</span></h2>
+<div class="meta">
+  Executado em 2026-04-28 às 03:19 (UTC-3) · 100 registros · Limiar de throttling: >20% (incorreto)
+</div>
+
+<div class="card err">
+  O AIMD estava implementado, mas o limiar de Multiplicative Decrease era <code>> 20%</code>.
+  Com taxa de 13% no passe 1 e 15% no passe 2, o algoritmo interpretou o sistema como "estável"
+  e não reduziu workers nem aumentou delay. Os 3 passes rodaram com <strong>workers=5 e delay=0s</strong>
+  em todos eles — o throttling diminuiu apenas pelo esgotamento natural dos registros, não por controle.
+</div>
+
+<div class="grid-4">
+  <div class="card kpi"><div class="v">100</div><div class="l">Registros submetidos</div></div>
+  <div class="card kpi"><div class="v" style="color:#059669">74</div><div class="l">Processados com sucesso</div></div>
+  <div class="card kpi"><div class="v" style="color:#dc2626">26</div><div class="l">Bloqueados pelo guardrail</div></div>
+  <div class="card kpi"><div class="v">6min 50s</div><div class="l">Duração total</div></div>
+</div>
+
+<h3>Passes de processamento</h3>
+<table>
+  <thead>
+    <tr><th>Passe</th><th>Workers</th><th>Delay (s)</th><th>Total</th><th>Sucesso</th>
+        <th>Throttled</th><th>Taxa</th><th>Duração</th><th>Vazão (reg/min)</th><th>Ação AIMD</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="font-weight:700;text-align:center">1</td>
+      <td class="num">5</td><td class="num">0.0s</td>
+      <td class="num">100</td>
+      <td class="num" style="color:#059669;font-weight:700">87</td>
+      <td class="num" style="color:#dc2626;font-weight:700">13</td>
+      <td><span class="pill amber">13.0%</span></td>
+      <td class="num">321.3s</td>
+      <td class="num">16.2</td>
+      <td style="font-size:12px;color:#dc2626">Nenhuma — 13% &lt; limiar 20%</td>
+    </tr>
+    <tr>
+      <td style="font-weight:700;text-align:center">2</td>
+      <td class="num">5</td><td class="num">0.0s</td>
+      <td class="num">13</td>
+      <td class="num" style="color:#059669;font-weight:700">11</td>
+      <td class="num" style="color:#dc2626;font-weight:700">2</td>
+      <td><span class="pill amber">15.4%</span></td>
+      <td class="num">45.7s</td>
+      <td class="num">14.5</td>
+      <td style="font-size:12px;color:#dc2626">Nenhuma — 15% &lt; limiar 20%</td>
+    </tr>
+    <tr>
+      <td style="font-weight:700;text-align:center">3</td>
+      <td class="num">5</td><td class="num">0.0s</td>
+      <td class="num">2</td>
+      <td class="num" style="color:#059669;font-weight:700">2</td>
+      <td class="num" style="color:var(--muted)">0</td>
+      <td><span class="pill green">0.0%</span></td>
+      <td class="num">9.0s</td>
+      <td class="num">13.4</td>
+      <td style="font-size:12px;color:var(--muted)">Zero registros — convergência trivial</td>
+    </tr>
+  </tbody>
+</table>
+
+<img src="/assets/images/graph-batch-0.png" alt="Batch 0 — 3 passes, workers fixos em 5"
+     style="max-width:100%;display:block;margin:0 auto;border-radius:6px;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+
+<h3>Latência por etapa — registros processados (74 desbloqueados)</h3>
+<table>
+  <thead>
+    <tr><th>Etapa</th><th class="num">Média</th><th class="num">P50</th>
+        <th class="num">P95</th><th class="num">P99</th><th class="num">Máx</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Guardrail Input</td><td class="num">661ms</td><td class="num">603ms</td><td class="num">1.400ms</td><td class="num">1.439ms</td><td class="num">1.439ms</td></tr>
+    <tr><td>① Triagem (Haiku)</td><td class="num">3.986ms</td><td class="num">3.008ms</td><td class="num">11.041ms</td><td class="num">12.401ms</td><td class="num">12.401ms</td></tr>
+    <tr><td>② Risco + RAG (Sonnet)</td><td class="num">5.600ms</td><td class="num">5.317ms</td><td class="num">8.177ms</td><td class="num">8.483ms</td><td class="num">8.483ms</td></tr>
+    <tr><td>Guardrail Output</td><td class="num">1.228ms</td><td class="num">1.211ms</td><td class="num">1.395ms</td><td class="num">1.570ms</td><td class="num">1.570ms</td></tr>
+    <tr style="font-weight:700;background:#fee2e2">
+      <td>E2E Total</td><td class="num">11.476ms</td><td class="num">10.760ms</td>
+      <td class="num">18.405ms</td><td class="num">19.241ms</td><td class="num">19.241ms</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<!-- ══ BATCH 1 ══ -->
+<h2>Batch 1 — AIMD em modo descoberta <span class="badge-b1">convergência real</span></h2>
+<div class="meta">
+  Executado em 2026-04-28 às 03:40 (UTC-3) · 100 registros · Parâmetros iniciais: 5 workers, delay 0s · Limiar corrigido para >5%
+</div>
+
+<div class="card ok">
+  Com o limiar corrigido para <code>> 5%</code>, ao detectar 17% de throttling no passe 1
+  o AIMD aplicou Multiplicative Decrease imediatamente: <strong>workers 5→2, delay 0→1.0s</strong>.
+  O passe 2 rodou com os parâmetros ajustados e zerou o throttling.
+</div>
+
+<div class="grid-4">
+  <div class="card kpi"><div class="v">100</div><div class="l">Registros submetidos</div></div>
+  <div class="card kpi"><div class="v" style="color:#059669">83</div><div class="l">Processados com sucesso</div></div>
+  <div class="card kpi"><div class="v" style="color:#dc2626">15</div><div class="l">Bloqueados pelo guardrail</div></div>
+  <div class="card kpi"><div class="v">7min 48s</div><div class="l">Duração total</div></div>
+</div>
+
+<h3>Passes de processamento</h3>
+<table>
+  <thead>
+    <tr><th>Passe</th><th>Workers</th><th>Delay (s)</th><th>Total</th><th>Sucesso</th>
+        <th>Throttled</th><th>Taxa</th><th>Duração</th><th>Vazão (reg/min)</th><th>Ação AIMD</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="font-weight:700;text-align:center">1</td>
+      <td class="num">5</td><td class="num">0.0s</td>
+      <td class="num">100</td>
+      <td class="num" style="color:#059669;font-weight:700">83</td>
+      <td class="num" style="color:#dc2626;font-weight:700">17</td>
+      <td><span class="pill red">17.0%</span></td>
+      <td class="num">359.6s</td>
+      <td class="num">13.9</td>
+      <td style="font-size:12px;color:#dc2626">↓ workers 5→2 · delay 0→1s</td>
+    </tr>
+    <tr>
+      <td style="font-weight:700;text-align:center">2</td>
+      <td class="num">2</td><td class="num">1.0s</td>
+      <td class="num">17</td>
+      <td class="num" style="color:#059669;font-weight:700">17</td>
+      <td class="num" style="color:var(--muted)">0</td>
+      <td><span class="pill green">0.0%</span></td>
+      <td class="num">91.5s</td>
+      <td class="num">11.1</td>
+      <td style="font-size:12px;color:#059669">Convergido ✓</td>
+    </tr>
+  </tbody>
+</table>
+
+<img src="/assets/images/graph-batch-1.png" alt="Batch 1 — 2 passes, convergência 5→2 workers"
+     style="max-width:100%;display:block;margin:0 auto;border-radius:6px;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+
+<h3>Latência por etapa — registros processados com sucesso</h3>
+<table>
+  <thead>
+    <tr><th>Etapa</th><th class="num">Média</th><th class="num">P50</th>
+        <th class="num">P95</th><th class="num">P99</th><th class="num">Máx</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Guardrail Input</td><td class="num">630ms</td><td class="num">583ms</td><td class="num">1.123ms</td><td class="num">1.450ms</td><td class="num">1.450ms</td></tr>
+    <tr><td>① Triagem (Haiku)</td><td class="num">4.500ms</td><td class="num">3.415ms</td><td class="num">12.012ms</td><td class="num">17.243ms</td><td class="num">17.243ms</td></tr>
+    <tr><td>② Risco + RAG (Sonnet)</td><td class="num">5.634ms</td><td class="num">5.426ms</td><td class="num">7.313ms</td><td class="num">14.249ms</td><td class="num">14.249ms</td></tr>
+    <tr><td>Guardrail Output</td><td class="num">1.218ms</td><td class="num">1.193ms</td><td class="num">1.365ms</td><td class="num">1.756ms</td><td class="num">1.756ms</td></tr>
+    <tr style="font-weight:700;background:#eff6ff">
+      <td>E2E Total</td><td class="num">11.982ms</td><td class="num">11.001ms</td>
+      <td class="num">22.054ms</td><td class="num">28.159ms</td><td class="num">28.159ms</td>
+    </tr>
+  </tbody>
+</table>
+
+<p style="font-size:12px;color:var(--muted)">
+  Nota: alta variância no Haiku (p95 = 12s vs p50 = 3.4s) — reflexo do throttling no passe 1
+  que afetou os tempos de resposta via backoff interno.
+</p>
+
+<hr>
+
+<!-- ══ BATCH 2 ══ -->
+<h2>Batch 2 — Parâmetros convergidos aplicados <span class="badge-b2">zero throttling</span></h2>
+<div class="meta">
+  Executado em 2026-04-28 às 03:55 (UTC-3) · 100 registros · Parâmetros: 2 workers, delay 1.0s (descobertos no Batch 1)
+</div>
+
+<div class="card ok">
+  Com os parâmetros já configurados em <code>.env</code> (workers=2, delay=1.0s), o batch rodou
+  em passe único sem nenhum evento de throttling. O AIMD não precisou agir — o sistema já operava
+  no regime ideal desde o início.
+</div>
+
+<div class="grid-4">
+  <div class="card kpi"><div class="v">100</div><div class="l">Registros submetidos</div></div>
+  <div class="card kpi"><div class="v" style="color:#059669">83</div><div class="l">Processados com sucesso</div></div>
+  <div class="card kpi"><div class="v" style="color:#dc2626">17</div><div class="l">Bloqueados pelo guardrail</div></div>
+  <div class="card kpi"><div class="v">7min 55s</div><div class="l">Duração total</div></div>
+</div>
+
+<h3>Passes de processamento</h3>
+<table>
+  <thead>
+    <tr><th>Passe</th><th>Workers</th><th>Delay (s)</th><th>Total</th><th>Sucesso</th>
+        <th>Throttled</th><th>Taxa</th><th>Duração</th><th>Vazão (reg/min)</th><th>Resultado</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="font-weight:700;text-align:center">1</td>
+      <td class="num">2</td><td class="num">1.0s</td>
+      <td class="num">100</td>
+      <td class="num" style="color:#059669;font-weight:700">83</td>
+      <td class="num" style="color:var(--muted)">0</td>
+      <td><span class="pill green">0.0%</span></td>
+      <td class="num">475.5s</td>
+      <td class="num">12.6</td>
+      <td style="font-size:12px;color:#059669">Sem throttling · passe único ✓</td>
+    </tr>
+  </tbody>
+</table>
+
+<img src="/assets/images/graph-batch-2.png" alt="Batch 2 — passe único, 0% throttle"
+     style="max-width:100%;display:block;margin:0 auto;border-radius:6px;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+
+<h3>Latência por etapa — registros processados com sucesso</h3>
+<table>
+  <thead>
+    <tr><th>Etapa</th><th class="num">Média</th><th class="num">P50</th>
+        <th class="num">P95</th><th class="num">P99</th><th class="num">Máx</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Guardrail Input</td><td class="num">598ms</td><td class="num">582ms</td><td class="num">724ms</td><td class="num">801ms</td><td class="num">801ms</td></tr>
+    <tr><td>① Triagem (Haiku)</td><td class="num">2.258ms</td><td class="num">2.126ms</td><td class="num">3.191ms</td><td class="num">4.379ms</td><td class="num">4.379ms</td></tr>
+    <tr><td>② Risco + RAG (Sonnet)</td><td class="num">6.036ms</td><td class="num">5.812ms</td><td class="num">7.775ms</td><td class="num">9.784ms</td><td class="num">9.784ms</td></tr>
+    <tr><td>Guardrail Output</td><td class="num">1.222ms</td><td class="num">1.197ms</td><td class="num">1.372ms</td><td class="num">1.774ms</td><td class="num">1.774ms</td></tr>
+    <tr style="font-weight:700;background:#d1fae5">
+      <td>E2E Total</td><td class="num">10.114ms</td><td class="num">9.968ms</td>
+      <td class="num">11.811ms</td><td class="num">15.441ms</td><td class="num">15.441ms</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<!-- ══ COMPARATIVO ══ -->
+<h2>Comparativo — Batch 0 × Batch 1 × Batch 2</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Métrica</th>
+      <th>Batch 0 <span style="font-weight:400;opacity:.8">(limiar frouxo)</span></th>
+      <th>Batch 1 <span style="font-weight:400;opacity:.8">(AIMD corrigido)</span></th>
+      <th>Batch 2 <span style="font-weight:400;opacity:.8">(convergido)</span></th>
+      <th>B0 → B2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Passes necessários</td>
+        <td class="num">3</td><td class="num">2</td><td class="num">1</td>
+        <td class="num"><span class="delta-up">−2 passes</span></td></tr>
+    <tr><td>Throttling — passe 1</td>
+        <td class="num">13.0%</td><td class="num">17.0%</td><td class="num">0.0%</td>
+        <td class="num"><span class="delta-up">−13pp</span></td></tr>
+    <tr><td>AIMD ajustou parâmetros?</td>
+        <td class="num" style="color:#dc2626">Não</td>
+        <td class="num" style="color:#059669">Sim (5→2w, 0→1s)</td>
+        <td class="num" style="color:var(--muted)">—</td>
+        <td></td></tr>
+    <tr><td>Registros bloqueados</td>
+        <td class="num">26</td><td class="num">15</td><td class="num">17</td>
+        <td class="num"><span class="delta-neu">determinístico por registro</span></td></tr>
+    <tr><td>Duração total</td>
+        <td class="num">410s</td><td class="num">451s</td><td class="num">475s</td>
+        <td class="num"><span class="delta-neu">ver nota ①</span></td></tr>
+    <tr><td>Duração normalizada (s/registro)</td>
+        <td class="num">5.54s/reg</td><td class="num">5.31s/reg</td><td class="num">5.72s/reg</td>
+        <td class="num"><span class="delta-neu">ver nota ②</span></td></tr>
+    <tr><td>Duração norm. sem delay intencional</td>
+        <td class="num">5.54s/reg</td><td class="num">5.31s/reg</td><td class="num" style="color:#059669;font-weight:700">5.22s/reg</td>
+        <td class="num"><span class="delta-up">−6% (mais eficiente)</span></td></tr>
+    <tr><td>E2E médio por registro</td>
+        <td class="num">11.476ms</td><td class="num">11.982ms</td><td class="num">10.114ms</td>
+        <td class="num"><span class="delta-up">−1.362ms (−12%)</span></td></tr>
+    <tr><td>E2E P95</td>
+        <td class="num">18.405ms</td><td class="num">22.054ms</td><td class="num">11.811ms</td>
+        <td class="num"><span class="delta-up">−6.594ms (−36%)</span></td></tr>
+    <tr><td>Haiku avg (triagem)</td>
+        <td class="num">3.986ms</td><td class="num">4.500ms</td><td class="num">2.258ms</td>
+        <td class="num"><span class="delta-up">−1.728ms (−43%)</span></td></tr>
+    <tr><td>Haiku P95</td>
+        <td class="num">11.041ms</td><td class="num">12.012ms</td><td class="num">3.191ms</td>
+        <td class="num"><span class="delta-up">−7.850ms (−71%)</span></td></tr>
+    <tr><td>Workers finais</td>
+        <td class="num">5 (sem ajuste)</td><td class="num">2</td><td class="num">2</td>
+        <td></td></tr>
+    <tr><td>Delay final</td>
+        <td class="num">0.0s (sem ajuste)</td><td class="num">1.0s</td><td class="num">1.0s</td>
+        <td></td></tr>
+  </tbody>
+</table>
+
+<p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.8">
+  <strong>① Por que o Batch 0 parece mais rápido em tempo absoluto (410s vs 475s)?</strong><br>
+  Dois efeitos se combinam: (a) processou 9 registros a menos que o Batch 2 (74 vs 83, CSVs diferentes);
+  a 5.5s/registro isso representa ~50s de diferença natural. (b) operou com 5 workers em paralelo vs
+  2 no Batch 2, aumentando a concorrência mesmo com retries de throttling.<br><br>
+  <strong>② Por que a duração normalizada do Batch 2 (5.72s/reg) parece maior que B0 (5.54s/reg)?</strong><br>
+  O delay intencional de 1.0s por registro, aplicado entre chamadas para evitar throttling,
+  adiciona ~41.5s ao total (83 reg ÷ 2 workers × 1.0s). Subtraindo esse overhead:
+  Batch 2 = <strong>5.22s/registro</strong> — o mais eficiente dos três. O delay não é desperdício:
+  é o "preço" de zero throttling, zero retries e latência previsível.
+</p>
+
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0">
+  <div style="text-align:center">
+    <img src="/assets/images/graph-batch-0.png" alt="Batch 0"
+         style="max-width:100%;border-radius:6px;border:1px solid #fca5a5;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+    <div style="font-size:11px;font-weight:700;color:#991b1b;margin-top:6px">Batch 0 — sem ajuste</div>
+    <div style="font-size:11px;color:var(--muted)">3 passes · workers fixos em 5</div>
+  </div>
+  <div style="text-align:center">
+    <img src="/assets/images/graph-batch-1.png" alt="Batch 1"
+         style="max-width:100%;border-radius:6px;border:1px solid #fcd34d;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+    <div style="font-size:11px;font-weight:700;color:#b45309;margin-top:6px">Batch 1 — convergência</div>
+    <div style="font-size:11px;color:var(--muted)">2 passes · 5→2 workers</div>
+  </div>
+  <div style="text-align:center">
+    <img src="/assets/images/graph-batch-2.png" alt="Batch 2"
+         style="max-width:100%;border-radius:6px;border:1px solid #86efac;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+    <div style="font-size:11px;font-weight:700;color:#065f46;margin-top:6px">Batch 2 — regime estável</div>
+    <div style="font-size:11px;color:var(--muted)">1 passe · 0% throttle</div>
+  </div>
+</div>
+
+<!-- ══ INSIGHT ══ -->
+<h2>Insights principais</h2>
+
+<div class="card warn" style="margin-bottom:12px">
+  <strong>Paradoxo de tempo: Batch 0 mais rápido em absoluto, mas menos eficiente por registro.</strong>
+  O Batch 0 levou 410s contra 475s do Batch 2 — mas processou 9 registros a menos (74 vs 83, CSVs diferentes)
+  e usou 5 workers em paralelo. Normalizado: 5.54s/reg (B0) vs 5.22s/reg (B2, descontando delay intencional).
+  O Batch 2 é 6% mais eficiente por registro, processa sem retries desperdiçados e com latência previsível.
+</div>
+
+<div class="card err" style="margin-bottom:12px">
+  <strong>Batch 0 — o AIMD implementado, mas silencioso.</strong> Com limiar de 20%, uma taxa de 13%
+  era invisível ao algoritmo. O sistema completou os 3 passes, mas por esgotamento da fila — não por
+  controle adaptivo. Sem o diagnóstico dos pass_stats, esse comportamento passaria despercebido.
+</div>
+
+<div class="card ok" style="margin-bottom:12px">
+  <strong>Batch 1 — convergência em 1 ajuste.</strong> Com limiar corrigido para 5%, o primeiro
+  passe detectou 17% de throttling e aplicou Multiplicative Decrease imediatamente (workers 5→2,
+  delay 0→1s). O passe 2 zerou o throttling, provando que o ponto de operação ideal foi encontrado.
+</div>
+
+<div class="card ok" style="margin-bottom:12px">
+  <strong>Haiku 43% mais rápido no Batch 2 vs Batch 0</strong> (3.99s → 2.26s avg), P95 71% menor
+  (11.0s → 3.2s). O throttling causava backoff interno que inflava artificialmente os tempos do Haiku —
+  sem throttling, o modelo responde no seu tempo natural e com muito menos variância.
+</div>
+
+<div class="card ok" style="margin-bottom:12px">
+  <strong>P95 E2E caiu 36% de B0 para B2</strong> (18.4s → 11.8s) — o percentil 95 é o indicador
+  mais sensível a picos causados por throttling/backoff. O Batch 2 mostra um pipeline muito mais
+  estável e previsível em toda a distribuição.
+</div>
+
+<div class="card warn">
+  <strong>Registros bloqueados variam entre batches (26 × 15 × 17)</strong> — os três batches usaram
+  CSVs diferentes, portanto a variação é esperada. O guardrail é determinístico para um mesmo dataset:
+  dentro de um mesmo arquivo, os mesmos registros são sempre bloqueados.
+</div>
+
+<!-- ══ CONCLUSÃO ══ -->
+<h2>Conclusão</h2>
+<p>
+  A jornada de três batches mostra o processo completo: <strong>bug detectado → diagnóstico
+  quantitativo → correção → validação</strong>. O AIMD encontrou empiricamente que
+  <strong>2 workers com delay de 1.0s por registro</strong> é o ponto de equilíbrio para a conta
+  AWS gratuita com quota de ~5 RPM por modelo. A partir do Batch 2, esses parâmetros foram fixados
+  no <code>.env</code> — o sistema agora opera no regime ideal sem necessidade de passes de descoberta.
+</p>
+<p>
+  Em um ambiente de produção com quota elevada ou provisioned throughput, o AIMD
+  reconvergeria automaticamente para um ponto mais agressivo (mais workers, menos delay),
+  sem necessidade de reconfiguração manual.
+</p>
+
+<div style="margin-top:24px;text-align:center">
+  <a href="/adr#throttle-adaptivo"
+     style="display:inline-flex;align-items:center;gap:6px;font-size:13px;
+            color:#1e40af;text-decoration:none;padding:5px 12px;border:1px solid #bfdbfe;
+            border-radius:6px;background:#eff6ff">
+    ← ADR-001 · seção Throttle Adaptivo
+  </a>
+</div>
+
+<div style="margin-top:24px;padding-top:20px;border-top:1px solid #e5e7eb;
+            font-size:12px;color:var(--muted);text-align:center">
+  FinGuard · Future Minds 3 · Nível 3 — Arquiteto da Solução · Grupo 23TB · Abril 2026
+</div>
+
+</body>
+</html>
