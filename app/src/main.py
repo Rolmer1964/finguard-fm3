@@ -167,17 +167,18 @@ def analyze_one(payload: AnalyzeRequest) -> JSONResponse:
 
 
 @app.post("/analyze-form", response_class=HTMLResponse)
-def analyze_from_form(request: Request, text: str = Form(...), product_hint: str = Form("")):
+def analyze_from_form(request: Request, text: str = Form(...), product_hint: str = Form(""), canal: str = Form("Web")):
     t_start     = time.time()
     started_at  = now_brt().strftime("%Y-%m-%d %H:%M:%S (UTC-3)")
     stem        = now_brt().strftime("report_%Y-%m-%d-%H-%M-%S")
 
-    result      = analyze(text, product_hint or None)
+    canal_val   = canal.strip() or "Web"
+    result      = analyze(text, product_hint or None, canal=canal_val)
 
     elapsed_s   = time.time() - t_start
     finished_at = now_brt().strftime("%Y-%m-%d %H:%M:%S (UTC-3)")
 
-    record = {"id": result.get("trace_id", stem), "canal": "Web", **result}
+    record = {"id": result.get("trace_id", stem), "canal": canal_val, **result}
 
     write_outputs(
         [record], stem=stem,
