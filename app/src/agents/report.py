@@ -45,13 +45,15 @@ def consolidate(triage: dict, risk: dict, canal: str | None = None) -> dict:
         urgency = risco_min
 
     # Override 3: canal regulatório → risco mínimo Alto por exposição regulatória (POL-SAC-001 §4.3)
+    risk_level_original = None
     risco_canal_min = _CANAIS_RISCO_MINIMO.get(canal or "")
     if risco_canal_min and _RISCO_ORDEM.get(risk_level or "", 0) < _RISCO_ORDEM[risco_canal_min]:
+        risk_level_original = risk_level
         nota = f" [Nível elevado de {risk_level} para {risco_canal_min} por canal regulatório ({canal}) — POL-SAC-001 §4.3]"
         risk_just  = (risk_just + nota).strip()
         risk_level = risco_canal_min
 
-    return {
+    out = {
         "category":           triage.get("category"),
         "product":            product,
         "sentiment":          triage.get("sentiment"),
@@ -63,3 +65,6 @@ def consolidate(triage: dict, risk: dict, canal: str | None = None) -> dict:
         "risk_justification": risk_just,
         "acoes_recomendadas": risk.get("acoes_recomendadas", []),
     }
+    if risk_level_original:
+        out["risk_level_original"] = risk_level_original
+    return out

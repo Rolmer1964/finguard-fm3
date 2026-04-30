@@ -361,7 +361,11 @@ function _populateModal(r) {
   document.getElementById('m-sentiment').textContent    = r.sentiment || '-';
   document.getElementById('m-urgency').innerHTML        = pill(r.urgency);
   document.getElementById('m-summary').textContent      = r.summary || '-';
-  document.getElementById('m-risk_level').innerHTML     = pill(r.risk_level);
+  document.getElementById('m-risk_level').innerHTML = r.risk_level_original
+    ? '<span style="text-decoration:line-through;color:#9ca3af;margin-right:4px">' + r.risk_level_original + '</span>'
+      + '<span style="color:#6b7280;margin-right:4px">→</span>'
+      + pill(r.risk_level)
+    : pill(r.risk_level);
   document.getElementById('m-risk_justification').textContent = r.risk_justification || '-';
 
   var prazo = r.prazo_resposta || '';
