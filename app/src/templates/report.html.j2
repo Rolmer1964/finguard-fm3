@@ -19,6 +19,8 @@
   th { background: #f3f4f6; }
   tr.clickable { cursor: pointer; }
   tr.clickable:hover td { background: #eff6ff; }
+  tr.blocked td { background: #fff7ed; }
+  tr.blocked:hover td { background: #fed7aa; }
   .pill { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
   .pill.crit  { background: #fee2e2; color: #991b1b; }
   .pill.alta  { background: #fed7aa; color: #9a3412; }
@@ -131,39 +133,83 @@
 <div class="card" style="margin-top: 24px">
   <h3 style="margin-top:0">Reclamações críticas</h3>
   {% if critical %}
-  <table>
-    <thead><tr><th>ID</th><th>Categoria</th><th>Produto</th><th>Urgência</th><th>Risco</th><th>Resumo</th></tr></thead>
+  <div style="overflow-x:auto">
+  <table style="min-width:900px">
+    <thead>
+      <tr>
+        <th style="width:90px;white-space:nowrap">ID</th>
+        <th style="width:100px">Categoria</th>
+        <th style="width:90px">Produto</th>
+        <th style="width:62px">Urgência</th>
+        <th style="width:62px">Risco</th>
+        <th>Parecer de Risco</th>
+        <th style="width:30%">Ações imediatas</th>
+      </tr>
+    </thead>
     <tbody>
     {% for c in critical %}
-      <tr class="clickable" onclick="openDetail('{{ c.id }}')">
-        <td>{{ c.id }}</td>
-        <td>{{ c.category or '-' }}</td>
-        <td>{{ c.product or '-' }}</td>
-        <td><span class="pill crit">{{ c.urgency or '-' }}</span></td>
-        <td><span class="pill crit">{{ c.risk_level or '-' }}</span></td>
-        <td>{{ c.summary or '-' }}</td>
+      <tr class="clickable" onclick="openDetail('{{ c.id }}', CRITICAL)">
+        <td style="font-family:monospace;font-size:11px;white-space:nowrap">{{ c.id }}</td>
+        <td style="font-size:12px">{{ c.category or '-' }}</td>
+        <td style="font-size:12px">{{ c.product or '-' }}</td>
+        <td>
+          {% set ul = (c.urgency or '').lower() %}
+          {% if ul.startswith('crít') %}<span class="pill crit">{{ c.urgency }}</span>
+          {% elif ul.startswith('alt') %}<span class="pill alta">{{ c.urgency }}</span>
+          {% elif ul.startswith('méd') or ul.startswith('med') %}<span class="pill media">{{ c.urgency }}</span>
+          {% elif ul.startswith('baix') %}<span class="pill baixa">{{ c.urgency }}</span>
+          {% else %}<span class="pill">{{ c.urgency or '-' }}</span>{% endif %}
+        </td>
+        <td>
+          {% set rl = (c.risk_level or '').lower() %}
+          {% if rl.startswith('crít') %}<span class="pill crit">{{ c.risk_level }}</span>
+          {% elif rl.startswith('alt') %}<span class="pill alta">{{ c.risk_level }}</span>
+          {% else %}<span class="pill">{{ c.risk_level or '-' }}</span>{% endif %}
+        </td>
+        <td style="font-size:12px;color:#374151">{{ c.risk_justification | truncate(140, true, '…') }}</td>
+        <td>
+          {% set acoes = c.acoes_recomendadas or [] %}
+          {% if acoes %}
+          <ul style="margin:0;padding-left:14px;font-size:11px;color:#374151;line-height:1.5">
+            {% for acao in acoes[:3] %}
+            <li style="margin-bottom:3px">{{ acao.split('(POL')[0].split('conforme')[0] | trim | truncate(72, true, '…') }}</li>
+            {% endfor %}
+            {% if acoes | length > 3 %}<li style="color:#9ca3af">+{{ acoes|length - 3 }} ação(ões)…</li>{% endif %}
+          </ul>
+          {% else %}-{% endif %}
+        </td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
+  </div>
   {% else %}<p>Nenhuma reclamação crítica no período.</p>{% endif %}
 </div>
 
 <div class="card" style="margin-top: 24px">
   <h3 style="margin-top:0">Todas as reclamações</h3>
   <table>
-    <thead><tr><th>ID</th><th>Canal</th><th>Categoria</th><th>Produto</th><th>Sentimento</th><th>Urgência</th><th>Risco</th><th>Resumo</th></tr></thead>
+    <thead><tr>
+      <th style="white-space:nowrap">ID</th>
+      <th style="white-space:nowrap">Canal</th>
+      <th style="white-space:nowrap">Categoria</th>
+      <th style="white-space:nowrap">Produto</th>
+      <th style="white-space:nowrap">Sentimento</th>
+      <th style="white-space:nowrap">Urgência</th>
+      <th style="white-space:nowrap">Risco</th>
+      <th>Resumo</th>
+    </tr></thead>
     <tbody>
     {% for r in results %}
       {% set u = (r.urgency or '') %}
       {% set rl = (r.risk_level or '') %}
-      <tr class="clickable" onclick="openDetail('{{ r.id }}')">
-        <td>{{ r.id }}</td>
-        <td>{{ r.canal or '-' }}</td>
-        <td>{{ r.category or '-' }}</td>
-        <td>{{ r.product or '-' }}</td>
-        <td>{{ r.sentiment or '-' }}</td>
-        <td>
+      <tr class="clickable{% if (r.category or '') == 'Bloqueado' %} blocked{% endif %}" onclick="openDetail('{{ r.id }}')">
+        <td style="white-space:nowrap;font-family:monospace;font-size:12px">{{ r.id }}</td>
+        <td style="white-space:nowrap">{{ r.canal or '-' }}</td>
+        <td style="white-space:nowrap">{{ r.category or '-' }}</td>
+        <td style="white-space:nowrap">{{ r.product or '-' }}</td>
+        <td style="white-space:nowrap">{{ r.sentiment or '-' }}</td>
+        <td style="white-space:nowrap">
           {% set ul = u.lower() %}
           {% if ul.startswith('crít') %}<span class="pill crit">{{ u }}</span>
           {% elif ul.startswith('alt') %}<span class="pill alta">{{ u }}</span>
@@ -171,7 +217,7 @@
           {% elif ul.startswith('baix') %}<span class="pill baixa">{{ u }}</span>
           {% else %}<span class="pill">{{ u or '-' }}</span>{% endif %}
         </td>
-        <td>
+        <td style="white-space:nowrap">
           {% set rll = rl.lower() %}
           {% if rll.startswith('crít') %}<span class="pill crit">{{ rl }}</span>
           {% elif rll.startswith('alt') %}<span class="pill alta">{{ rl }}</span>
@@ -188,6 +234,7 @@
 
 <script>
 var RECORDS = {{ results | tojson }};
+var CRITICAL = {{ critical | tojson }};
 var INDEX = {};
 RECORDS.forEach(function(r) { INDEX[r.id] = r; });
 </script>
