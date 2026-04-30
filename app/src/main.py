@@ -163,7 +163,7 @@ def healthz() -> dict:
 @app.post("/analyze")
 def analyze_one(payload: AnalyzeRequest) -> JSONResponse:
     """Executa o grafo (triage → risk → report) numa reclamação e devolve o JSON consolidado."""
-    return JSONResponse(analyze(payload.text, payload.product_hint))
+    return JSONResponse(analyze(payload.text, payload.product_hint, canal=payload.canal))
 
 
 @app.post("/analyze-form", response_class=HTMLResponse)
