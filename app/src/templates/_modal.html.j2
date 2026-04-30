@@ -284,22 +284,45 @@ function buildSecurity(r) {
     });
     var piiKeys = Object.keys(allPii);
     var _PII_LABELS = {cpf:'CPF', cartao:'Cartão', conta:'Conta', nome:'Nome'};
-    if (piiKeys.length > 0 || bedrockFields.length > 0) {
+
+    // Bedrock detail: agrega pii_types, content e profanity de todos os campos intervenidos
+    var bdPii = [], bdContent = [], bdProfanity = false;
+    outMeta.forEach(function(m) {
+      var d = m.bedrock_detail || {};
+      (d.pii_types || []).forEach(function(t) { if (bdPii.indexOf(t) < 0) bdPii.push(t); });
+      (d.content   || []).forEach(function(t) { if (bdContent.indexOf(t) < 0) bdContent.push(t); });
+      if (d.profanity) bdProfanity = true;
+    });
+    var hasAny = piiKeys.length > 0 || bdPii.length > 0 || bdContent.length > 0 || bdProfanity;
+
+    if (hasAny) {
       html += '<div style="margin-top:8px;padding:9px 12px;background:#fef9c3;border:1px solid #fcd34d;border-radius:6px;font-size:12px">'
-        + '<div style="font-weight:700;color:#92400e;margin-bottom:5px">⚡ Guardrail de saída — anonimizações aplicadas</div>'
+        + '<div style="font-weight:700;color:#92400e;margin-bottom:5px">⚡ Guardrail de saída — sanitizações aplicadas</div>'
         + '<div style="display:flex;flex-wrap:wrap;gap:5px">';
+      // PII local (regex)
       piiKeys.forEach(function(k) {
         html += '<span style="background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:2px 9px;border-radius:4px;font-size:12px;font-family:monospace">'
           + '[' + (_PII_LABELS[k]||k).toUpperCase() + ' OMITIDO] &times;' + allPii[k] + '</span>';
       });
-      if (bedrockFields.length > 0) {
+      // PII detectado pelo Bedrock
+      bdPii.forEach(function(t) {
         html += '<span style="background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6;padding:2px 9px;border-radius:4px;font-size:12px">'
-          + 'Bedrock: ' + bedrockFields.join(', ') + '</span>';
+          + '🔒 ' + t + '</span>';
+      });
+      // Conteúdo filtrado pelo Bedrock
+      bdContent.forEach(function(t) {
+        html += '<span style="background:#fce7f3;border:1px solid #f9a8d4;color:#9d174d;padding:2px 9px;border-radius:4px;font-size:12px">'
+          + '⚠ ' + t + '</span>';
+      });
+      // Profanity
+      if (bdProfanity) {
+        html += '<span style="background:#fce7f3;border:1px solid #f9a8d4;color:#9d174d;padding:2px 9px;border-radius:4px;font-size:12px">'
+          + '⚠ Linguagem inapropriada</span>';
       }
       html += '</div></div>';
     } else {
       html += '<div style="margin-top:8px;font-size:12px;color:#6b7280">'
-        + '✓ Guardrail de saída — sem ocorrências de PII</div>';
+        + '✓ Guardrail de saída — sem ocorrências detectadas</div>';
     }
   }
 

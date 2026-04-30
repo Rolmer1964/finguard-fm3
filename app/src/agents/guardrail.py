@@ -134,6 +134,56 @@ def _local_input_check(text: str) -> dict:
 
 # ── Output guardrail ───────────────────────────────────────────────────────────
 
+_PII_TYPE_LABELS: dict[str, str] = {
+    "EMAIL":                   "E-mail",
+    "EMAIL_ADDRESS":           "E-mail",
+    "PHONE":                   "Telefone",
+    "PHONE_NUMBER":            "Telefone",
+    "NAME":                    "Nome",
+    "CREDIT_DEBIT_NUMBER":     "Cartão",
+    "CREDIT_DEBIT_EXPIRY":     "Validade cartão",
+    "CREDIT_DEBIT_CVV":        "CVV",
+    "AWS_ACCESS_KEY":          "Chave AWS",
+    "AWS_SECRET_KEY":          "Chave secreta AWS",
+    "IP_ADDRESS":              "IP",
+    "ADDRESS":                 "Endereço",
+    "US_SOCIAL_SECURITY_NUMBER": "CPF/SSN",
+    "DRIVER_ID":               "CNH",
+    "PASSPORT_NUMBER":         "Passaporte",
+}
+
+_CONTENT_LABELS: dict[str, str] = {
+    "INSULTS":    "Linguagem ofensiva",
+    "HATE":       "Discurso de ódio",
+    "VIOLENCE":   "Violência",
+    "SEXUAL":     "Conteúdo sexual",
+    "MISCONDUCT": "Conduta imprópria",
+    "PROMPT_ATTACK": "Prompt injection",
+}
+
+
+def _extract_output_detail(assessments: list) -> dict:
+    pii_types: list[str] = []
+    content: list[str]   = []
+    profanity             = False
+    for a in assessments:
+        for p in a.get("sensitiveInformationPolicy", {}).get("piiEntities", []):
+            if p.get("action") not in ("NONE", None):
+                label = _PII_TYPE_LABELS.get(p["type"], p["type"])
+                if label not in pii_types:
+                    pii_types.append(label)
+        for f in a.get("contentPolicy", {}).get("filters", []):
+            if f.get("action") not in ("NONE", None):
+                label = _CONTENT_LABELS.get(f["type"], f["type"])
+                conf  = f.get("confidence", "")
+                entry = f"{label} ({conf})" if conf else label
+                if entry not in content:
+                    content.append(entry)
+        if a.get("wordPolicy", {}).get("managedWordLists"):
+            profanity = True
+    return {"pii_types": pii_types, "content": content, "profanity": profanity}
+
+
 def sanitize_output(text: str, field: str = "") -> tuple[str, dict]:
     """
     Sanitiza o texto de saída removendo/anonimizando dados sensíveis.
@@ -151,7 +201,8 @@ def sanitize_output(text: str, field: str = "") -> tuple[str, dict]:
             text = outputs[0].get("text", text) if outputs else text
             if r["action"] == "GUARDRAIL_INTERVENED":
                 meta["bedrock_intervened"] = True
-                logger.info("guardrail OUTPUT interveio campo=%s", field)
+                meta["bedrock_detail"]     = _extract_output_detail(r["assessments"])
+                logger.info("guardrail OUTPUT interveio campo=%s detail=%s", field, meta["bedrock_detail"])
         except Exception:
             logger.exception("erro Bedrock guardrail OUTPUT campo=%s — fallback regex", field)
 
