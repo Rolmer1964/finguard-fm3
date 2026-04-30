@@ -167,9 +167,15 @@ def _extract_output_detail(assessments: list) -> dict:
     content: list[str]   = []
     profanity             = False
     for a in assessments:
-        for p in a.get("sensitiveInformationPolicy", {}).get("piiEntities", []):
+        sip = a.get("sensitiveInformationPolicy", {})
+        for p in sip.get("piiEntities", []):
             if p.get("action") not in ("NONE", None):
                 label = _PII_TYPE_LABELS.get(p["type"], p["type"])
+                if label not in pii_types:
+                    pii_types.append(label)
+        for rx in sip.get("regexes", []):
+            if rx.get("action") not in ("NONE", None):
+                label = rx.get("name") or rx.get("regex") or "Regex"
                 if label not in pii_types:
                     pii_types.append(label)
         for f in a.get("contentPolicy", {}).get("filters", []):
