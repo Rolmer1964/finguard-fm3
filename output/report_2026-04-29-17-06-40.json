@@ -1,0 +1,15 @@
+[
+  {
+    "id": "REC-10011",
+    "canal": "Redes Sociais",
+    "texto_original": "meu cartão foi cancelado sem razao e me dá vontade de jogar uma bomba nesse banco. Sou cliente há dez anos e no ultimo ano isso já ocorreu 3 vezes. já fiz reclamacoes e nao obtive resposta. Vcs parecem não prestar mesmo. Quero sua falencia.",
+    "category": "Bloqueado",
+    "product": "—",
+    "sentiment": "—",
+    "urgency": "—",
+    "summary": "[Entrada bloqueada pelo guardrail de proteção]",
+    "risk_level": "Bloqueado",
+    "risk_justification": "Esta entrada não pode ser processada pelo FinGuard. O sistema está disponível exclusivamente para análise de reclamações bancárias de clientes. Por favor, envie o texto de uma reclamação válida.",
+    "block_reason": "VIOLENCE (LOW)"
+  }
+]

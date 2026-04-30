@@ -1,0 +1,1 @@
+{"filename": "caps.csv", "started_at": "2026-04-29 17:06:40 (UTC-3)", "finished_at": "2026-04-29 17:06:42 (UTC-3)", "elapsed_s": 1.7209675312042236, "pass_stats": [{"pass_num": 1, "workers": 2, "delay_s": 1.0, "retries": 2, "total": 1, "success": 1, "throttled": 0, "throttle_rate": 0.0, "throttle_pct": 0.0, "duration_s": 1.7, "throughput_rpm": 34.9}]}

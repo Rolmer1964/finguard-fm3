@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(python3 *)",
+      "Bash(grep -v \"^$\")",
+      "Bash(xargs -I{} git show -s --format=\"%H %s%n%b\" {})",
+      "Bash(grep -v \"^--$\")",
+      "Bash(git filter-branch *)",
+      "Bash(xargs git *)",
+      "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch *)",
+      "Bash(git stash *)",
+      "Bash(git push *)",
+      "Bash(git checkout *)",
+      "Bash(gh auth *)",
+      "Bash(gh repo *)",
+      "Bash(git mv *)",
+      "Bash(python3.12 --version)",
+      "Bash(python3.11 --version)",
+      "Bash(py --version)",
+      "Bash(where python *)",
+      "Bash(py *)"
+    ]
+  }
+}
