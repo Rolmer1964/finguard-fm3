@@ -20,19 +20,36 @@ _CANAIS_CRITICOS: set[str] = {"Banco Central", "Procon", "Justiça"}
 _URGENCIA_ORDEM: dict[str, int] = {"Crítica": 4, "Alta": 3, "Média": 2, "Baixa": 1}
 _RISCO_URGENCIA_MINIMA: dict[str, str] = {"Crítico": "Alta"}
 
+# Risco mínimo por canal regulatório — exposição independente do conteúdo (POL-SAC-001 §4.3)
+_RISCO_ORDEM: dict[str, int] = {"Crítico": 4, "Alto": 3, "Médio": 2, "Baixo": 1}
+_CANAIS_RISCO_MINIMO: dict[str, str] = {
+    "Banco Central": "Alto",
+    "Procon":        "Alto",
+    "Justiça":       "Alto",
+}
+
 
 def consolidate(triage: dict, risk: dict, canal: str | None = None) -> dict:
-    urgency = triage.get("urgency")
-    product = triage.get("product")
+    urgency    = triage.get("urgency")
+    product    = triage.get("product")
+    risk_level = risk.get("risk_level")
+    risk_just  = risk.get("risk_justification") or ""
 
     # Override 1: canal regulatório → urgência CRÍTICA obrigatória (POL-SAC-001 §4.3)
     if canal in _CANAIS_CRITICOS and urgency != "Crítica":
         urgency = "Crítica"
 
     # Override 2: risco Crítico garante urgência mínima Alta (segunda linha de defesa)
-    risco_min = _RISCO_URGENCIA_MINIMA.get(risk.get("risk_level") or "")
+    risco_min = _RISCO_URGENCIA_MINIMA.get(risk_level or "")
     if risco_min and _URGENCIA_ORDEM.get(urgency or "", 0) < _URGENCIA_ORDEM[risco_min]:
         urgency = risco_min
+
+    # Override 3: canal regulatório → risco mínimo Alto por exposição regulatória (POL-SAC-001 §4.3)
+    risco_canal_min = _CANAIS_RISCO_MINIMO.get(canal or "")
+    if risco_canal_min and _RISCO_ORDEM.get(risk_level or "", 0) < _RISCO_ORDEM[risco_canal_min]:
+        nota = f" [Nível elevado de {risk_level} para {risco_canal_min} por canal regulatório ({canal}) — POL-SAC-001 §4.3]"
+        risk_just  = (risk_just + nota).strip()
+        risk_level = risco_canal_min
 
     return {
         "category":           triage.get("category"),
@@ -42,7 +59,7 @@ def consolidate(triage: dict, risk: dict, canal: str | None = None) -> dict:
         "summary":            triage.get("summary"),
         "prazo_resposta":     _SLA_POR_URGENCIA.get(urgency or ""),
         "area_responsavel":   _AREA_POR_PRODUTO.get(product or "", "Área de Suporte Geral"),
-        "risk_level":         risk.get("risk_level"),
-        "risk_justification": risk.get("risk_justification"),
+        "risk_level":         risk_level,
+        "risk_justification": risk_just,
         "acoes_recomendadas": risk.get("acoes_recomendadas", []),
     }
