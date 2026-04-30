@@ -7,6 +7,7 @@ services:
       - "8000:8000"
     volumes:
       - ./assets/adr.html:/app/assets/adr.html:ro
+      - ./assets/relatorio-tecnico.html:/app/assets/relatorio-tecnico.html:ro
       - ./assets/hackathon:/app/assets/hackathon:ro
       - ./assets/images:/app/assets/images:ro
       - ./assets/presentation:/app/assets/presentation:ro

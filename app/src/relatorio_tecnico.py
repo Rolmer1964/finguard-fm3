@@ -1,8 +1,8 @@
-"""Geração do ADR (Architectural Decision Record) em HTML navegável.
+"""Geração do Relatório Técnico de Entrega em HTML navegável.
 
-O ADR é renderizado a partir de um template Jinja2, com dados de runtime
+Renderizado a partir de um template Jinja2, com dados de runtime
 (modelos configurados, status do guardrail, contagem de docs no RAG).
-Pode ser servido pelo endpoint /adr ou salvo em /app/docs/adr.html.
+Servido pelo endpoint /relatorio-tecnico ou salvo em /app/docs/relatorio-tecnico.html.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from .settings import settings
 
-logger = logging.getLogger("adr")
+logger = logging.getLogger("relatorio_tecnico")
 
 _env = Environment(
     loader=FileSystemLoader(str(Path(__file__).parent / "templates")),
@@ -25,7 +25,7 @@ _env = Environment(
 
 
 def _rag_status() -> dict:
-    """Lê o manifest do RAG, se existir, para mostrar volume indexado no ADR."""
+    """Lê o manifest do RAG, se existir, para mostrar volume indexado no relatório."""
     mpath = Path(settings.RAG_INDEX_DIR) / "manifest.json"
     if not mpath.exists():
         return {"available": False}
@@ -45,8 +45,8 @@ def _rag_status() -> dict:
         return {"available": False}
 
 
-def render_adr() -> str:
-    return _env.get_template("adr.html.j2").render(
+def render_relatorio() -> str:
+    return _env.get_template("relatorio_tecnico.html.j2").render(
         generated_at=now_brt().isoformat(timespec="seconds"),
         models={
             "triage": settings.BEDROCK_MODEL_TRIAGE,
@@ -62,11 +62,11 @@ def render_adr() -> str:
     )
 
 
-def write_adr() -> str:
-    html = render_adr()
+def write_relatorio() -> str:
+    html = render_relatorio()
     out_dir = Path(settings.DOCS_DIR)
     out_dir.mkdir(parents=True, exist_ok=True)
-    path = out_dir / "adr.html"
+    path = out_dir / "relatorio-tecnico.html"
     path.write_text(html, encoding="utf-8")
-    logger.info("ADR salvo em %s", path)
+    logger.info("Relatório Técnico de Entrega salvo em %s", path)
     return str(path)

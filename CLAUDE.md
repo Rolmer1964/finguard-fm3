@@ -71,7 +71,7 @@ app/src/
 assets/
   docs/              # PDFs/MDs com política interna (fonte do RAG)
   index/             # FAISS index + manifest (persistido)
-  adr.html           # Architecture Decision Record
+  relatorio-tecnico.html  # Relatório Técnico de Entrega
   presentation/      # Material de apresentação do hackathon
     analise_aimd.html
     proximos_passos_aimd.md
@@ -145,9 +145,9 @@ e `delay -= 0.5s`. O algoritmo persiste entre passes dentro de um batch.
 | POST | `/ingest` | Dispara re-ingestão RAG em background |
 | GET  | `/ingest/status` | Estado atual da ingestão |
 
-### Decisões de arquitetura
+### Relatório Técnico de Entrega
 
-Ver `assets/adr.html` para o registro completo. Decisões-chave:
+Ver `assets/relatorio-tecnico.html` para o documento completo. Decisões-chave:
 
 - **Haiku para triagem, Sonnet para risco**: otimização de custo — classificação simples
   não justifica modelo maior.

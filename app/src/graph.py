@@ -179,18 +179,22 @@ def get_graph():
 
 # ── Trace store ───────────────────────────────────────────────────────────────
 
-def _store_trace(trace_id: str, text: str, result: dict) -> None:
+def _store_trace(trace_id: str, text: str, result: dict, canal: str | None = None) -> None:
     tm = result.get("timings_ms", {})
     _traces.appendleft({
-        "trace_id":     trace_id,
-        "timestamp":    now_brt().strftime("%H:%M:%S"),
-        "text_preview": (text[:70] + "…") if len(text) > 70 else text,
-        "blocked":      result.get("blocked", False),
-        "category":     result.get("category"),
-        "urgency":      result.get("urgency"),
-        "risk_level":   result.get("risk_level"),
-        "timings_ms":   tm,
-        "total_ms": sum_timings(tm),
+        "trace_id":         trace_id,
+        "timestamp":        now_brt().strftime("%H:%M:%S"),
+        "text_preview":     (text[:70] + "…") if len(text) > 70 else text,
+        "blocked":          result.get("blocked", False),
+        "category":         result.get("category"),
+        "urgency":          result.get("urgency"),
+        "risk_level":       result.get("risk_level"),
+        "product":          result.get("product"),
+        "canal":            canal,
+        "prazo_resposta":   result.get("prazo_resposta"),
+        "area_responsavel": result.get("area_responsavel"),
+        "timings_ms":       tm,
+        "total_ms":         sum_timings(tm),
     })
 
 
@@ -228,5 +232,5 @@ def analyze(text: str, product_hint: str | None = None, record_id: str | None = 
         **final_payload,
         "timings_ms": final_state.get("timings_ms", {}),
     }
-    _store_trace(trace_id, text, result)
+    _store_trace(trace_id, text, result, canal=state.get("canal"))
     return result

@@ -31,7 +31,8 @@
   <div style="display:flex;gap:8px;align-self:center">
     <a href="/reports" style="background:#1e40af;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">Relatórios</a>
     <a href="/traces"  style="background:#1e40af;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">Log</a>
-    <a href="/adr"     style="background:#065f46;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">ADR</a>
+    <a href="/politica-decisoria" style="background:#7c3aed;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">Dados Decisórios</a>
+    <a href="#" onclick="openAdrModal();return false;" style="background:#065f46;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">ADR</a>
     <a href="/admin"   style="background:#6b7280;color:white;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">Admin</a>
   </div>
 </div>
@@ -202,5 +203,20 @@ document.querySelector('form[action="/batch"]').addEventListener('submit', funct
 });
 </script>
 {% endraw %}
+
+<div id="adr-modal" onclick="if(event.target===this)closeAdrModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:10px;width:92%;max-width:1020px;height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.3)">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #e5e7eb;flex-shrink:0">
+      <span style="font-weight:600;font-size:14px;color:#1f2937">ADR-001 — Arquitetura de Triagem Automatizada de Reclamações Bancárias</span>
+      <button onclick="closeAdrModal()" style="background:none;border:none;cursor:pointer;font-size:20px;color:#6b7280;padding:2px 8px;border-radius:4px;line-height:1" title="Fechar (Esc)">✕</button>
+    </div>
+    <iframe src="/adr" style="flex:1;border:none;width:100%"></iframe>
+  </div>
+</div>
+<script>
+function openAdrModal(){document.getElementById('adr-modal').style.display='flex';}
+function closeAdrModal(){document.getElementById('adr-modal').style.display='none';}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAdrModal();});
+</script>
 </body>
 </html>
