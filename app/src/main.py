@@ -168,11 +168,24 @@ def analyze_one(payload: AnalyzeRequest) -> JSONResponse:
 
 @app.post("/analyze-form", response_class=HTMLResponse)
 def analyze_from_form(request: Request, text: str = Form(...), product_hint: str = Form("")):
-    result = analyze(text, product_hint or None)
-    return templates.TemplateResponse(
-        "result.html.j2",
-        {"request": request, "result": result, "texto_original": mask_profanity(text)},
+    t_start     = time.time()
+    started_at  = now_brt().strftime("%Y-%m-%d %H:%M:%S (UTC-3)")
+    stem        = now_brt().strftime("report_%Y-%m-%d-%H-%M-%S")
+
+    result      = analyze(text, product_hint or None)
+
+    elapsed_s   = time.time() - t_start
+    finished_at = now_brt().strftime("%Y-%m-%d %H:%M:%S (UTC-3)")
+
+    record = {"id": result.get("trace_id", stem), "canal": "Web", **result}
+
+    write_outputs(
+        [record], stem=stem,
+        started_at=started_at, finished_at=finished_at,
+        elapsed_s=elapsed_s, label="Consulta unitária",
     )
+
+    return RedirectResponse(url=f"/report/{stem}", status_code=303)
 
 
 @app.post("/batch")
@@ -236,7 +249,7 @@ async def batch(file: UploadFile = File(...), label: str = Form("")) -> JSONResp
                              "summary": "[Entrada bloqueada pelo guardrail de proteção]",
                              "risk_level": "Bloqueado", "risk_justification": r.get("message", ""),
                              "block_reason": r.get("block_reason", "")}
-                return {"id": rec_id, "canal": canal, "texto_original": mask_profanity(texto), **r}
+                return {"id": rec_id, "canal": canal, **r}
             return process_row
 
         workers  = settings.BATCH_MAX_WORKERS

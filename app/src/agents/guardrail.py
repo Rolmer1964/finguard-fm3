@@ -134,21 +134,21 @@ def _local_input_check(text: str) -> dict:
 
 # ── Output guardrail ───────────────────────────────────────────────────────────
 
-def sanitize_output(text: str, field: str = "") -> str:
+def sanitize_output(text: str, field: str = "") -> tuple[str, dict]:
     """
     Sanitiza o texto de saída removendo/anonimizando dados sensíveis.
-    Usa Bedrock guardrail (quando configurado) + regex como defesa em profundidade.
+    Retorna (texto_sanitizado, meta) onde meta descreve o que foi encontrado/alterado.
     """
+    meta: dict = {"field": field, "bedrock_intervened": False, "pii": {}}
+
     if not text:
-        return text
+        return text, meta
 
     if settings.GUARDRAIL_ID_OUTPUT or settings.GUARDRAIL_ID:
         try:
             r = _apply("OUTPUT", text)
             if r["action"] == "GUARDRAIL_INTERVENED":
-                # Quando o guardrail bloqueia (falso positivo de content policy),
-                # outputs[0] contém blockedOutputsMessaging — não o texto sanitizado.
-                # Nesse caso, mantemos o original e aplicamos apenas o regex local.
+                meta["bedrock_intervened"] = True
                 logger.warning("guardrail OUTPUT bloqueou campo=%s — usando regex como fallback", field)
             else:
                 outputs = r["outputs"]
@@ -156,12 +156,19 @@ def sanitize_output(text: str, field: str = "") -> str:
         except Exception:
             logger.exception("erro Bedrock guardrail OUTPUT campo=%s — fallback regex", field)
 
-    return _regex_sanitize(text)
+    text, pii = _regex_sanitize(text)
+    meta["pii"] = pii
+    return text, meta
 
 
-def _regex_sanitize(text: str) -> str:
-    text = _CPF_RE.sub("[CPF OMITIDO]", text)
-    text = _CARD_RE.sub("[CARTÃO OMITIDO]", text)
-    text = _ACCOUNT_RE.sub("[CONTA OMITIDA]", text)
-    text = _NOME_RE.sub(r'\1[NOME OMITIDO]', text)
-    return text
+def _regex_sanitize(text: str) -> tuple[str, dict]:
+    text, n_cpf     = _CPF_RE.subn("[CPF OMITIDO]", text)
+    text, n_card    = _CARD_RE.subn("[CARTÃO OMITIDO]", text)
+    text, n_account = _ACCOUNT_RE.subn("[CONTA OMITIDA]", text)
+    text, n_nome    = _NOME_RE.subn(r'\1[NOME OMITIDO]', text)
+    meta = {}
+    if n_cpf:     meta["cpf"]     = n_cpf
+    if n_card:    meta["cartao"]  = n_card
+    if n_account: meta["conta"]   = n_account
+    if n_nome:    meta["nome"]    = n_nome
+    return text, meta

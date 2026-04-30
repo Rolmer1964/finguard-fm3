@@ -271,6 +271,38 @@ function buildSecurity(r) {
       + '</div></div>';
   }
 
+  // Guardrail de saída
+  if (!isBlocked) {
+    var outMeta = r.guardrail_output_meta || [];
+    var allPii = {};
+    var bedrockFields = [];
+    outMeta.forEach(function(m) {
+      if (m.bedrock_intervened) bedrockFields.push(m.field);
+      Object.keys(m.pii || {}).forEach(function(k) {
+        allPii[k] = (allPii[k] || 0) + m.pii[k];
+      });
+    });
+    var piiKeys = Object.keys(allPii);
+    var _PII_LABELS = {cpf:'CPF', cartao:'Cartão', conta:'Conta', nome:'Nome'};
+    if (piiKeys.length > 0 || bedrockFields.length > 0) {
+      html += '<div style="margin-top:8px;padding:9px 12px;background:#fef9c3;border:1px solid #fcd34d;border-radius:6px;font-size:12px">'
+        + '<div style="font-weight:700;color:#92400e;margin-bottom:5px">⚡ Guardrail de saída — anonimizações aplicadas</div>'
+        + '<div style="display:flex;flex-wrap:wrap;gap:5px">';
+      piiKeys.forEach(function(k) {
+        html += '<span style="background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:2px 9px;border-radius:4px;font-size:12px;font-family:monospace">'
+          + '[' + (_PII_LABELS[k]||k).toUpperCase() + ' OMITIDO] &times;' + allPii[k] + '</span>';
+      });
+      if (bedrockFields.length > 0) {
+        html += '<span style="background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6;padding:2px 9px;border-radius:4px;font-size:12px">'
+          + 'Bedrock: ' + bedrockFields.join(', ') + '</span>';
+      }
+      html += '</div></div>';
+    } else {
+      html += '<div style="margin-top:8px;font-size:12px;color:#6b7280">'
+        + '✓ Guardrail de saída — sem ocorrências de PII</div>';
+    }
+  }
+
   // Sinal Outros + Crítico
   if (isOutrosCritico) {
     html += '<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;'

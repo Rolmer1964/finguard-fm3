@@ -7,6 +7,7 @@ from typing import TypedDict
 from langgraph.graph import END, StateGraph
 
 from .agents.guardrail import BLOCKED_INPUT_MESSAGE, check_input, sanitize_output
+from .profanity import mask as mask_profanity
 from .settings import now_brt
 from .agents.report import consolidate
 from .agents.risk import run_risk
@@ -27,6 +28,7 @@ class AnalysisState(TypedDict, total=False):
     risk: dict
     final: dict
     timings_ms: dict
+    guardrail_output_meta: list
 
 
 def _now_ms() -> int:
@@ -131,11 +133,19 @@ def _node_guardrail_output(state: AnalysisState) -> AnalysisState:
     tid = state.get("trace_id", "?")
     logger.info("[%s] AGENT=guardrail_output IN", tid)
     final = dict(state.get("final", {}))
+    output_metas = []
     for field in ("texto_original", "summary", "risk_justification"):
         if final.get(field):
-            final[field] = sanitize_output(final[field], field=field)
+            sanitized, meta = sanitize_output(final[field], field=field)
+            final[field] = sanitized
+            if meta.get("bedrock_intervened") or meta.get("pii"):
+                output_metas.append(meta)
+    if output_metas:
+        final["guardrail_output_meta"] = output_metas
+    if final.get("texto_original"):
+        final["texto_original"] = mask_profanity(final["texto_original"])
     dt = _now_ms() - t0
-    logger.info("[%s] AGENT=guardrail_output OUT in %dms", tid, dt)
+    logger.info("[%s] AGENT=guardrail_output OUT in %dms pii_fields=%d", tid, dt, len(output_metas))
     timings = {**state.get("timings_ms", {}), "guardrail_output": dt}
     return {**state, "final": final, "timings_ms": timings}
 
