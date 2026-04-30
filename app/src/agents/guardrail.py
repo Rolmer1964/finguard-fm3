@@ -147,12 +147,11 @@ def sanitize_output(text: str, field: str = "") -> tuple[str, dict]:
     if settings.GUARDRAIL_ID_OUTPUT or settings.GUARDRAIL_ID:
         try:
             r = _apply("OUTPUT", text)
+            outputs = r["outputs"]
+            text = outputs[0].get("text", text) if outputs else text
             if r["action"] == "GUARDRAIL_INTERVENED":
                 meta["bedrock_intervened"] = True
-                logger.warning("guardrail OUTPUT bloqueou campo=%s — usando regex como fallback", field)
-            else:
-                outputs = r["outputs"]
-                text = outputs[0].get("text", text) if outputs else text
+                logger.info("guardrail OUTPUT interveio campo=%s", field)
         except Exception:
             logger.exception("erro Bedrock guardrail OUTPUT campo=%s — fallback regex", field)
 
