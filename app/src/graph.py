@@ -143,7 +143,10 @@ def _node_guardrail_output(state: AnalysisState) -> AnalysisState:
     if output_metas:
         final["guardrail_output_meta"] = output_metas
     if final.get("texto_original"):
-        final["texto_original"] = mask_profanity(final["texto_original"])
+        original = final["texto_original"]
+        final["texto_original"] = mask_profanity(original)
+        if final["texto_original"] != original:
+            final["profanity_masked"] = True
     dt = _now_ms() - t0
     logger.info("[%s] AGENT=guardrail_output OUT in %dms pii_fields=%d", tid, dt, len(output_metas))
     timings = {**state.get("timings_ms", {}), "guardrail_output": dt}
