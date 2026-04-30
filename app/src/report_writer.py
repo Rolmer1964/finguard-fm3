@@ -152,12 +152,16 @@ def write_outputs(
     json_path.write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
 
     fields = ["id", "canal", "texto_original", "category", "product", "sentiment", "urgency",
-              "summary", "risk_level", "risk_justification"]
+              "prazo_resposta", "area_responsavel", "summary", "risk_level",
+              "risk_justification", "acoes_recomendadas"]
     with csv_path.open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
         w.writeheader()
         for r in results:
-            w.writerow({k: r.get(k, "") for k in fields})
+            row = {k: r.get(k, "") for k in fields}
+            acoes = r.get("acoes_recomendadas") or []
+            row["acoes_recomendadas"] = " | ".join(acoes) if isinstance(acoes, list) else acoes
+            w.writerow(row)
 
     ctx = build_report_context(results, meta)
     totals = {k: ctx[k] for k in ("by_category", "by_product", "by_urgency", "by_risk", "by_sentiment", "by_canal")}

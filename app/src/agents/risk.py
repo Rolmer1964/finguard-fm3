@@ -17,12 +17,19 @@ Avalie:
 - Necessidade de escalação imediata
 
 Níveis de risco permitidos: "Baixo", "Médio", "Alto", "Crítico".
-A justificativa deve ter 2-3 frases, em português, tom profissional. NÃO inclua dados sensíveis.
+A justificativa deve ter 2-3 frases, em português, tom profissional. Cite a seção da POL-SAC-001
+que embasa a decisão (ex: "conforme §2.3 da POL-SAC-001"). NÃO inclua dados sensíveis.
+
+Com base na urgência e no produto identificados na triagem, gere a lista de ações imediatas
+obrigatórias conforme as seções 2 e 3 da POL-SAC-001. As ações devem ser concretas, citar
+prazos quando a política os define e mencionar a área responsável quando relevante.
+Máximo de 5 ações.
 
 Responda APENAS com JSON:
 {
   "risco": "...",
-  "justificativa": "..."
+  "justificativa": "...",
+  "acoes_recomendadas": ["ação 1", "ação 2", ...]
 }"""
 
 
@@ -56,7 +63,7 @@ Texto original da reclamação:
 
 Avalie o risco e justifique com base nos trechos da política. Responda apenas com o JSON solicitado."""
 
-    raw = invoke_claude(settings.BEDROCK_MODEL_RISK, SYSTEM_PROMPT, user, max_tokens=500, temperature=0.2)
+    raw = invoke_claude(settings.BEDROCK_MODEL_RISK, SYSTEM_PROMPT, user, max_tokens=800, temperature=0.2)
     try:
         data = parse_json_object(raw)
     except Exception:
@@ -65,7 +72,8 @@ Avalie o risco e justifique com base nos trechos da política. Responda apenas c
 
     logger.info("risk usou %d trechos da política (top-k=%d)", len(chunks), settings.RAG_TOP_K)
     return {
-        "risk_level": data.get("risco") or "Baixo",
+        "risk_level":         data.get("risco") or "Baixo",
         "risk_justification": data.get("justificativa") or "",
-        "rag_chunks_used": len(chunks),
+        "acoes_recomendadas": data.get("acoes_recomendadas") or [],
+        "rag_chunks_used":    len(chunks),
     }

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FinGuard — Análise da Política Interna (POL-SAC-001)</title>
+<style>
+  :root {
+    --blue: #1e40af; --blue-light: #dbeafe; --green: #065f46; --green-light: #d1fae5;
+    --amber: #92400e; --amber-light: #fef3c7; --red: #991b1b; --red-light: #fee2e2;
+    --purple: #5b21b6; --purple-light: #ede9fe;
+    --gray: #374151; --muted: #6b7280; --bg: #f9fafb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         background: var(--bg); color: var(--gray); line-height: 1.65; padding: 40px 32px;
+         max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 26px; color: var(--blue); margin-bottom: 6px; }
+  h2 { font-size: 18px; color: var(--blue); margin: 36px 0 12px;
+       padding-bottom: 8px; border-bottom: 2px solid var(--blue-light); }
+  h3 { font-size: 14px; color: var(--gray); margin: 20px 0 8px; text-transform: uppercase;
+       letter-spacing: .05em; }
+  h4 { font-size: 14px; color: var(--blue); margin: 16px 0 6px; font-weight: 700; }
+  p  { margin-bottom: 10px; font-size: 14px; }
+  li { font-size: 14px; margin-left: 20px; margin-bottom: 4px; }
+  ul { margin-bottom: 10px; }
+  .meta { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
+  .card { background: white; border-radius: 8px; padding: 20px;
+          box-shadow: 0 1px 3px rgba(0,0,0,.08); margin-bottom: 16px; }
+  .card.ok     { border-left: 4px solid #059669; }
+  .card.warn   { border-left: 4px solid #d97706; }
+  .card.err    { border-left: 4px solid #dc2626; }
+  .card.info   { border-left: 4px solid var(--blue); }
+  .card.purple { border-left: 4px solid #7c3aed; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }
+  th { background: var(--blue); color: white; padding: 9px 12px; text-align: left; font-size: 12px; }
+  td { padding: 9px 12px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f0f9ff; }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 999px;
+          font-size: 11px; font-weight: 700; }
+  .pill.green  { background: var(--green-light);  color: var(--green); }
+  .pill.red    { background: var(--red-light);    color: var(--red); }
+  .pill.amber  { background: var(--amber-light);  color: var(--amber); }
+  .pill.blue   { background: var(--blue-light);   color: var(--blue); }
+  .pill.purple { background: var(--purple-light); color: var(--purple); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 16px 0; }
+  code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px;
+         font-family: "SF Mono", Consolas, monospace; font-size: 12px; }
+  pre  { background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 8px;
+         font-size: 12px; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+  pre .cm { color: #94a3b8; }
+  pre .ky { color: #7dd3fc; }
+  pre .st { color: #a5f3fc; }
+  pre .nu { color: #fcd34d; }
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 32px 0; }
+  .gap-num { display: inline-block; width: 24px; height: 24px; background: #dc2626;
+             color: white; border-radius: 50%; text-align: center; line-height: 24px;
+             font-size: 12px; font-weight: 700; margin-right: 8px; flex-shrink: 0; }
+  .prop-num { display: inline-block; width: 24px; height: 24px; background: #059669;
+              color: white; border-radius: 50%; text-align: center; line-height: 24px;
+              font-size: 12px; font-weight: 700; margin-right: 8px; flex-shrink: 0; }
+  .flex-row { display: flex; align-items: flex-start; gap: 8px; }
+  .section-badge { font-size: 11px; color: var(--muted); font-family: monospace;
+                   background: #f3f4f6; padding: 2px 8px; border-radius: 4px; }
+  .impact { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px;
+            border-radius: 4px; margin-left: 8px; }
+  .impact.alta   { background: #fef3c7; color: #92400e; }
+  .impact.media  { background: #dbeafe; color: #1e40af; }
+  .impact.baixa  { background: #d1fae5; color: #065f46; }
+  .urgency-critica { background: #fee2e2; color: #991b1b; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+  .urgency-alta    { background: #fef3c7; color: #92400e; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+  .urgency-media   { background: #dbeafe; color: #1e40af; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+  .urgency-baixa   { background: #d1fae5; color: #065f46; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+  .callout { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px;
+             padding: 14px 18px; margin: 16px 0; font-size: 14px; }
+  .callout strong { color: #92400e; }
+</style>
+</head>
+<body>
+
+<h1>Análise da Política Interna de Atendimento (POL-SAC-001)</h1>
+<p class="meta">
+  FinGuard · Hackathon Future Minds 3 · Grupo 23TB &nbsp;|&nbsp;
+  Documento: <strong>POL-SAC-001 v2.0</strong> · Vigência: Janeiro/2026 &nbsp;|&nbsp;
+  Análise: 2026-04-29
+</p>
+
+<div class="callout">
+  <strong>Pergunta central desta análise:</strong> A política interna está vetorizada como RAG.
+  O que estamos <em>deixando na mesa</em> ao não a usar de forma mais estruturada como regra
+  operacional na definição dos agentes?
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2>1. O Que a Política Define</h2>
+
+<p>O documento <strong>POL-SAC-001 v2.0</strong> é a diretriz operacional completa para tratamento
+de reclamações bancárias. Vai muito além de texto para busca semântica — é um <em>rulebook</em>
+com prazos, responsáveis, ações prescritivas e critérios de escalação mensuráveis.</p>
+
+<h3>2. Urgências e SLAs</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Nível</th><th>Definição precisa (critérios)</th>
+      <th>Prazo de resposta</th><th>Ações imediatas obrigatórias</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="urgency-baixa">BAIXA</span></td>
+      <td>Dúvidas operacionais, informação, insatisfações leves sem impacto financeiro</td>
+      <td><strong>5 dias úteis</strong></td>
+      <td>
+        Protocolo + confirmação ao cliente em até 24h<br>
+        Fila padrão da área responsável<br>
+        Sem acompanhamento gerencial
+      </td>
+    </tr>
+    <tr>
+      <td><span class="urgency-media">MÉDIA</span></td>
+      <td>Impacto financeiro moderado, problemas recorrentes, falhas de atendimento</td>
+      <td><strong>3 dias úteis</strong></td>
+      <td>
+        Protocolo + confirmação em até <strong>12h</strong><br>
+        Analista sênior avalia em até <strong>24h</strong><br>
+        Se valor financeiro: análise preliminar de estorno à Operações<br>
+        Posicionamento intermediário se prazo exceder 48h
+      </td>
+    </tr>
+    <tr>
+      <td><span class="urgency-alta">ALTA</span></td>
+      <td>Valores <strong>&gt; R$ 500</strong>, múltiplas tentativas sem resolução, ameaça de escalação regulatória</td>
+      <td><strong>24 horas</strong></td>
+      <td>
+        Contato ativo com cliente em até <strong>4h</strong><br>
+        Analista <em>dedicado</em> designado<br>
+        Notificar coordenador da área<br>
+        Iniciar estorno ou compensação temporária se aplicável<br>
+        Registrar no painel gerencial
+      </td>
+    </tr>
+    <tr>
+      <td><span class="urgency-critica">CRÍTICA</span></td>
+      <td>Fraude, violação regulatória, menção a Banco Central/Procon/Justiça, vulnerabilidade do cliente</td>
+      <td><strong>4 horas</strong></td>
+      <td>
+        Contato ativo IMEDIATO (máx. <strong>2h</strong>)<br>
+        Escalar gerente + Compliance<br>
+        Fraude → Prevenção a Fraudes + bloquear transações<br>
+        BC/Procon → ouvidoria + notificar jurídico<br>
+        Vulnerabilidade → protocolo de atendimento sensível<br>
+        Relatório de incidente em até 24h
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Seção 3 — Procedimentos por Produto</h3>
+<table>
+  <thead>
+    <tr><th>Produto</th><th>Casos e ações específicas</th><th>Responsável</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Cartão de Crédito</strong></td>
+      <td>
+        Cobrança indevida: contestação em 24h; estorno provisório em 48h se &gt; R$ 200<br>
+        Fraude: bloquear imediatamente + 2ª via + investigação em 12h<br>
+        Cancelamento: processar em 24h + estornar anuidades proporcionais
+      </td>
+      <td>Gerência de Cartões</td>
+    </tr>
+    <tr>
+      <td><strong>Conta Corrente</strong></td>
+      <td>
+        Tarifas indevidas: revisar extrato 90 dias + estorno automático se comprovado<br>
+        Acesso/app: TI com prioridade se afetar transações<br>
+        Encerramento: 5 dias úteis + confirmar saldo zerado
+      </td>
+      <td>Gerência de Contas</td>
+    </tr>
+    <tr>
+      <td><strong>Empréstimo</strong></td>
+      <td>
+        Divergência de taxas: recalcular parcelas em 48h + comparativo ao cliente<br>
+        Cobranças pós-quitação: suspender em 24h + carta de quitação<br>
+        Renegociação: oferecer ao menos 2 alternativas
+      </td>
+      <td>Gerência de Crédito</td>
+    </tr>
+    <tr>
+      <td><strong>Investimentos</strong></td>
+      <td>
+        Taxas não informadas: revisar contrato; estornar se ausência comprovada<br>
+        Rentabilidade divergente: relatório comparativo em 72h<br>
+        Resgate bloqueado: desbloquear ou justificar formalmente em 24h
+      </td>
+      <td>Gerência de Investimentos</td>
+    </tr>
+    <tr>
+      <td><strong>Seguros</strong></td>
+      <td>
+        Reajuste sem aviso: verificar cláusula; estornar diferença se aviso insuficiente<br>
+        Negativa de sinistro: reanálise por perito diferente em 5 dias<br>
+        Cancelamento: 48h + devolução proporcional do prêmio
+      </td>
+      <td>Gerência de Seguros</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Seção 4 — Procedimentos por Canal</h3>
+<table>
+  <thead><tr><th>Canal</th><th>Regras específicas</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>SAC</strong></td>
+      <td>Primeira instância. Prazo legal: 5 dias úteis. Protocolo numérico obrigatório.</td>
+    </tr>
+    <tr>
+      <td><strong>Ouvidoria</strong></td>
+      <td>Segunda instância. Analista sênior dedicado. Prazo legal: 10 dias úteis (+ 10 prorrogável). Gera relatório mensal à diretoria.</td>
+    </tr>
+    <tr>
+      <td><strong>Banco Central / Procon</strong></td>
+      <td><strong>Urgência automaticamente CRÍTICA.</strong> Prazo conforme órgão (~10 dias). Resposta revisada pelo jurídico. Notificar Compliance em até 2h.</td>
+    </tr>
+    <tr>
+      <td><strong>Redes Sociais</strong></td>
+      <td>Resposta pública em até 2h. Migrar para canal privado imediatamente. Se viralizar: acionar Comunicação. Risco reputacional: notificar Marketing.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2>2. Como a Política é Usada Hoje</h2>
+
+<div class="card info">
+  <h4>Uso atual: RAG passivo</h4>
+  <p>O PDF é fragmentado em chunks pelo pipeline de ingestão, vetorizado com <strong>Amazon Titan Embed Text v2</strong>
+  (1024 dimensões) e persistido em índice FAISS. Durante o processamento de cada reclamação,
+  o agente de risco (<code>risk.py</code>) executa uma busca semântica com os top-K trechos
+  mais relevantes e os injeta no prompt de usuário como contexto livre.</p>
+
+  <pre><span class="cm"># app/src/agents/risk.py — linha 40-57 (estado atual)</span>
+<span class="ky">def</span> run_risk(text, triage):
+    chunks = retrieve(_build_query(text, triage), k=settings.RAG_TOP_K)
+    policy_context = format_for_prompt(chunks)   <span class="cm"># ← fragmentos brutos</span>
+
+    user = <span class="st">f"""{policy_context}
+
+Triagem prévia:
+- Urgência: {triage.get('urgency')}
+...
+
+Avalie o risco e justifique com base nos trechos da política."""</span></pre>
+
+  <p>O agente Sonnet recebe os fragmentos e produz <strong>apenas dois campos:</strong>
+  <code>risk_level</code> e <code>risk_justification</code>. Não há ações recomendadas,
+  prazos, responsáveis ou procedimentos por produto no output.</p>
+</div>
+
+<div class="grid-2">
+  <div class="card ok">
+    <h4>O que funciona</h4>
+    <ul>
+      <li>O RAG recupera contexto relevante da política para casos ambíguos</li>
+      <li>O agente de risco tem acesso ao texto da política como suporte à justificativa</li>
+      <li>A busca semântica tende a trazer o trecho certo para o caso específico</li>
+    </ul>
+  </div>
+  <div class="card err">
+    <h4>O que não acontece</h4>
+    <ul>
+      <li>Nenhuma ação prescritiva é gerada a partir da urgência/produto</li>
+      <li>O prazo de resposta (SLA) nunca aparece no output</li>
+      <li>O responsável pelo caso não é identificado</li>
+      <li>Regras de canal não são aplicadas</li>
+      <li>A triagem não conhece os critérios precisos da política</li>
+      <li>A justificativa de risco não cita seções do documento</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2>3. Gaps Identificados</h2>
+
+<p>Sete lacunas entre o que a política prescreve e o que o sistema entrega hoje.</p>
+
+<!-- GAP 1 -->
+<div class="card err">
+  <div class="flex-row">
+    <span class="gap-num">1</span>
+    <div>
+      <h4>Ações recomendadas não são geradas <span class="impact alta">Impacto: ALTO</span></h4>
+      <p>A seção 2 da política define ações imediatas obrigatórias para cada nível de urgência.
+      São ações operacionais concretas que o analista <em>deve executar</em> ao receber o caso.
+      O FinGuard não produz nenhuma delas.</p>
+      <p><strong>Exemplo para urgência MÉDIA com Cartão de Crédito:</strong></p>
+      <ul>
+        <li>Registrar protocolo e enviar confirmação ao cliente em até <strong>12h</strong></li>
+        <li>Analista sênior deve avaliar em até <strong>24h</strong></li>
+        <li>Solicitar análise preliminar de estorno à área de Operações</li>
+        <li>Iniciar contestação de fatura em até 24h</li>
+        <li>Estorno provisório em até 48h se valor > R$ 200</li>
+        <li>Enviar posicionamento intermediário ao cliente se prazo exceder 48h</li>
+      </ul>
+      <p>Nada disso está no output atual. O analista recebe o risco e a urgência, mas precisa
+      consultar a política manualmente para saber o que fazer.</p>
+    </div>
+  </div>
+</div>
+
+<!-- GAP 2 -->
+<div class="card err">
+  <div class="flex-row">
+    <span class="gap-num">2</span>
+    <div>
+      <h4>Prazo de resposta (SLA) não é entregue <span class="impact alta">Impacto: ALTO</span></h4>
+      <p>A política define SLAs exatos por urgência: BAIXA → 5 dias úteis, MÉDIA → 3 dias úteis,
+      ALTA → 24 horas, CRÍTICA → 4 horas. Essa informação é <em>determinística</em> — não precisa
+      de LLM para derivar — mas não aparece em nenhum campo do output.</p>
+      <p>O analista que recebe a triagem "urgência ALTA" precisa lembrar, por conta própria,
+      que tem 24 horas. A política diz isso explicitamente; o sistema ignora.</p>
+    </div>
+  </div>
+</div>
+
+<!-- GAP 3 -->
+<div class="card err">
+  <div class="flex-row">
+    <span class="gap-num">3</span>
+    <div>
+      <h4>Área responsável não é identificada <span class="impact media">Impacto: MÉDIO</span></h4>
+      <p>A seção 3 define o responsável por produto: Cartão → Gerência de Cartões,
+      Conta Corrente → Gerência de Contas, Empréstimo → Gerência de Crédito, etc.
+      O produto já é classificado na triagem — o roteamento para a área responsável
+      deveria ser automático, mas não é entregue no output.</p>
+    </div>
+  </div>
+</div>
+
+<!-- GAP 4 -->
+<div class="card err">
+  <div class="flex-row">
+    <span class="gap-num">4</span>
+    <div>
+      <h4>Critérios de urgência na triagem são imprecisos <span class="impact alta">Impacto: ALTO</span></h4>
+      <p>O prompt do agente de triagem (<code>triage.py</code>, sistema) diz genericamente:
+      <em>"Menções a órgãos reguladores elevam a urgência."</em></p>
+      <p>A política é mais precisa e categórica:</p>
+      <ul>
+        <li><strong>Banco Central / Procon → urgência CRÍTICA automaticamente</strong> (seção 4.3)</li>
+        <li><strong>Valor explícito acima de R$ 500 → urgência mínima ALTA</strong> (seção 2.3)</li>
+        <li><strong>Fraude + Justiça + vulnerabilidade do cliente → CRÍTICA obrigatória</strong> (seção 2.4)</li>
+        <li>Canal <strong>Redes Sociais</strong> com risco de viralização → tratamento específico</li>
+      </ul>
+      <p>O Haiku está classificando urgência sem conhecer esses gatilhos quantitativos da política.
+      Isso resulta em possível subclassificação — um caso com R$ 600 em disputa poderia sair como
+      MÉDIA quando deveria ser ALTA.</p>
+    </div>
+  </div>
+</div>
+
+<!-- GAP 5 -->
+<div class="card err">
+  <div class="flex-row">
+    <span class="gap-num">5</span>
+    <div>
+      <h4>Regras de canal não são aplicadas <span class="impact media">Impacto: MÉDIO</span></h4>
+      <p>A seção 4 define comportamentos distintos por canal de origem. Por exemplo:</p>
+      <ul>
+        <li><strong>Redes Sociais:</strong> resposta pública em 2h; migrar para DM; acionar Comunicação se viral</li>
+        <li><strong>Ouvidoria:</strong> analista sênior dedicado; relatório mensal à diretoria</li>
+        <li><strong>Banco Central/Procon:</strong> urgência CRÍTICA + notificar Compliance em 2h + revisão jurídica</li>
+      </ul>
+      <p>O campo <code>channel</code> não existe no output atual. Mesmo que o sistema recebesse
+      a informação de canal, nenhuma regra específica de canal é derivada.</p>
+    </div>
+  </div>
+</div>
+
+<!-- GAP 6 -->
+<div class="card err">
+  <div class="flex-row">
+    <span class="gap-num">6</span>
+    <div>
+      <h4>Procedimentos por produto não viram ações prescritivas <span class="impact alta">Impacto: ALTO</span></h4>
+      <p>A seção 3 tem regras específicas por produto que vão muito além da urgência geral.
+      Elas são <em>condicionais</em> ao tipo de problema identificado:</p>
+      <ul>
+        <li>Cartão + fraude → "bloquear cartão imediatamente, emitir 2ª via, investigação em 12h"</li>
+        <li>Empréstimo + cobranças após quitação → "suspender cobranças em até 24h; emitir carta de quitação"</li>
+        <li>Seguros + negativa de sinistro → "reanálise por perito diferente em até 5 dias"</li>
+      </ul>
+      <p>O agente de risco vê esses trechos via RAG, mas o prompt não instrui a <em>extrair</em>
+      e <em>estruturar</em> as ações prescritivas — apenas pede justificativa de risco.
+      O resultado é uma justificativa descritiva quando o analista precisa de uma lista de tarefas.</p>
+    </div>
+  </div>
+</div>
+
+<!-- GAP 7 -->
+<div class="card warn">
+  <div class="flex-row">
+    <span class="gap-num">7</span>
+    <div>
+      <h4>Justificativa de risco não cita a seção da política <span class="impact baixa">Impacto: BAIXO</span></h4>
+      <p>Para auditabilidade e rastreabilidade regulatória, a justificativa de risco deveria
+      citar a seção da política que embasou a decisão
+      (ex: <em>"conforme seção 2.4 da POL-SAC-001, a menção ao Banco Central eleva a urgência
+      para CRÍTICA e requer escalação para Compliance em até 2h"</em>).</p>
+      <p>Atualmente a justificativa é uma prosa genérica sem referência ao documento.
+      Se auditada, não demonstra qual regra foi aplicada.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2>4. Propostas de Melhoria</h2>
+
+<p>Cinco mudanças concretas, ordenadas por impacto e esforço de implementação.</p>
+
+<!-- PROP 1 -->
+<div class="card ok">
+  <div class="flex-row">
+    <span class="prop-num">1</span>
+    <div>
+      <h4>Campo <code>recommended_actions</code> no agente de risco <span class="impact alta">Alto impacto</span></h4>
+      <p>Expandir o output do <code>risk.py</code> com uma lista de ações prescritivas,
+      geradas pelo Sonnet com base na combinação urgência + produto + categoria.
+      O system prompt já instrui a avaliar risco — basta adicionar a instrução de
+      <em>derivar as ações obrigatórias</em> da política.</p>
+
+      <p><strong>Mudança no system prompt de <code>risk.py</code>:</strong></p>
+      <pre><span class="cm"># Adicionar ao SYSTEM_PROMPT de risk.py:</span>
+
+<span class="st">"""
+Além do nível de risco e justificativa, gere a lista de ações
+imediatas obrigatórias conforme a política (seções 2 e 3),
+considerando a urgência e o produto identificados na triagem.
+
+As ações devem ser concretas, mensuráveis e citar prazos da
+política (ex: "Analista sênior deve avaliar em até 24h").
+Máximo de 5 ações. Inclua no JSON:
+
+{
+  "risco": "...",
+  "justificativa": "...",
+  "acoes_recomendadas": ["ação 1", "ação 2", ...]
+}
+"""</span></pre>
+
+      <p><strong>Exemplo de output esperado (urgência MÉDIA, Cartão de Crédito, Cobrança Indevida):</strong></p>
+      <pre>[
+  <span class="st">"Registrar protocolo e enviar confirmação ao cliente em até 12h (POL-SAC-001 §2.2)"</span>,
+  <span class="st">"Analista sênior deve avaliar o caso em até 24h (POL-SAC-001 §2.2)"</span>,
+  <span class="st">"Iniciar contestação de fatura em até 24h (POL-SAC-001 §3.1)"</span>,
+  <span class="st">"Se valor > R$ 200: solicitar estorno provisório em até 48h à Gerência de Cartões (POL-SAC-001 §3.1)"</span>,
+  <span class="st">"Se prazo exceder 48h: enviar posicionamento intermediário ao cliente (POL-SAC-001 §2.2)"</span>
+]</pre>
+    </div>
+  </div>
+</div>
+
+<!-- PROP 2 -->
+<div class="card ok">
+  <div class="flex-row">
+    <span class="prop-num">2</span>
+    <div>
+      <h4>Campos determinísticos: <code>prazo_resposta</code> e <code>area_responsavel</code> <span class="impact alta">Alto impacto, zero custo de LLM</span></h4>
+      <p>Esses dados são determinísticos — o mapeamento é 1:1 com a urgência/produto.
+      Não precisam de chamada ao modelo. Devem ser adicionados em <code>report.py</code>
+      na função <code>consolidate()</code>:</p>
+
+      <pre><span class="cm"># app/src/agents/report.py</span>
+
+<span class="ky">_SLA_POR_URGENCIA</span> = {
+    <span class="st">"Baixa"</span>:   <span class="st">"5 dias úteis"</span>,
+    <span class="st">"Média"</span>:   <span class="st">"3 dias úteis"</span>,
+    <span class="st">"Alta"</span>:    <span class="st">"24 horas"</span>,
+    <span class="st">"Crítica"</span>: <span class="st">"4 horas"</span>,
+}
+
+<span class="ky">_AREA_POR_PRODUTO</span> = {
+    <span class="st">"Cartão de Crédito"</span>: <span class="st">"Gerência de Cartões"</span>,
+    <span class="st">"Conta Corrente"</span>:    <span class="st">"Gerência de Contas"</span>,
+    <span class="st">"Empréstimo"</span>:        <span class="st">"Gerência de Crédito"</span>,
+    <span class="st">"Investimentos"</span>:     <span class="st">"Gerência de Investimentos"</span>,
+    <span class="st">"Seguros"</span>:          <span class="st">"Gerência de Seguros"</span>,
+}
+
+<span class="ky">def</span> consolidate(triage, risk):
+    urgency = triage.get(<span class="st">"urgency"</span>)
+    product = triage.get(<span class="st">"product"</span>)
+    <span class="ky">return</span> {
+        ...,
+        <span class="st">"prazo_resposta"</span>:   _SLA_POR_URGENCIA.get(urgency),
+        <span class="st">"area_responsavel"</span>: _AREA_POR_PRODUTO.get(product, <span class="st">"Área de Suporte Geral"</span>),
+        <span class="st">"acoes_recomendadas"</span>: risk.get(<span class="st">"recommended_actions"</span>, []),
+    }</pre>
+    </div>
+  </div>
+</div>
+
+<!-- PROP 3 -->
+<div class="card ok">
+  <div class="flex-row">
+    <span class="prop-num">3</span>
+    <div>
+      <h4>Critérios quantitativos e absolutistas no prompt de triagem <span class="impact alta">Alto impacto</span></h4>
+      <p>O Haiku precisa conhecer os gatilhos <em>obrigatórios</em> da política para não subclassificar.
+      São regras simples e pequenas o suficiente para estar no system prompt — sem depender de RAG:</p>
+
+      <pre><span class="cm"># Adicionar à seção "Critérios de decisão" do SYSTEM_PROMPT de triage.py:</span>
+
+<span class="st">"""
+Gatilhos obrigatórios de urgência (POL-SAC-001):
+- Menção a Banco Central, Procon ou processo judicial →
+  urgência CRÍTICA obrigatória, independente de outros fatores.
+- Indício de fraude, transação não autorizada ou ameaça de
+  denúncia a órgão regulador → urgência mínima CRÍTICA.
+- Valor financeiro em disputa explicitamente acima de R$ 500 →
+  urgência mínima ALTA.
+- Múltiplas tentativas anteriores sem resolução →
+  urgência mínima ALTA.
+- Vulnerabilidade emocional ou financeira do cliente
+  (ex: comprometimento de subsistência) → urgência CRÍTICA.
+"""</span></pre>
+
+      <p>Esses 5 gatilhos cobrem todos os casos onde a política é mais restritiva que a
+      heurística geral do Haiku, sem aumentar significativamente o tamanho do prompt.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PROP 4 -->
+<div class="card ok">
+  <div class="flex-row">
+    <span class="prop-num">4</span>
+    <div>
+      <h4>Inferência de canal e regras específicas <span class="impact media">Impacto médio</span></h4>
+      <p>O campo <code>channel</code> pode ser passado no CSV de batch (ou inferido do contexto).
+      Com ele disponível, regras adicionais são derivadas deterministicamente:</p>
+
+      <pre><span class="cm"># Exemplos de regras de canal (determinísticas, sem LLM):</span>
+
+<span class="ky">_REGRAS_CANAL</span> = {
+    <span class="st">"Redes Sociais"</span>: [
+        <span class="st">"Resposta pública em até 2h no canal de origem"</span>,
+        <span class="st">"Migrar atendimento para canal privado imediatamente"</span>,
+        <span class="st">"Monitorar repercussão — se viralizar: acionar Comunicação"</span>,
+    ],
+    <span class="st">"Ouvidoria"</span>: [
+        <span class="st">"Analista sênior dedicado obrigatório"</span>,
+        <span class="st">"Gera relatório mensal à diretoria"</span>,
+        <span class="st">"Prazo legal: 10 dias úteis (prorrogável por mais 10)"</span>,
+    ],
+    <span class="st">"Banco Central"</span>: [
+        <span class="st">"Urgência CRÍTICA automática"</span>,
+        <span class="st">"Notificar Compliance em até 2h"</span>,
+        <span class="st">"Resposta revisada pelo jurídico antes do envio"</span>,
+    ],
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- PROP 5 -->
+<div class="card ok">
+  <div class="flex-row">
+    <span class="prop-num">5</span>
+    <div>
+      <h4>Justificativa citando seção da política (auditabilidade) <span class="impact baixa">Impacto: baixo, esforço mínimo</span></h4>
+      <p>Pequena adição ao system prompt do agente de risco instruindo a citar a seção.
+      Melhora a rastreabilidade e demonstra conformidade ao auditor:</p>
+
+      <pre><span class="cm"># Adicionar à instrução de justificativa no SYSTEM_PROMPT de risk.py:</span>
+<span class="st">"Cite a seção da POL-SAC-001 que embasa cada elemento da justificativa "</span>
+<span class="st">"(ex: 'conforme §2.3 da POL-SAC-001, valores acima de R$500 elevam a urgência para ALTA')."</span></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2>5. Comparativo: Output Atual vs. Output Enriquecido</h2>
+
+<div class="grid-2">
+  <div class="card err">
+    <h4>Output atual — o que o analista recebe</h4>
+    <pre>{
+  <span class="ky">"category"</span>:          <span class="st">"Cobrança Indevida"</span>,
+  <span class="ky">"product"</span>:           <span class="st">"Cartão de Crédito"</span>,
+  <span class="ky">"urgency"</span>:           <span class="st">"Média"</span>,
+  <span class="ky">"risk_level"</span>:        <span class="st">"Médio"</span>,
+  <span class="ky">"risk_justification"</span>: <span class="st">"A reclamação apresenta
+  impacto financeiro moderado sem indícios
+  de fraude ou violação regulatória."</span>
+}</pre>
+    <p style="margin-top:10px">O analista precisa:<br>
+    → Consultar a política para saber o que fazer<br>
+    → Calcular o prazo manualmente<br>
+    → Descobrir quem é o responsável<br>
+    → Decidir sozinho as ações a tomar</p>
+  </div>
+  <div class="card ok">
+    <h4>Output enriquecido — o que o analista teria</h4>
+    <pre>{
+  <span class="ky">"category"</span>:          <span class="st">"Cobrança Indevida"</span>,
+  <span class="ky">"product"</span>:           <span class="st">"Cartão de Crédito"</span>,
+  <span class="ky">"urgency"</span>:           <span class="st">"Média"</span>,
+  <span class="ky">"prazo_resposta"</span>:    <span class="st">"3 dias úteis"</span>,
+  <span class="ky">"area_responsavel"</span>:  <span class="st">"Gerência de Cartões"</span>,
+  <span class="ky">"risk_level"</span>:        <span class="st">"Médio"</span>,
+  <span class="ky">"risk_justification"</span>: <span class="st">"Impacto financeiro
+  moderado; conforme §2.2 da POL-SAC-001,
+  exige analista sênior em 24h."</span>,
+  <span class="ky">"acoes_recomendadas"</span>: [
+    <span class="st">"Protocolo + confirmação ao cliente em 12h"</span>,
+    <span class="st">"Analista sênior avalia em até 24h"</span>,
+    <span class="st">"Solicitar análise de estorno à Operações"</span>,
+    <span class="st">"Iniciar contestação em até 24h (§3.1)"</span>,
+    <span class="st">"Estorno provisório em 48h se valor > R$200"</span>
+  ]
+}</pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2>6. Resumo de Impacto e Esforço</h2>
+
+<table>
+  <thead>
+    <tr><th>#</th><th>Proposta</th><th>Impacto</th><th>Esforço</th><th>Custo de LLM</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Campo <code>acoes_recomendadas</code> no agente de risco</td>
+      <td><span class="pill red">Alto</span></td>
+      <td><span class="pill amber">Médio</span> (prompt + schema)</td>
+      <td>+~100 tokens/registro</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Campos <code>prazo_resposta</code> + <code>area_responsavel</code> determinísticos</td>
+      <td><span class="pill red">Alto</span></td>
+      <td><span class="pill green">Baixo</span> (dict lookup)</td>
+      <td>Zero</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Gatilhos obrigatórios de urgência no prompt de triagem</td>
+      <td><span class="pill red">Alto</span></td>
+      <td><span class="pill green">Baixo</span> (5 linhas no prompt)</td>
+      <td>+~30 tokens/registro</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Inferência de canal e regras específicas</td>
+      <td><span class="pill amber">Médio</span></td>
+      <td><span class="pill amber">Médio</span> (novo campo no CSV)</td>
+      <td>Zero</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Justificativa citando seção da política</td>
+      <td><span class="pill green">Baixo</span></td>
+      <td><span class="pill green">Baixo</span> (1 linha no prompt)</td>
+      <td>Zero</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+<p class="meta" style="margin-top:16px">
+  Referência: <strong>POL-SAC-001 v2.0</strong> · Aprovação: Diretoria de Experiência do Cliente ·
+  Vigência: Janeiro/2026<br>
+  Código analisado: <code>app/src/agents/risk.py</code>, <code>app/src/agents/triage.py</code>,
+  <code>app/src/agents/report.py</code>
+</p>
+
+</body>
+</html>

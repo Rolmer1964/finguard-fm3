@@ -21,6 +21,7 @@ class AnalysisState(TypedDict, total=False):
     trace_id: str
     text: str
     product_hint: str | None
+    canal: str | None
     guardrail_input: dict
     triage: dict
     risk: dict
@@ -115,7 +116,7 @@ def _node_report(state: AnalysisState) -> AnalysisState:
     t0  = _now_ms()
     tid = state.get("trace_id", "?")
     logger.info("[%s] AGENT=report IN", tid)
-    final = consolidate(state.get("triage", {}), state.get("risk", {}))
+    final = consolidate(state.get("triage", {}), state.get("risk", {}), canal=state.get("canal"))
     final["texto_original"] = state.get("text", "")
     dt = _now_ms() - t0
     logger.info("[%s] AGENT=report OUT in %dms", tid, dt)
@@ -210,10 +211,10 @@ def inject_trace(entry: dict) -> None:
 
 # ── Ponto de entrada público ──────────────────────────────────────────────────
 
-def analyze(text: str, product_hint: str | None = None, record_id: str | None = None) -> dict:
+def analyze(text: str, product_hint: str | None = None, record_id: str | None = None, canal: str | None = None) -> dict:
     """Executa o grafo completo e devolve payload final + estado intermediário + timings."""
     trace_id = record_id or uuid.uuid4().hex[:8]
-    state: AnalysisState = {"trace_id": trace_id, "text": text, "product_hint": product_hint}
+    state: AnalysisState = {"trace_id": trace_id, "text": text, "product_hint": product_hint, "canal": canal}
     logger.info("[%s] GRAPH START", trace_id)
     final_state = get_graph().invoke(state)
     logger.info("[%s] GRAPH END timings=%s", trace_id, final_state.get("timings_ms"))

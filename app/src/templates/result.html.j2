@@ -181,8 +181,8 @@
       <div class="io-body">
         <div class="io-col">
           <div class="io-tag">Entrada</div>
-          <div>7 campos dos agentes anteriores</div>
-          <div class="muted" style="margin-top:4px">category, product, sentiment, urgency, summary (Triagem) + risk_level, risk_justification (Risco)</div>
+          <div>9 campos dos agentes anteriores</div>
+          <div class="muted" style="margin-top:4px">category, product, sentiment, urgency, summary (Triagem) + risk_level, risk_justification, acoes_recomendadas (Risco)</div>
         </div>
         <div class="io-mid">→</div>
         <div class="io-col out">
@@ -210,6 +210,8 @@
       {% elif u.startswith('baix') %}<span class="pill baixa">{{ result.urgency }}</span>
       {% else %}<span class="pill">{{ result.urgency }}</span>{% endif %}
     </p>
+    {% if result.prazo_resposta %}<p><strong>Prazo de resposta:</strong> {{ result.prazo_resposta }}</p>{% endif %}
+    {% if result.area_responsavel %}<p><strong>Área responsável:</strong> {{ result.area_responsavel }}</p>{% endif %}
     <p><strong>Resumo:</strong></p>
     <p style="white-space:pre-wrap; margin: 0;">{{ result.summary }}</p>
   </div>
@@ -228,6 +230,17 @@
     <p style="white-space:pre-wrap; margin: 0;">{{ result.risk_justification }}</p>
   </div>
 </div>
+
+{% if result.acoes_recomendadas %}
+<div class="card" style="border-left:4px solid #2563eb">
+  <h3 style="margin-top:0;color:#1e40af">Ações Recomendadas (POL-SAC-001)</h3>
+  <ol style="margin:0;padding-left:20px">
+    {% for acao in result.acoes_recomendadas %}
+    <li style="margin-bottom:6px;font-size:14px">{{ acao }}</li>
+    {% endfor %}
+  </ol>
+</div>
+{% endif %}
 
 <div class="card">
   <h3 style="margin-top:0">JSON bruto</h3>

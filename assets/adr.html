@@ -108,6 +108,7 @@
   <a href="#batch-paralelo">Batch Paralelo</a>
   <a href="#throttle-adaptivo">Throttle Adaptivo</a>
   <a href="#modal-api">Modal de Detalhe</a>
+  <a href="#politica-interna">Política Interna</a>
   <a href="#consequencias">Consequências</a>
   <a href="#recomendacoes">Recomendações</a>
   <div class="sep"></div>
@@ -285,20 +286,20 @@
     <tr>
       <td><code>step_triage</code></td>
       <td>Claude Haiku 4.5</td>
-      <td>Classifica categoria, produto, sentimento, urgência e gera resumo</td>
+      <td>Classifica categoria, produto, sentimento, urgência e gera resumo. Aplica gatilhos obrigatórios da POL-SAC-001 (ex: Banco Central → CRÍTICA automática; valor &gt; R$500 → mínimo ALTA)</td>
       <td><code>triage: {category, product, sentiment, urgency, summary}</code></td>
     </tr>
     <tr>
       <td><code>step_risk</code></td>
       <td>Claude Sonnet 4.5 + FAISS + Titan</td>
-      <td>Avalia risco (Baixo→Crítico) à luz da Política Interna via RAG</td>
-      <td><code>risk: {risk_level, risk_justification, rag_chunks_used}</code></td>
+      <td>Avalia risco (Baixo→Crítico) à luz da Política Interna via RAG. Gera justificativa citando seções da POL-SAC-001 e lista de ações imediatas obrigatórias (seções 2 e 3)</td>
+      <td><code>risk: {risk_level, risk_justification, acoes_recomendadas[], rag_chunks_used}</code></td>
     </tr>
     <tr>
       <td><code>step_report</code></td>
       <td>Python puro</td>
-      <td>Consolida campos de triage + risk em payload final estruturado</td>
-      <td><code>final: {category, product, …, risk_level, risk_justification}</code></td>
+      <td>Consolida campos de triage + risk. Deriva deterministicamente <code>prazo_resposta</code> (SLA por urgência) e <code>area_responsavel</code> (gerência por produto) da POL-SAC-001 — zero custo de LLM</td>
+      <td><code>final: {category, product, …, prazo_resposta, area_responsavel, risk_level, risk_justification, acoes_recomendadas[]}</code></td>
     </tr>
     <tr>
       <td><code>step_guardrail_output</code></td>
@@ -832,6 +833,110 @@
 </div>
 </section>
 
+<!-- ═══ POLÍTICA INTERNA ═══ -->
+<section id="politica-interna">
+<h2>Integração Estrutural da Política Interna (POL-SAC-001)</h2>
+
+<div class="card decision">
+  <p>
+    <strong>Usar a POL-SAC-001 não apenas como fonte de RAG, mas como regra operacional
+    estrutural nos agentes</strong> — com gatilhos obrigatórios no prompt de triagem,
+    geração de ações prescritivas no agente de risco e campos determinísticos derivados
+    da política na consolidação final.
+  </p>
+</div>
+
+<h3>Problema</h3>
+<p>
+  A versão inicial vetorizava o PDF e recuperava fragmentos via FAISS para o agente de risco.
+  Isso cobre casos ambíguos, mas não garante aplicação das regras absolutas da política.
+  O Haiku classificava urgência sem conhecer os gatilhos quantitativos
+  (ex.: valor &gt; R$ 500 → ALTA; Banco Central → CRÍTICA automática).
+  O Sonnet justificava o risco, mas não prescrevia as ações que o analista deveria executar.
+  O output não informava prazo de resposta nem área responsável.
+</p>
+
+<h3>Decisão de design</h3>
+<table>
+  <thead><tr><th>Camada</th><th>Uso anterior</th><th>Uso atual</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>step_triage</code> (Haiku)</td>
+      <td>Critérios vagos ("órgãos reguladores elevam urgência")</td>
+      <td>6 gatilhos obrigatórios da POL-SAC-001 embutidos no system prompt — Banco Central/Procon/Justiça → CRÍTICA; valor &gt; R$500 → mínimo ALTA; fraude → CRÍTICA; vulnerabilidade do cliente → CRÍTICA</td>
+    </tr>
+    <tr>
+      <td><code>step_risk</code> (Sonnet + RAG)</td>
+      <td>Retornava apenas <code>risk_level</code> e <code>risk_justification</code></td>
+      <td>Também retorna <code>acoes_recomendadas[]</code> — lista de até 5 ações concretas com prazos da POL-SAC-001 (seções 2 e 3) citando a seção na justificativa</td>
+    </tr>
+    <tr>
+      <td><code>step_report</code> (Python puro)</td>
+      <td>7 campos consolidados</td>
+      <td>+2 campos determinísticos: <code>prazo_resposta</code> (mapeamento urgência→SLA: Baixa=5 dias úteis, Média=3 dias, Alta=24h, Crítica=4h) e <code>area_responsavel</code> (mapeamento produto→gerência)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="card ok">
+  <strong>Por que os SLAs e a área responsável não usam LLM?</strong> São mapeamentos 1:1
+  determinísticos — a política define exatamente um prazo para cada urgência e exatamente uma
+  gerência para cada produto. Usar um modelo para derivar isso seria custoso, não-determinístico
+  e mais lento. Dicionários Python são a solução correta aqui.
+</div>
+
+<div class="card ok" style="margin-top:12px">
+  <strong>Por que as ações recomendadas usam LLM?</strong> Porque dependem da combinação
+  urgência + produto + categoria + contexto da reclamação — uma matriz de centenas de combinações
+  onde o RAG complementa as regras absolutas com o texto específico da política relevante ao caso.
+  O Sonnet tem acesso ao texto completo da política via RAG e pode derivar as ações corretas para
+  a situação específica.
+</div>
+
+<div class="card decision" style="margin-top:12px">
+  <strong>Override determinístico de urgência por canal (POL-SAC-001 §4.3)</strong><br>
+  O campo <code>canal</code> do CSV é propagado pelo grafo
+  (<code>AnalysisState → analyze() → _node_report → consolidate(canal=)</code>) e usado
+  para dois overrides determinísticos, zero custo de LLM, aplicados após a triagem:<br><br>
+  <strong>1.</strong> Se <code>canal ∈ {Banco Central, Procon, Justiça}</code> e urgência ≠ Crítica
+  → força <code>urgency = "Crítica"</code>. A POL-SAC-001 §4.3 é explícita: "URGÊNCIA
+  AUTOMATICAMENTE CRÍTICA". Não há margem interpretativa — regra determinística é mais
+  defensável em auditoria que decisão de LLM.<br><br>
+  <strong>2.</strong> Se <code>risk_level = "Crítico"</code> e urgência &lt; Alta
+  → eleva urgência para "Alta". Garante que ataques capturados pela segunda linha de defesa
+  (Sonnet) recebam SLA adequado, mesmo que o Haiku tenha classificado urgência como Baixa.
+</div>
+
+<h3>Output enriquecido — exemplo (urgência MÉDIA, Cartão de Crédito)</h3>
+<pre style="background:#1e293b;color:#e2e8f0;padding:16px;border-radius:8px;font-size:12px;overflow-x:auto">{
+  "category":           "Cobrança Indevida",
+  "product":            "Cartão de Crédito",
+  "urgency":            "Média",
+  "prazo_resposta":     "3 dias úteis",
+  "area_responsavel":   "Gerência de Cartões",
+  "risk_level":         "Médio",
+  "risk_justification": "Impacto financeiro moderado sem indício de fraude. Conforme §2.2
+                         da POL-SAC-001, exige analista sênior em 24h e análise de estorno.",
+  "acoes_recomendadas": [
+    "Registrar protocolo e enviar confirmação ao cliente em até 12h (POL-SAC-001 §2.2)",
+    "Analista sênior deve avaliar em até 24h (POL-SAC-001 §2.2)",
+    "Iniciar contestação de fatura em até 24h (POL-SAC-001 §3.1)",
+    "Se valor > R$ 200: solicitar estorno provisório em até 48h à Gerência de Cartões (POL-SAC-001 §3.1)",
+    "Enviar posicionamento intermediário ao cliente caso prazo exceda 48h (POL-SAC-001 §2.2)"
+  ]
+}</pre>
+
+<p>
+  Análise detalhada dos 7 gaps identificados e 5 propostas:
+  <a href="/assets/presentation/analise_politica_interna.html" target="_blank"
+     style="display:inline-block;margin-top:6px;padding:6px 14px;background:#eff6ff;
+            color:#1d4ed8;border:1px solid #bfdbfe;border-radius:6px;font-size:13px;
+            text-decoration:none;font-weight:600">
+    Ver análise completa da POL-SAC-001 →
+  </a>
+</p>
+</section>
+
 <!-- ═══ CONSEQUÊNCIAS ═══ -->
 <section id="consequencias">
 <h2>Consequências (Trade-offs)</h2>
@@ -846,6 +951,8 @@
       <li>RAG local sem dependência de serviço gerenciado</li>
       <li>Extensível: novos agentes entram como nós no grafo</li>
       <li>Processamento batch com relatórios HTML, CSV, JSON e MD</li>
+      <li>Output prescritivo: ações recomendadas, prazo de resposta e área responsável derivados diretamente da POL-SAC-001</li>
+      <li>Triagem com gatilhos obrigatórios da política — sem subclassificação de urgência</li>
     </ul>
   </div>
   <div class="card warn">

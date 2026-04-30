@@ -120,13 +120,14 @@ def _analyze_with_retry(
     rec_id: str,
     rate_limit_delay: float,
     max_retries: int,
+    canal: str | None = None,
 ) -> dict:
     if rate_limit_delay > 0:
         time.sleep(rate_limit_delay)
     last_exc: Exception | None = None
     for attempt in range(max_retries + 1):
         try:
-            return analyze(texto, produto_hint, record_id=rec_id)
+            return analyze(texto, produto_hint, record_id=rec_id, canal=canal)
         except Exception as exc:
             last_exc = exc
             if attempt < max_retries:
@@ -214,6 +215,7 @@ async def batch(file: UploadFile = File(...), label: str = Form("")) -> JSONResp
                         rec_id=rec_id,
                         rate_limit_delay=delay,
                         max_retries=retries,
+                        canal=canal,
                     )
                 except Exception as exc:
                     if "ThrottlingException" in str(exc) or "throttling" in str(exc).lower():

@@ -45,9 +45,21 @@ Critérios de decisão:
 - Baseie-se apenas nas informações explícitas do texto.
 - Não infira dados pessoais, financeiros ou sensíveis.
 - Em caso de dúvida entre categorias, escolha a opção mais conservadora.
-- Menções a órgãos reguladores, fraude, ameaça de denúncia ou risco
-legal elevam a urgência.
 - Produto sugerido pelo canal é apenas uma pista, não uma certeza.
+
+Gatilhos obrigatórios de urgência (POL-SAC-001):
+- Menção a Banco Central, Procon ou processo judicial →
+  urgência CRÍTICA obrigatória, independente de outros fatores.
+- Indício de fraude ou transação não autorizada →
+  urgência CRÍTICA obrigatória.
+- Ameaça explícita de denúncia a órgão regulador →
+  urgência CRÍTICA obrigatória.
+- Valor financeiro em disputa explicitamente acima de R$ 500 →
+  urgência mínima ALTA.
+- Múltiplas tentativas anteriores sem resolução →
+  urgência mínima ALTA.
+- Vulnerabilidade emocional ou financeira do cliente
+  (ex: comprometimento de subsistência) → urgência CRÍTICA.
 
 Resumo:
 - 2 a 3 linhas, em português.
@@ -85,9 +97,17 @@ def run_triage(text: str, product_hint: str | None) -> dict:
         logger.exception("falha ao parsear triagem; raw=%r", raw)
         data = {}
 
+    _PRODUTOS_VALIDOS = {
+        "Cartão de Crédito", "Conta Corrente", "Empréstimo",
+        "Investimentos", "Seguros", "Não Identificado",
+    }
+    product = data.get("produto") or product_hint or "Não Identificado"
+    if product not in _PRODUTOS_VALIDOS:
+        product = "Não Identificado"
+
     return {
         "category": data.get("categoria") or "Outros",
-        "product": data.get("produto") or product_hint or "Não Identificado",
+        "product":  product,
         "sentiment": data.get("sentimento") or "Neutro",
         "urgency": data.get("urgencia") or "Baixa",
         "summary": mask(data.get("resumo") or ""),
