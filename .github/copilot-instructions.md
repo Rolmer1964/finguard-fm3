@@ -1,5 +1,14 @@
 # FinGuard — Copilot Instructions
 
+## Diretrizes de contribuição
+
+- **Mudanças cirúrgicas**: toque apenas o que precisa ser tocado. Não melhore código adjacente, não refatore o que não está quebrado, mantenha o estilo existente.
+- **Simplicidade primeiro**: mínimo de código que resolve o problema. Sem features além do solicitado, sem abstrações para código de uso único, sem tratamento de erros para cenários impossíveis.
+- **Antes de implementar**: se houver múltiplas interpretações, prefira a mais simples. Se algo não estiver claro, sinalize — não assuma silenciosamente.
+- **Sem comentários óbvios**: só adicione comentário quando o *porquê* não for evidente pelo código. Nunca descreva o que o código faz.
+- **Sem Co-Authored-By** em commits.
+- **Linguagem**: código, comentários e mensagens de commit em Português Brasil.
+
 ## Sobre o projeto
 
 Sistema de análise de reclamações bancárias — Hackathon Future Minds 3, Nível 3, Grupo 23TB.
