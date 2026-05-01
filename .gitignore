@@ -22,7 +22,9 @@ Thumbs.db
 # Logs
 *.log
 
-data/synthetic_complaints.csv
+# Datasets e outputs de runtime
+data/
+output/
 
 # Índice RAG (regenerável via `make rag-ingest`)
 assets/index/
