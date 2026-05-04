@@ -134,34 +134,97 @@ def _local_input_check(text: str) -> dict:
 
 # ── Output guardrail ───────────────────────────────────────────────────────────
 
-def sanitize_output(text: str, field: str = "") -> str:
+_PII_TYPE_LABELS: dict[str, str] = {
+    "EMAIL":                   "E-mail",
+    "EMAIL_ADDRESS":           "E-mail",
+    "PHONE":                   "Telefone",
+    "PHONE_NUMBER":            "Telefone",
+    "NAME":                    "Nome",
+    "CREDIT_DEBIT_NUMBER":     "Cartão",
+    "CREDIT_DEBIT_EXPIRY":     "Validade cartão",
+    "CREDIT_DEBIT_CVV":        "CVV",
+    "AWS_ACCESS_KEY":          "Chave AWS",
+    "AWS_SECRET_KEY":          "Chave secreta AWS",
+    "IP_ADDRESS":              "IP",
+    "ADDRESS":                 "Endereço",
+    "US_SOCIAL_SECURITY_NUMBER": "CPF/SSN",
+    "DRIVER_ID":               "CNH",
+    "PASSPORT_NUMBER":         "Passaporte",
+}
+
+_CONTENT_LABELS: dict[str, str] = {
+    "INSULTS":    "Linguagem ofensiva",
+    "HATE":       "Discurso de ódio",
+    "VIOLENCE":   "Violência",
+    "SEXUAL":     "Conteúdo sexual",
+    "MISCONDUCT": "Conduta imprópria",
+    "PROMPT_ATTACK": "Prompt injection",
+}
+
+
+def _extract_output_detail(assessments: list) -> dict:
+    pii_types: list[str] = []
+    content: list[str]   = []
+    profanity             = False
+    for a in assessments:
+        sip = a.get("sensitiveInformationPolicy", {})
+        for p in sip.get("piiEntities", []):
+            if p.get("action") not in ("NONE", None):
+                label = _PII_TYPE_LABELS.get(p["type"], p["type"])
+                if label not in pii_types:
+                    pii_types.append(label)
+        for rx in sip.get("regexes", []):
+            if rx.get("action") not in ("NONE", None):
+                label = rx.get("name") or rx.get("regex") or "Regex"
+                if label not in pii_types:
+                    pii_types.append(label)
+        for f in a.get("contentPolicy", {}).get("filters", []):
+            if f.get("action") not in ("NONE", None):
+                label = _CONTENT_LABELS.get(f["type"], f["type"])
+                conf  = f.get("confidence", "")
+                entry = f"{label} ({conf})" if conf else label
+                if entry not in content:
+                    content.append(entry)
+        if a.get("wordPolicy", {}).get("managedWordLists"):
+            profanity = True
+    return {"pii_types": pii_types, "content": content, "profanity": profanity}
+
+
+def sanitize_output(text: str, field: str = "") -> tuple[str, dict]:
     """
     Sanitiza o texto de saída removendo/anonimizando dados sensíveis.
-    Usa Bedrock guardrail (quando configurado) + regex como defesa em profundidade.
+    Retorna (texto_sanitizado, meta) onde meta descreve o que foi encontrado/alterado.
     """
+    meta: dict = {"field": field, "bedrock_intervened": False, "pii": {}}
+
     if not text:
-        return text
+        return text, meta
 
     if settings.GUARDRAIL_ID_OUTPUT or settings.GUARDRAIL_ID:
         try:
             r = _apply("OUTPUT", text)
+            outputs = r["outputs"]
+            text = outputs[0].get("text", text) if outputs else text
             if r["action"] == "GUARDRAIL_INTERVENED":
-                # Quando o guardrail bloqueia (falso positivo de content policy),
-                # outputs[0] contém blockedOutputsMessaging — não o texto sanitizado.
-                # Nesse caso, mantemos o original e aplicamos apenas o regex local.
-                logger.warning("guardrail OUTPUT bloqueou campo=%s — usando regex como fallback", field)
-            else:
-                outputs = r["outputs"]
-                text = outputs[0].get("text", text) if outputs else text
+                meta["bedrock_intervened"] = True
+                meta["bedrock_detail"]     = _extract_output_detail(r["assessments"])
+                logger.info("guardrail OUTPUT interveio campo=%s detail=%s", field, meta["bedrock_detail"])
         except Exception:
             logger.exception("erro Bedrock guardrail OUTPUT campo=%s — fallback regex", field)
 
-    return _regex_sanitize(text)
+    text, pii = _regex_sanitize(text)
+    meta["pii"] = pii
+    return text, meta
 
 
-def _regex_sanitize(text: str) -> str:
-    text = _CPF_RE.sub("[CPF OMITIDO]", text)
-    text = _CARD_RE.sub("[CARTÃO OMITIDO]", text)
-    text = _ACCOUNT_RE.sub("[CONTA OMITIDA]", text)
-    text = _NOME_RE.sub(r'\1[NOME OMITIDO]', text)
-    return text
+def _regex_sanitize(text: str) -> tuple[str, dict]:
+    text, n_cpf     = _CPF_RE.subn("[CPF OMITIDO]", text)
+    text, n_card    = _CARD_RE.subn("[CARTÃO OMITIDO]", text)
+    text, n_account = _ACCOUNT_RE.subn("[CONTA OMITIDA]", text)
+    text, n_nome    = _NOME_RE.subn(r'\1[NOME OMITIDO]', text)
+    meta = {}
+    if n_cpf:     meta["cpf"]     = n_cpf
+    if n_card:    meta["cartao"]  = n_card
+    if n_account: meta["conta"]   = n_account
+    if n_nome:    meta["nome"]    = n_nome
+    return text, meta

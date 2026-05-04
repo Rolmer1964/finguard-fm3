@@ -55,31 +55,50 @@ guardrails de conteúdo, RAG sobre política interna e processamento em batch pa
 
 ```
 app/src/
-  main.py            # FastAPI app, rotas, loop AIMD de batch
-  graph.py           # Pipeline LangGraph, trace store (deque sem limite)
-  report_writer.py   # write_outputs() — gera JSON/CSV/MD/HTML
-  settings.py        # Pydantic Settings (lê do .env)
+  main.py              # FastAPI app, rotas, loop AIMD de batch
+  graph.py             # Pipeline LangGraph, trace store (deque sem limite)
+  report_writer.py     # write_outputs() — gera JSON/CSV/MD/HTML
+  relatorio_tecnico.py # Serve assets/relatorio-tecnico.html como rota
+  settings.py          # Pydantic Settings (lê do .env)
+  models.py            # AnalyzeRequest (Pydantic)
+  helpers.py           # Funções auxiliares de template
+  llm.py               # Clientes Bedrock (Haiku, Sonnet)
+  profanity.py         # mask() — filtro local de palavrões
+  agents/
+    guardrail.py       # check_input / sanitize_output (Bedrock + regex + profanity)
+    triage.py          # Haiku — categoria, produto, sentimento, urgência
+    risk.py            # Sonnet + RAG — nível de risco, justificativa, ações
+    report.py          # consolidate() — overrides POL-SAC-001, SLA, área responsável
+  guardrails/          # Módulo alternativo de guardrails (input_guard, output_guard)
+  rag/
+    ingest.py          # ingest_all() — processa docs e atualiza índice FAISS
+    loader.py          # Carrega PDFs/MDs de assets/docs/
+    chunker.py         # Divide documentos em chunks
+    embedder.py        # Titan Embed Text v2 (1024 dim)
+    store.py           # Persiste/carrega índice FAISS + manifest
+    retriever.py       # Busca semântica — top-k chunks para o Sonnet
   templates/
-    index.html.j2    # Formulário de envio individual
-    report.html.j2   # Relatório gerencial de batch
-    reports.html.j2  # Listagem de relatórios gerados
-    traces.html.j2   # Log de execuções com estatísticas
-    result.html.j2   # Resultado de registro individual
-    admin.html.j2    # Painel de admin (rebuild RAG index)
-    _modal.html.j2   # Modal compartilhado (incluído via {% include %})
+    index.html.j2               # Formulário individual com seleção de canal
+    report.html.j2              # Relatório gerencial de batch
+    reports.html.j2             # Listagem de relatórios gerados
+    traces.html.j2              # Log de execuções com estatísticas
+    result.html.j2              # Resultado de registro individual
+    admin.html.j2               # Painel de admin (rebuild RAG index)
+    politica_decisoria.html.j2  # Painel Decisório dinâmico (POL-SAC-001)
+    relatorio_tecnico.html.j2   # Relatório Técnico de Entrega
+    _header.html.j2             # Header de navegação compartilhado
+    _modal.html.j2              # Modal compartilhado (incluído via {% include %})
 
 assets/
   docs/              # PDFs/MDs com política interna (fonte do RAG)
-  index/             # FAISS index + manifest (persistido)
-  relatorio-tecnico.html  # Relatório Técnico de Entrega
+  index/             # FAISS index + manifest (GITIGNORED, regenerável)
+  adr.html           # ADR-001 — decisões arquiteturais
+  relatorio-tecnico.html  # Relatório Técnico de Entrega (estático)
   presentation/      # Material de apresentação do hackathon
-    analise_aimd.html
-    proximos_passos_aimd.md
-    relatorios/      # Relatórios e logs dos experimentos
 
+data/                # Datasets (GITIGNORED)
 output/              # Relatórios gerados em runtime (GITIGNORED)
-scripts/             # CSVs de datasets de teste
-documentacao/        # Docs de referência (regras.md, etc.)
+scripts/             # Utilitários: create_guardrail.py, rag_ingest.py…
 ```
 
 ### Comandos frequentes
