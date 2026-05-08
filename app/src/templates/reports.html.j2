@@ -25,6 +25,9 @@
   .recompose-btn:hover { background:#f3f4f6; }
   .recompose-ok  { color:#059669; font-size:12px; white-space:nowrap; }
   .recompose-err { color:#dc2626; font-size:12px; }
+  .del-btn { background:none; border:1px solid #fca5a5; color:#dc2626; padding:3px 10px;
+             border-radius:4px; font-size:12px; cursor:pointer; white-space:nowrap; }
+  .del-btn:hover { background:#fef2f2; border-color:#f87171; }
 </style>
 </head>
 <body>
@@ -41,6 +44,7 @@
       <th>Tamanho</th>
       <th>Relatório</th>
       <th>Log</th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
@@ -64,11 +68,14 @@
           <button class="recompose-btn" onclick="recompose('{{ r.stem }}', this)">↺ Recompor log</button>
           {% endif %}
         </td>
+        <td>
+          <button class="del-btn" onclick="deleteReport('{{ r.stem }}', this)">✕ Deletar</button>
+        </td>
       </tr>
       {% endfor %}
     {% else %}
       <tr>
-        <td colspan="6" style="text-align:center;padding:32px;color:#9ca3af">
+        <td colspan="7" style="text-align:center;padding:32px;color:#9ca3af">
           Nenhum relatório gerado ainda. Processe um CSV para começar.
         </td>
       </tr>
@@ -77,6 +84,27 @@
 </table>
 {% raw %}
 <script>
+async function deleteReport(stem, btn) {
+  if (!confirm('Deletar o relatório ' + stem + '?\nEsta ação não pode ser desfeita.')) return;
+  btn.disabled = true;
+  btn.textContent = '⏳';
+  try {
+    const r = await fetch('/report/' + encodeURIComponent(stem), {method: 'DELETE'});
+    const d = await r.json();
+    if (r.ok) {
+      btn.closest('tr').remove();
+    } else {
+      btn.disabled = false;
+      btn.textContent = '✕ Deletar';
+      alert('Erro: ' + (d.detail || JSON.stringify(d)));
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '✕ Deletar';
+    alert('Falha na requisição: ' + e);
+  }
+}
+
 async function recompose(stem, btn) {
   btn.disabled = true;
   btn.textContent = '⏳';

@@ -102,8 +102,16 @@
      z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:16px">
   <div style="color:#f1f5f9;font-size:20px;font-weight:700">⚙️ Processando batch…</div>
   <div id="ov-stats" style="color:#94a3b8;font-size:13px;text-align:center;min-height:18px"></div>
+  <div id="snake-hud" style="width:360px;display:flex;flex-direction:column;align-items:center;
+       justify-content:center;gap:2px;background:#0f172a;
+       border:2px solid #1e3a5f;border-bottom:none;border-radius:8px 8px 0 0;padding:14px 0 10px">
+    <div id="snake-score" style="color:#34d399;font-size:96px;font-family:monospace;
+         font-weight:700;line-height:0.9;letter-spacing:-4px">0</div>
+    <div style="font-size:11px;font-family:monospace;color:#64748b;letter-spacing:2px;margin-top:4px">PONTUAÇÃO</div>
+    <div id="snake-record-line" style="font-size:12px;font-family:monospace;color:#f59e0b;min-height:16px;margin-top:2px"></div>
+  </div>
   <canvas id="snake-canvas" width="360" height="360"
-          style="border:2px solid #1e3a5f;border-radius:8px;background:#0f172a"></canvas>
+          style="border:2px solid #1e3a5f;border-top:none;border-radius:0 0 8px 8px;background:#0f172a"></canvas>
   <div style="color:#475569;font-size:12px">← ↑ ↓ → ou WASD para jogar enquanto aguarda</div>
   <div id="ov-timer" style="color:#38bdf8;font-size:20px;font-family:monospace;min-height:28px"></div>
 </div>
@@ -112,11 +120,35 @@
 <script>
 // ── Snake ──────────────────────────────────────────────────────────────────────
 const CELL = 18, COLS = 20, ROWS = 20;
-let snake, dir, nextDir, food, score, loopId;
+let snake, dir, nextDir, food, score, loopId, gameOverPending;
+let snakeRecord = 0, snakeRecordDate = '';
+
+function loadRecord() {
+  snakeRecord = parseInt(localStorage.getItem('snake_record') || '0');
+  snakeRecordDate = localStorage.getItem('snake_record_date') || '';
+  updateRecordLine();
+}
+
+function checkRecord(pts) {
+  if (pts > snakeRecord) {
+    snakeRecord = pts;
+    snakeRecordDate = new Date().toLocaleDateString('pt-BR');
+    localStorage.setItem('snake_record', snakeRecord);
+    localStorage.setItem('snake_record_date', snakeRecordDate);
+    updateRecordLine();
+  }
+}
+
+function updateRecordLine() {
+  const el = document.getElementById('snake-record-line');
+  if (!el) return;
+  el.textContent = snakeRecord > 0 ? '🏆 ' + snakeRecord + ' · ' + snakeRecordDate : '';
+}
 
 function snakeInit() {
   snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
   dir = {x:1,y:0}; nextDir = {x:1,y:0}; score = 0;
+  gameOverPending = false;
   foodPlace();
 }
 
@@ -126,9 +158,21 @@ function foodPlace() {
 }
 
 function snakeStep() {
+  if (gameOverPending) return;
   dir = nextDir;
   const head = {x:(snake[0].x+dir.x+COLS)%COLS, y:(snake[0].y+dir.y+ROWS)%ROWS};
-  if (snake.some(s => s.x===head.x && s.y===head.y)) { snakeInit(); return; }
+  if (snake.some(s => s.x===head.x && s.y===head.y)) {
+    gameOverPending = true;
+    checkRecord(score);
+    const scoreEl = document.getElementById('snake-score');
+    scoreEl.style.color = '#f43f5e';
+    scoreEl.textContent = 'FIM';
+    setTimeout(() => {
+      scoreEl.style.color = '#34d399';
+      snakeInit();
+    }, 900);
+    return;
+  }
   snake.unshift(head);
   if (head.x===food.x && head.y===food.y) { score++; foodPlace(); } else { snake.pop(); }
 }
@@ -143,13 +187,15 @@ function snakeDraw() {
     cx.fillStyle = i===0 ? '#34d399' : '#10b981';
     cx.fillRect(s.x*CELL+1, s.y*CELL+1, CELL-2, CELL-2);
   });
-  cx.fillStyle = '#334155'; cx.font = '11px monospace';
-  cx.fillText('score: '+score, 5, 13);
+  if (!gameOverPending) {
+    document.getElementById('snake-score').textContent = score;
+  }
 }
 
 function snakeStart() {
   if (loopId) clearInterval(loopId);
   snakeInit();
+  loadRecord();
   loopId = setInterval(() => { snakeStep(); snakeDraw(); }, 110);
 }
 

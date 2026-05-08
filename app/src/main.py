@@ -246,10 +246,19 @@ async def batch(file: UploadFile = File(...), label: str = Form("")) -> JSONResp
                 else:
                     if r.get("blocked"):
                         logger.warning("[%s] bloqueada pelo guardrail reason=%s", rec_id, r.get("block_reason"))
-                        r = {"category": "Bloqueado", "product": "—", "sentiment": "—", "urgency": "—",
-                             "summary": "[Entrada bloqueada pelo guardrail de proteção]",
-                             "risk_level": "Bloqueado", "risk_justification": r.get("message", ""),
-                             "block_reason": r.get("block_reason", "")}
+                        r = {
+                            "trace_id":           r.get("trace_id", ""),
+                            "texto_original":     r.get("texto_original", texto),
+                            "timings_ms":         r.get("timings_ms", {}),
+                            "block_reason":       r.get("block_reason", ""),
+                            "category":           "Bloqueado",
+                            "product":            "—",
+                            "sentiment":          "—",
+                            "urgency":            "—",
+                            "summary":            "[Entrada bloqueada pelo guardrail de proteção]",
+                            "risk_level":         "—",
+                            "risk_justification": "",
+                        }
                 return {"id": rec_id, "canal": canal, **r}
             return process_row
 
@@ -483,6 +492,24 @@ def report_detail(request: Request, stem: str):
     meta = _json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
     ctx = build_report_context(results, meta)
     return templates.TemplateResponse("report.html.j2", {"request": request, "stem": stem, **ctx})
+
+
+@app.delete("/report/{stem}")
+def delete_report(stem: str) -> JSONResponse:
+    import re
+    if not re.fullmatch(r"report_\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}", stem):
+        raise HTTPException(status_code=400, detail="stem inválido")
+    out_dir = Path(settings.OUTPUT_DIR)
+    removed = 0
+    for ext in (".json", ".meta.json", ".csv", ".md"):
+        f = out_dir / f"{stem}{ext}"
+        if f.exists():
+            f.unlink()
+            removed += 1
+    if removed == 0:
+        raise HTTPException(status_code=404, detail="Relatório não encontrado")
+    logger.info("report deletado: %s (%d arquivo(s))", stem, removed)
+    return JSONResponse({"status": "ok", "stem": stem, "removed_files": removed})
 
 
 # ── Rotas: traces / log ───────────────────────────────────────────────────────
