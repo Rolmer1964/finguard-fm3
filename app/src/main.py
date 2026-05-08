@@ -494,6 +494,28 @@ def report_detail(request: Request, stem: str):
     return templates.TemplateResponse("report.html.j2", {"request": request, "stem": stem, **ctx})
 
 
+_SNAKE_RECORD_PATH = BASE.parent / "assets" / "snake_record.json"
+
+@app.get("/snake/record")
+def snake_record_get() -> JSONResponse:
+    if _SNAKE_RECORD_PATH.exists():
+        return JSONResponse(_json.loads(_SNAKE_RECORD_PATH.read_text(encoding="utf-8")))
+    return JSONResponse({"record": 0, "date": ""})
+
+@app.post("/snake/record")
+def snake_record_post(body: dict) -> JSONResponse:
+    record = int(body.get("record", 0))
+    date   = str(body.get("date", ""))
+    current = 0
+    if _SNAKE_RECORD_PATH.exists():
+        current = _json.loads(_SNAKE_RECORD_PATH.read_text(encoding="utf-8")).get("record", 0)
+    if record <= current:
+        return JSONResponse({"status": "no_update", "record": current})
+    _SNAKE_RECORD_PATH.write_text(_json.dumps({"record": record, "date": date}, ensure_ascii=False), encoding="utf-8")
+    logger.info("snake record atualizado: %d (%s)", record, date)
+    return JSONResponse({"status": "updated", "record": record})
+
+
 @app.delete("/report/{stem}")
 def delete_report(stem: str) -> JSONResponse:
     import re

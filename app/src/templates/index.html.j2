@@ -124,18 +124,23 @@ let snake, dir, nextDir, food, score, loopId, gameOverPending;
 let snakeRecord = 0, snakeRecordDate = '';
 
 function loadRecord() {
-  snakeRecord = parseInt(localStorage.getItem('snake_record') || '0');
-  snakeRecordDate = localStorage.getItem('snake_record_date') || '';
-  updateRecordLine();
+  fetch('/snake/record').then(r => r.json()).then(d => {
+    snakeRecord = d.record || 0;
+    snakeRecordDate = d.date || '';
+    updateRecordLine();
+  }).catch(() => {});
 }
 
 function checkRecord(pts) {
   if (pts > snakeRecord) {
     snakeRecord = pts;
     snakeRecordDate = new Date().toLocaleDateString('pt-BR');
-    localStorage.setItem('snake_record', snakeRecord);
-    localStorage.setItem('snake_record_date', snakeRecordDate);
     updateRecordLine();
+    fetch('/snake/record', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({record: snakeRecord, date: snakeRecordDate})
+    }).catch(() => {});
   }
 }
 
