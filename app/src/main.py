@@ -167,7 +167,10 @@ def analyze_one(payload: AnalyzeRequest) -> JSONResponse:
 
 
 @app.post("/analyze-form", response_class=HTMLResponse)
-def analyze_from_form(request: Request, text: str = Form(...), product_hint: str = Form(""), canal: str = Form("Web")):
+def analyze_from_form(
+    request: Request, text: str = Form(...), product_hint: str = Form(""),
+    canal: str = Form("Web"),
+):
     t_start     = time.time()
     started_at  = now_brt().strftime("%Y-%m-%d %H:%M:%S (UTC-3)")
     stem        = now_brt().strftime("report_%Y-%m-%d-%H-%M-%S")
@@ -386,19 +389,22 @@ def ingest_status() -> JSONResponse:
 
 # ── Rotas: admin ──────────────────────────────────────────────────────────────
 
-@app.get("/admin", response_class=HTMLResponse)
-def admin_page(request: Request):
+def _build_admin_context() -> dict:
     docs = [d.name for d in Path(settings.RAG_DOCS_DIR).iterdir() if d.is_file()]
     guardrail_id = settings.GUARDRAIL_ID or None
-    return templates.TemplateResponse("admin.html.j2", {
-        "request":      request,
+    return {
         "n_out":        count_output_files(),
         "n_vec":        rag_vector_count(),
         "n_traces":     len(get_traces()),
         "docs":         docs,
         "guardrail_id": guardrail_id,
         "guardrail_ver": settings.GUARDRAIL_VERSION if guardrail_id else "—",
-    })
+    }
+
+
+@app.get("/admin", response_class=HTMLResponse)
+def admin_page(request: Request):
+    return templates.TemplateResponse("admin.html.j2", {"request": request, **_build_admin_context()})
 
 
 @app.post("/admin/reset")
@@ -443,8 +449,7 @@ def admin_reset(target: str = "all") -> JSONResponse:
 
 # ── Rotas: relatórios ─────────────────────────────────────────────────────────
 
-@app.get("/reports", response_class=HTMLResponse)
-def reports_page(request: Request):
+def _build_reports_context() -> dict:
     out_dir    = Path(settings.OUTPUT_DIR)
     json_files = sorted(
         [f for f in out_dir.glob("report_*.json") if not f.name.endswith(".meta.json")],
@@ -474,15 +479,15 @@ def reports_page(request: Request):
         }
 
     reports = [_report_entry(f) for f in json_files]
-    return templates.TemplateResponse("reports.html.j2", {
-        "request": request,
-        "reports": reports,
-        "total":   len(json_files),
-    })
+    return {"reports": reports, "total": len(json_files)}
 
 
-@app.get("/report/{stem}", response_class=HTMLResponse)
-def report_detail(request: Request, stem: str):
+@app.get("/reports", response_class=HTMLResponse)
+def reports_page(request: Request):
+    return templates.TemplateResponse("reports.html.j2", {"request": request, **_build_reports_context()})
+
+
+def _load_report_context(stem: str) -> dict:
     out_dir   = Path(settings.OUTPUT_DIR)
     json_path = out_dir / f"{stem}.json"
     if not json_path.exists():
@@ -490,7 +495,12 @@ def report_detail(request: Request, stem: str):
     results = _json.loads(json_path.read_text(encoding="utf-8"))
     meta_path = out_dir / f"{stem}.meta.json"
     meta = _json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
-    ctx = build_report_context(results, meta)
+    return build_report_context(results, meta)
+
+
+@app.get("/report/{stem}", response_class=HTMLResponse)
+def report_detail(request: Request, stem: str):
+    ctx = _load_report_context(stem)
     return templates.TemplateResponse("report.html.j2", {"request": request, "stem": stem, **ctx})
 
 
@@ -536,8 +546,7 @@ def delete_report(stem: str) -> JSONResponse:
 
 # ── Rotas: traces / log ───────────────────────────────────────────────────────
 
-@app.get("/traces", response_class=HTMLResponse)
-def traces_page(request: Request):
+def _build_traces_context() -> dict:
     data = get_traces()
 
     series: dict[str, list[float]] = {"total_ms": [], "triage": [], "risk": [], "report": []}
@@ -574,13 +583,17 @@ def traces_page(request: Request):
             "risk_level_html": pill_html(t.get("risk_level"), _LEVEL_STYLE),
         })
 
-    return templates.TemplateResponse("traces.html.j2", {
-        "request":  request,
+    return {
         "count":    len(data),
         "st":       st,
         "has_data": bool(data),
         "traces":   traces_display,
-    })
+    }
+
+
+@app.get("/traces", response_class=HTMLResponse)
+def traces_page(request: Request):
+    return templates.TemplateResponse("traces.html.j2", {"request": request, **_build_traces_context()})
 
 
 @app.post("/traces/recompose")

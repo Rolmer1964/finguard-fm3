@@ -7,7 +7,6 @@ langgraph==0.2.34
 langchain-core==0.3.10
 Jinja2==3.1.4
 python-multipart==0.0.12
-# RAG (Tier 2: embeddings + FAISS in-memory)
 faiss-cpu==1.8.0.post1
 pypdf==5.0.1
 numpy==1.26.4
