@@ -4,80 +4,57 @@
 <meta charset="utf-8">
 <title>FinGuard — Relatório Gerencial</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+{% include '_style.html.j2' %}
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 24px; color: #1f2937; background: #f9fafb; }
-  h1 { margin-bottom: 4px; }
-  .meta { color: #6b7280; margin-bottom: 24px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
-  .card { background: white; padding: 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-  .kpi { display: flex; gap: 16px; margin-bottom: 24px; }
-  .kpi .card { flex: 1; text-align: center; }
-  .kpi .v { font-size: 32px; font-weight: 700; }
-  .kpi .l { color: #6b7280; font-size: 13px; }
-  table { width: 100%; border-collapse: collapse; }
-  th, td { padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: top; font-size: 13px; }
-  th { background: #f3f4f6; }
-  tr.clickable { cursor: pointer; }
-  tr.clickable:hover td { background: #eff6ff; }
-  tr.blocked td { background: #fff7ed; }
-  tr.blocked:hover td { background: #fed7aa; }
-  .pill { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
-  .pill.crit  { background: #fee2e2; color: #991b1b; }
-  .pill.alta  { background: #fed7aa; color: #9a3412; }
-  .pill.media { background: #fef3c7; color: #92400e; }
-  .pill.baixa { background: #d1fae5; color: #065f46; }
-  ul.recs li { margin: 6px 0; }
-
-  .muted { color: #6b7280; font-size: 13px; }
+  .app .kpi { display:flex; gap:16px; margin-bottom:24px; margin-top:16px; }
+  .app .kpi .card { flex:1; text-align:center; margin-top:0; }
+  .app .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; }
+  tr.clickable { cursor:pointer; }
+  .app tr.clickable:hover td { background:var(--bordo-50); }
+  .app tr.blocked td { background:#fdf3ec; }
+  .app tr.blocked:hover td { background:#f7e3d0; }
+  .app ul.recs li { margin:6px 0; }
 </style>
 </head>
-<body>
+<body class="app">
 
 {% set active = 'report' %}
 {% include '_header.html.j2' %}
+<div class="app-body">
 
 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
   <div>
     <h1 style="margin:0">FinGuard — Relatório Gerencial</h1>
-    <div class="meta" style="margin-top:4px">Gerado em {{ generated_at }}</div>
+    <div class="muted" style="margin-top:4px">Gerado em {{ generated_at }}</div>
   </div>
   <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <a href="/output/{{ stem }}.json" download
-       style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#1e40af;color:white;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">
-      &#8659; JSON
-    </a>
-    <a href="/output/{{ stem }}.csv" download
-       style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#047857;color:white;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">
-      &#8659; CSV
-    </a>
-    <a href="/output/{{ stem }}.md" download
-       style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#6b7280;color:white;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none">
-      &#8659; Markdown
-    </a>
+    <a href="/output/{{ stem }}.json" download class="btn" style="margin-top:0">&#8659; JSON</a>
+    <a href="/output/{{ stem }}.csv" download class="btn btn-outline" style="margin-top:0">&#8659; CSV</a>
+    <a href="/output/{{ stem }}.md" download class="btn btn-ghost" style="margin-top:0">&#8659; Markdown</a>
   </div>
 </div>
 
 <div class="kpi">
-  <div class="card"><div class="v">{{ total }}</div><div class="l">Total de reclamações</div></div>
-  <div class="card"><div class="v">{{ critical|length }}</div><div class="l">Críticas (urgência ou risco)</div></div>
+  <div class="card kpi-card"><div class="v">{{ total }}</div><div class="l">Total de reclamações</div></div>
+  <div class="card kpi-card"><div class="v">{{ critical|length }}</div><div class="l">Críticas (urgência ou risco)</div></div>
   {% if elapsed_s is not none %}
   <div class="card">
-    <div style="font-size:13px;color:#6b7280;line-height:1.9">
-      <div><span style="font-weight:600">Início:</span> {{ started_at }}</div>
-      <div><span style="font-weight:600">Fim:</span> {{ finished_at }}</div>
-      <div><span style="font-size:18px;font-weight:700;color:#1e40af">{{ elapsed_fmt }}</span></div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.9">
+      <div><span style="font-weight:600;color:var(--text)">Início:</span> {{ started_at }}</div>
+      <div><span style="font-weight:600;color:var(--text)">Fim:</span> {{ finished_at }}</div>
+      <div><span style="font-size:18px;font-weight:700;color:var(--bordo-700)">{{ elapsed_fmt }}</span></div>
     </div>
-    <div class="l" style="margin-top:4px">Tempo de execução</div>
+    <div class="l" style="margin-top:4px;color:var(--muted)">Tempo de execução</div>
   </div>
   {% endif %}
 </div>
 
 <div class="grid">
-  <div class="card"><h3 style="margin-top:0">Por categoria</h3><canvas id="chCategoria"></canvas></div>
-  <div class="card"><h3 style="margin-top:0">Por canal</h3><canvas id="chCanal"></canvas></div>
-  <div class="card"><h3 style="margin-top:0">Por produto</h3><canvas id="chProduto"></canvas></div>
-  <div class="card"><h3 style="margin-top:0">Por urgência</h3><canvas id="chUrgencia"></canvas></div>
-  <div class="card"><h3 style="margin-top:0">Por nível de risco</h3><canvas id="chRisco"></canvas></div>
+  <div class="card" style="margin-top:0"><h3 style="margin-top:0">Por categoria</h3><canvas id="chCategoria"></canvas></div>
+  <div class="card" style="margin-top:0"><h3 style="margin-top:0">Por canal</h3><canvas id="chCanal"></canvas></div>
+  <div class="card" style="margin-top:0"><h3 style="margin-top:0">Por produto</h3><canvas id="chProduto"></canvas></div>
+  <div class="card" style="margin-top:0"><h3 style="margin-top:0">Por urgência</h3><canvas id="chUrgencia"></canvas></div>
+  <div class="card" style="margin-top:0"><h3 style="margin-top:0">Por nível de risco</h3><canvas id="chRisco"></canvas></div>
 </div>
 
 {% if pass_stats %}
@@ -101,11 +78,11 @@
             <td style="text-align:center">{{ p.workers }}</td>
             <td style="text-align:center">{{ p.delay_s }}</td>
             <td style="text-align:center">{{ p.total }}</td>
-            <td style="text-align:center;color:#059669;font-weight:600">{{ p.success }}</td>
-            <td style="text-align:center;color:{% if p.throttled > 0 %}#dc2626{% else %}#6b7280{% endif %};font-weight:600">{{ p.throttled }}</td>
+            <td style="text-align:center;color:#1f5c34;font-weight:600">{{ p.success }}</td>
+            <td style="text-align:center;color:{% if p.throttled > 0 %}#7a1a2b{% else %}var(--muted){% endif %};font-weight:600">{{ p.throttled }}</td>
             <td style="text-align:center">
               <span style="padding:2px 7px;border-radius:999px;font-size:11px;font-weight:700;
-                background:{% if rate > 20 %}#fee2e2;color:#991b1b{% elif rate > 5 %}#fef3c7;color:#92400e{% else %}#d1fae5;color:#065f46{% endif %}">
+                background:{% if rate > 20 %}#f6d9de;color:#7a1a2b{% elif rate > 5 %}#faf0cf;color:#7a5f0c{% else %}#dcefe0;color:#1f5c34{% endif %}">
                 {{ rate }}%
               </span>
             </td>
@@ -123,14 +100,14 @@
 </div>
 {% endif %}
 
-<div class="card" style="margin-top: 24px">
+<div class="card" style="margin-top:24px">
   <h3 style="margin-top:0">Recomendações</h3>
   <ul class="recs">
     {% for r in recommendations %}<li>{{ r }}</li>{% endfor %}
   </ul>
 </div>
 
-<div class="card" style="margin-top: 24px">
+<div class="card" style="margin-top:24px">
   <h3 style="margin-top:0">Reclamações críticas</h3>
   {% if critical %}
   <div style="overflow-x:auto">
@@ -166,15 +143,15 @@
           {% elif rl.startswith('alt') %}<span class="pill alta">{{ c.risk_level }}</span>
           {% else %}<span class="pill">{{ c.risk_level or '-' }}</span>{% endif %}
         </td>
-        <td style="font-size:12px;color:#374151">{{ c.risk_justification | truncate(140, true, '…') }}</td>
+        <td style="font-size:12px;color:var(--text)">{{ c.risk_justification | truncate(140, true, '…') }}</td>
         <td>
           {% set acoes = c.acoes_recomendadas or [] %}
           {% if acoes %}
-          <ul style="margin:0;padding-left:14px;font-size:11px;color:#374151;line-height:1.5">
+          <ul style="margin:0;padding-left:14px;font-size:11px;color:var(--text);line-height:1.5">
             {% for acao in acoes[:3] %}
             <li style="margin-bottom:3px">{{ acao.split('(POL')[0].split('conforme')[0] | trim | truncate(72, true, '…') }}</li>
             {% endfor %}
-            {% if acoes | length > 3 %}<li style="color:#9ca3af">+{{ acoes|length - 3 }} ação(ões)…</li>{% endif %}
+            {% if acoes | length > 3 %}<li style="color:var(--muted)">+{{ acoes|length - 3 }} ação(ões)…</li>{% endif %}
           </ul>
           {% else %}-{% endif %}
         </td>
@@ -186,7 +163,7 @@
   {% else %}<p>Nenhuma reclamação crítica no período.</p>{% endif %}
 </div>
 
-<div class="card" style="margin-top: 24px">
+<div class="card" style="margin-top:24px">
   <h3 style="margin-top:0">Todas as reclamações</h3>
   <table>
     <thead><tr>
@@ -232,6 +209,8 @@
   </table>
 </div>
 
+</div><!-- app-body -->
+
 <script>
 var RECORDS = {{ results | tojson }};
 var CRITICAL = {{ critical | tojson }};
@@ -247,15 +226,15 @@ function bar(id, data, color) {
   var values = Object.values(data);
   new Chart(document.getElementById(id), {
     type: 'bar',
-    data: { labels: labels, datasets: [{ data: values, backgroundColor: color }] },
+    data: { labels: labels, datasets: [{ data: values, backgroundColor: color, borderRadius: 4 }] },
     options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
   });
 }
-bar('chCategoria', {{ by_category|tojson }}, '#3b82f6');
-bar('chCanal',     {{ by_canal|tojson }},    '#8b5cf6');
-bar('chProduto',   {{ by_product|tojson }},  '#10b981');
-bar('chUrgencia',  {{ by_urgency|tojson }},  '#f59e0b');
-bar('chRisco',     {{ by_risk|tojson }},     '#ef4444');
+bar('chCategoria', {{ by_category|tojson }}, '#93213f');
+bar('chCanal',     {{ by_canal|tojson }},    '#b02c50');
+bar('chProduto',   {{ by_product|tojson }},  '#7a1a35');
+bar('chUrgencia',  {{ by_urgency|tojson }},  '#c94a6b');
+bar('chRisco',     {{ by_risk|tojson }},     '#551227');
 
 {% if pass_stats %}
 (function() {
@@ -266,14 +245,14 @@ bar('chRisco',     {{ by_risk|tojson }},     '#ef4444');
     data: {
       labels: labels,
       datasets: [
-        { label: 'Sucesso',   data: ps.map(function(p){ return p.success; }),   backgroundColor: '#34d399', yAxisID: 'y' },
-        { label: 'Throttled', data: ps.map(function(p){ return p.throttled; }), backgroundColor: '#f87171', yAxisID: 'y' },
+        { label: 'Sucesso',   data: ps.map(function(p){ return p.success; }),   backgroundColor: '#1f5c34', yAxisID: 'y' },
+        { label: 'Throttled', data: ps.map(function(p){ return p.throttled; }), backgroundColor: '#b02c50', yAxisID: 'y' },
         { label: 'Taxa throttle %', data: ps.map(function(p){ return p.throttle_pct; }),
-          type: 'line', borderColor: '#f59e0b', backgroundColor: 'transparent',
-          pointBackgroundColor: '#f59e0b', borderWidth: 2, yAxisID: 'y2' },
+          type: 'line', borderColor: '#b8893f', backgroundColor: 'transparent',
+          pointBackgroundColor: '#b8893f', borderWidth: 2, yAxisID: 'y2' },
         { label: 'Workers', data: ps.map(function(p){ return p.workers; }),
-          type: 'line', borderColor: '#818cf8', backgroundColor: 'transparent',
-          pointBackgroundColor: '#818cf8', borderWidth: 2, borderDash: [4,3], yAxisID: 'y2' },
+          type: 'line', borderColor: '#7a1a35', backgroundColor: 'transparent',
+          pointBackgroundColor: '#7a1a35', borderWidth: 2, borderDash: [4,3], yAxisID: 'y2' },
       ]
     },
     options: {

@@ -6,6 +6,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      - ./app/src:/app/src
       - ./assets/adr.html:/app/assets/adr.html:ro
       - ./assets/relatorio-tecnico.html:/app/assets/relatorio-tecnico.html:ro
       - ./assets/hackathon:/app/assets/hackathon:ro

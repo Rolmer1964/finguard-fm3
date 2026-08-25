@@ -3,39 +3,29 @@
 <head>
 <meta charset="utf-8">
 <title>Relatórios — FinGuard</title>
+{% include '_style.html.j2' %}
 <style>
-  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-         max-width:1100px; margin:32px auto; padding:0 16px; color:#1f2937; background:#f9fafb; }
-  h1 { margin-bottom:4px; }
-  .muted { color:#6b7280; font-size:13px; margin-bottom:16px; display:block; }
-  table { width:100%; border-collapse:collapse; background:white; border-radius:8px;
-          overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.08); }
-  th { background:#1e40af; color:white; padding:10px 12px; text-align:left;
-       font-size:12px; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; }
-  td { padding:10px 12px; border-bottom:1px solid #e5e7eb; vertical-align:middle; }
-  tr:last-child td { border-bottom:none; }
-  tr:hover td { background:#f0f9ff; }
-  a { color:#2563eb; text-decoration:none; }
-  a:hover { text-decoration:underline; }
-  .dl-btn { color:white; padding:3px 10px; border-radius:4px; font-size:12px;
-            text-decoration:none; white-space:nowrap; }
-  .dl-none { color:#d1d5db; white-space:nowrap; }
-  .recompose-btn { background:none; border:1px solid #6b7280; color:#374151; padding:3px 10px;
+  .app .dl-btn { color:white; padding:3px 10px; border-radius:4px; font-size:12px;
+            text-decoration:none; white-space:nowrap; background:var(--bordo-700); }
+  .app .dl-btn:hover { background:var(--bordo-800); }
+  .app .dl-none { color:#c7b1b8; white-space:nowrap; }
+  .app .recompose-btn { background:none; border:1px solid var(--muted); color:var(--text); padding:3px 10px;
                    border-radius:4px; font-size:12px; cursor:pointer; white-space:nowrap; }
-  .recompose-btn:hover { background:#f3f4f6; }
-  .recompose-ok  { color:#059669; font-size:12px; white-space:nowrap; }
-  .recompose-err { color:#dc2626; font-size:12px; }
-  .del-btn { background:none; border:1px solid #fca5a5; color:#dc2626; padding:3px 10px;
+  .app .recompose-btn:hover { background:var(--bordo-50); }
+  .app .recompose-ok  { color:#1f5c34; font-size:12px; white-space:nowrap; }
+  .app .recompose-err { color:#7a1a2b; font-size:12px; }
+  .app .del-btn { background:none; border:1px solid #e7a9b6; color:#7a1a2b; padding:3px 10px;
              border-radius:4px; font-size:12px; cursor:pointer; white-space:nowrap; }
-  .del-btn:hover { background:#fef2f2; border-color:#f87171; }
+  .app .del-btn:hover { background:#f6d9de; border-color:#e0546f; }
 </style>
 </head>
-<body>
+<body class="app">
 {% set active = 'reports' %}
 {% include '_header.html.j2' %}
+<div class="app-body">
 <h1>Relatórios gerados</h1>
 <span class="muted">{{ total }} relatório(s) em /output — ordenados do mais recente para o mais antigo.</span>
-<table>
+<table style="margin-top:12px">
   <thead>
     <tr>
       <th>Report ID</th>
@@ -52,16 +42,15 @@
       {% for r in reports %}
       <tr>
         <td style="font-size:13px;font-family:monospace;white-space:nowrap">{{ r.ts_display }}</td>
-        <td style="font-size:13px;color:{% if r.label %}#1f2937{% else %}#9ca3af{% endif %}">
+        <td style="font-size:13px;color:{% if r.label %}#2b1017{% else %}#c7b1b8{% endif %}">
           {{ r.label if r.label else "—" }}
         </td>
-        <td style="font-size:12px;color:{% if r.filename %}#374151{% else %}#9ca3af{% endif %};white-space:nowrap">
+        <td style="font-size:12px;color:{% if r.filename %}#5c1330{% else %}#c7b1b8{% endif %};white-space:nowrap">
           {{ r.filename if r.filename else "—" }}
         </td>
-        <td style="font-size:12px;color:#6b7280">{{ r.size_kb }} KB</td>
+        <td style="font-size:12px;color:var(--muted)">{{ r.size_kb }} KB</td>
         <td>
-          <a href="/report/{{ r.stem }}"
-             class="dl-btn" style="background:#1e40af">&#128196; Ver relatório</a>
+          <a href="/report/{{ r.stem }}" class="dl-btn">&#128196; Ver relatório</a>
         </td>
         <td>
           {% if r.has_json %}
@@ -75,13 +64,14 @@
       {% endfor %}
     {% else %}
       <tr>
-        <td colspan="7" style="text-align:center;padding:32px;color:#9ca3af">
+        <td colspan="7" style="text-align:center;padding:32px;color:#c7b1b8">
           Nenhum relatório gerado ainda. Processe um CSV para começar.
         </td>
       </tr>
     {% endif %}
   </tbody>
 </table>
+</div><!-- app-body -->
 {% raw %}
 <script>
 async function deleteReport(stem, btn) {

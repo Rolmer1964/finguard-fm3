@@ -3,45 +3,30 @@
 <head>
 <meta charset="utf-8">
 <title>Admin — FinGuard</title>
+{% include '_style.html.j2' %}
 <style>
-  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-         max-width:900px; margin:40px auto; padding:0 16px; color:#1f2937; background:#f9fafb; }
-  h1 { margin-bottom:4px; }
-  .muted { color:#6b7280; font-size:13px; }
-  .card { background:white; padding:20px; border-radius:8px;
-          box-shadow:0 1px 3px rgba(0,0,0,.08); margin-top:16px; }
-  .stat-row { display:flex; justify-content:space-between; align-items:center;
-              padding:10px 0; border-bottom:1px solid #e5e7eb; font-size:14px; }
-  .stat-row:last-child { border-bottom:none; }
-  .stat-val { font-weight:700; font-size:18px; }
-  .stat-val.zero { color:#9ca3af; }
-  .stat-val.ok   { color:#059669; }
-  .stat-val.warn { color:#d97706; }
-  .btn { display:inline-block; padding:9px 18px; border-radius:6px; font-size:13px;
-         font-weight:500; border:none; cursor:pointer; text-decoration:none; white-space:nowrap; }
-  .btn-danger  { background:#dc2626; color:white; }
-  .btn-danger:hover  { background:#b91c1c; }
-  .btn-primary { background:#2563eb; color:white; }
-  .btn-primary:hover { background:#1d4ed8; }
-  .btn-green   { background:#059669; color:white; }
-  .btn-green:hover   { background:#047857; }
-  .btn-orange  { background:#ea580c; color:white; }
-  .btn-orange:hover  { background:#c2410c; }
-  .btn-teal    { background:#7c3aed; color:white; }
-  .btn-teal:hover    { background:#6d28d9; }
-  .actions       { display:flex; justify-content:space-between; align-items:center;
+  .app-body.narrow { max-width:900px; }
+  .app .stat-row { display:flex; justify-content:space-between; align-items:center;
+              padding:10px 0; border-bottom:1px solid var(--border); font-size:14px; }
+  .app .stat-row:last-child { border-bottom:none; }
+  .app .stat-val { font-weight:700; font-size:18px; }
+  .app .stat-val.zero { color:#c7b1b8; }
+  .app .stat-val.ok   { color:#1f5c34; }
+  .app .stat-val.warn { color:#b8893f; }
+  .app .actions       { display:flex; justify-content:space-between; align-items:center;
                    gap:10px; margin-top:16px; flex-wrap:wrap; }
-  .actions-group { display:flex; gap:10px; flex-wrap:wrap; }
+  .app .actions-group { display:flex; gap:10px; flex-wrap:wrap; }
   #result { margin-top:12px; padding:12px; border-radius:6px; font-size:13px;
             font-family:monospace; white-space:pre; display:none; }
-  #result.ok  { background:#d1fae5; color:#065f46; }
-  #result.err { background:#fee2e2; color:#991b1b; }
-  .doc-list { font-size:13px; color:#374151; margin:8px 0 0; padding-left:20px; }
+  #result.ok  { background:#dcefe0; color:#1f5c34; }
+  #result.err { background:#f6d9de; color:#7a1a2b; }
+  .app .doc-list { font-size:13px; color:var(--text); margin:8px 0 0; padding-left:20px; }
 </style>
 </head>
-<body>
+<body class="app">
 {% set active = 'admin' %}
 {% include '_header.html.j2' %}
+<div class="app-body narrow">
 <h1 style="margin-top:4px">Painel Administrativo</h1>
 <p class="muted">Gerenciamento de estado do FinGuard. Use antes ou após apresentações.</p>
 
@@ -88,8 +73,8 @@
 <div class="card">
   <h3 style="margin-top:0">Documentos</h3>
   <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <a href="/relatorio-tecnico" class="btn btn-primary">Rel. Técnico de Entrega</a>
-    <a href="/assets/presentation/analise_politica_pos_deploy.md" target="_blank" class="btn btn-teal">Análise POL-SAC-001</a>
+    <a href="/relatorio-tecnico" class="btn" style="margin-top:0">Rel. Técnico de Entrega</a>
+    <a href="/assets/presentation/analise_politica_pos_deploy.md" target="_blank" class="btn btn-outline" style="margin-top:0">Análise POL-SAC-001</a>
   </div>
 </div>
 
@@ -97,16 +82,17 @@
   <h3 style="margin-top:0">Ações</h3>
   <div class="actions">
     <div class="actions-group">
-      <button class="btn btn-primary" onclick="doIngest()">↺ Re-ingerir documentos</button>
-      <button class="btn btn-green"   onclick="doReset('traces')">Limpar log de execuções</button>
-      <button class="btn btn-orange"  onclick="doReset('outputs')">Limpar relatórios</button>
-      <button class="btn btn-teal"    onclick="doReset('index')">Zerar índice RAG</button>
+      <button class="btn" style="margin-top:0" onclick="doIngest()">↺ Re-ingerir documentos</button>
+      <button class="btn btn-outline" style="margin-top:0" onclick="doReset('traces')">Limpar log de execuções</button>
+      <button class="btn btn-gold" style="margin-top:0" onclick="doReset('outputs')">Limpar relatórios</button>
+      <button class="btn btn-outline" style="margin-top:0" onclick="doReset('index')">Zerar índice RAG</button>
     </div>
-    <button class="btn btn-danger" onclick="doReset('all')">⚠ Zerar tudo</button>
+    <button class="btn btn-danger" style="margin-top:0" onclick="doReset('all')">⚠ Zerar tudo</button>
   </div>
   <div id="result"></div>
 </div>
 
+</div><!-- app-body -->
 {% raw %}
 <script>
 async function doIngest() {

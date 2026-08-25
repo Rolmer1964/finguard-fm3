@@ -1,58 +1,58 @@
 <style>
 #modal-overlay {
   display:none; position:fixed; inset:0;
-  background:rgba(0,0,0,0.45); z-index:1000;
+  background:rgba(58,13,31,0.5); z-index:1000;
   align-items:center; justify-content:center;
 }
 #modal-overlay.open { display:flex; }
 #modal-box {
-  background:#f9fafb; border-radius:10px;
+  background:#fbf1f4; border-radius:10px;
   width:100%; max-height:90vh; position:relative;
   display:flex; flex-direction:column;
-  box-shadow:0 8px 32px rgba(0,0,0,0.18);
+  box-shadow:0 8px 32px rgba(58,13,31,0.22);
 }
 #modal-header {
   flex-shrink:0; padding:16px 60px 14px;
-  border-bottom:1px solid #e5e7eb;
+  border-bottom:1px solid #ecd9df;
   border-radius:10px 10px 0 0;
-  background:#f9fafb;
+  background:#fbf1f4;
 }
 #modal-box.blocked, #modal-box.blocked #modal-header { background:#fff7ed; }
 #modal-box.blocked #modal-header { border-bottom-color:#fed7aa; }
-#modal-box.paradox { background:#fee2e2; }
+#modal-box.paradox { background:#f6d9de; }
 #modal-scroll {
   flex:1; min-height:0; overflow-y:auto; padding:16px 60px 24px;
 }
 #modal-close {
   position:absolute; top:12px; right:16px;
   background:none; border:none; font-size:22px;
-  cursor:pointer; color:#6b7280;
+  cursor:pointer; color:#8a6270;
 }
-#modal-close:hover { color:#111; }
+#modal-close:hover { color:#3a0d1f; }
 #modal-shell {
   position:relative; width:90%; max-width:760px;
 }
 #modal-prev, #modal-next {
   position:absolute; top:50%; transform:translateY(-50%);
-  background:rgba(17,24,39,0.72); border:1px solid rgba(255,255,255,0.18);
+  background:rgba(58,13,31,0.75); border:1px solid rgba(255,255,255,0.18);
   color:white; font-size:28px; width:36px; height:56px;
   border-radius:6px; cursor:pointer; z-index:10;
   display:flex; align-items:center; justify-content:center;
   transition:background 0.15s;
   -webkit-user-select:none; user-select:none; line-height:1;
 }
-#modal-prev:hover, #modal-next:hover { background:rgba(17,24,39,0.92); }
+#modal-prev:hover, #modal-next:hover { background:rgba(58,13,31,0.92); }
 #modal-prev { left:5px; }
 #modal-next { right:5px; }
-.m-card { background:white; padding:20px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.08); margin-top:16px; }
+.m-card { background:#fffdfd; padding:20px; border-radius:8px; box-shadow:0 1px 3px rgba(58,13,31,0.08); margin-top:16px; border:1px solid #ecd9df; }
 .m-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px; }
-.m-pill { padding:4px 12px; border-radius:999px; font-size:13px; font-weight:600; background:#e5e7eb; color:#374151; }
-.m-pill.crit  { background:#fee2e2; color:#991b1b; }
-.m-pill.alta  { background:#fed7aa; color:#9a3412; }
-.m-pill.media { background:#fef3c7; color:#92400e; }
-.m-pill.baixa { background:#d1fae5; color:#065f46; }
-.m-muted { color:#6b7280; font-size:13px; }
-.m-pre { background:#f3f4f6; padding:12px; border-radius:6px; overflow-x:auto; font-size:12px; white-space:pre-wrap; }
+.m-pill { padding:4px 12px; border-radius:999px; font-size:13px; font-weight:600; background:#f0e2e6; color:#5c1330; }
+.m-pill.crit  { background:#f6d9de; color:#7a1a2b; }
+.m-pill.alta  { background:#f7e3d0; color:#8a4a12; }
+.m-pill.media { background:#faf0cf; color:#7a5f0c; }
+.m-pill.baixa { background:#dcefe0; color:#1f5c34; }
+.m-muted { color:#8a6270; font-size:13px; }
+.m-pre { background:#fbf1f4; border:1px solid #ecd9df; padding:12px; border-radius:6px; overflow-x:auto; font-size:12px; white-space:pre-wrap; }
 @media (max-width:600px) { .m-grid { grid-template-columns:1fr; } }
 </style>
 
@@ -60,14 +60,14 @@
   <div id="modal-shell">
   <div id="modal-box">
     <div id="modal-header">
-      <h2 id="m-title" style="margin:0">Detalhe da reclamação</h2>
+      <h2 id="m-title" style="margin:0;font-family:'Playfair Display',Georgia,serif;color:#3a0d1f">Detalhe da reclamação</h2>
       <div class="m-muted" id="m-meta" style="margin-top:4px"></div>
     </div>
     <button id="modal-close" onclick="closeModal()" title="Fechar">&times;</button>
     <button id="modal-prev" onclick="event.stopPropagation(); _navModal(-1)" title="Anterior (←)">&#8249;</button>
     <button id="modal-next" onclick="event.stopPropagation(); _navModal(1)" title="Próximo (→)">&#8250;</button>
     <div id="modal-scroll">
-      <div id="m-loading" style="display:none;text-align:center;padding:32px;color:#6b7280;font-size:14px">
+      <div id="m-loading" style="display:none;text-align:center;padding:32px;color:#8a6270;font-size:14px">
         ⏳ Buscando registro…
       </div>
       <div id="m-content">
@@ -94,7 +94,7 @@
             <p id="m-risk_justification" style="white-space:pre-wrap;margin:0"></p>
           </div>
         </div>
-        <div class="m-card" id="m-acoes-card" style="margin-top:16px;display:none;border-left:4px solid #2563eb"></div>
+        <div class="m-card" id="m-acoes-card" style="margin-top:16px;display:none;border-left:4px solid #93213f"></div>
         <div class="m-card" id="m-security-card" style="margin-top:16px"></div>
         <div class="m-card" id="m-pipeline-card" style="margin-top:16px"></div>
         <div class="m-card">
@@ -152,18 +152,18 @@ function buildPipeline(r) {
   function pct(ms) { return Math.max(ms / total * 100, 1).toFixed(1) + '%'; }
 
   function ioBlock(label, lines, accent) {
-    return '<div style="flex:1;font-size:13px;line-height:1.55' + (accent ? ';color:#065f46' : '') + '">'
-      + '<div style="font-size:10px;font-weight:700;letter-spacing:.07em;color:#9ca3af;text-transform:uppercase;margin-bottom:4px">' + label + '</div>'
+    return '<div style="flex:1;font-size:13px;line-height:1.55' + (accent ? ';color:#5c1330' : '') + '">'
+      + '<div style="font-size:10px;font-weight:700;letter-spacing:.07em;color:#8a6270;text-transform:uppercase;margin-bottom:4px">' + label + '</div>'
       + lines.map(function(l){ return '<div>' + l + '</div>'; }).join('')
       + '</div>';
   }
 
   function ioRow(hdr, inLines, outLines) {
-    return '<div style="border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;margin-bottom:8px">'
-      + '<div style="background:#f9fafb;padding:7px 12px;font-size:12px;font-weight:600;border-bottom:1px solid #e5e7eb">' + hdr + '</div>'
+    return '<div style="border:1px solid #ecd9df;border-radius:6px;overflow:hidden;margin-bottom:8px">'
+      + '<div style="background:#fbf1f4;padding:7px 12px;font-size:12px;font-weight:600;border-bottom:1px solid #ecd9df">' + hdr + '</div>'
       + '<div style="display:flex;gap:8px;padding:10px 12px;align-items:flex-start">'
       + ioBlock('Entrada', inLines, false)
-      + '<div style="align-self:center;color:#d1d5db;font-size:18px;padding:0 4px;flex-shrink:0">→</div>'
+      + '<div style="align-self:center;color:#d9c3ca;font-size:18px;padding:0 4px;flex-shrink:0">→</div>'
       + ioBlock('Saída', outLines, true)
       + '</div></div>';
   }
@@ -179,55 +179,55 @@ function buildPipeline(r) {
     +     '<div style="font-size:11px;color:#9ca3af;margin-top:2px">Entrada</div>'
     +     '<div style="font-size:22px;font-weight:700;margin-top:6px;color:#14532d">' + gi_ms + 'ms</div>'
     +   '</div>'
-    +   '<div style="display:flex;align-items:center;color:#d1d5db;font-size:20px;padding:0 6px">→</div>'
-    +   '<div style="flex:1;background:#eef2ff;border:1px solid #a5b4fc;border-radius:8px;padding:12px 10px;text-align:center">'
-    +     '<div style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#4338ca">① Triagem</div>'
-    +     '<div style="font-size:11px;color:#9ca3af;margin-top:2px">Claude Haiku</div>'
-    +     '<div style="font-size:22px;font-weight:700;margin-top:6px;color:#312e81">' + t_ms + 'ms</div>'
+    +   '<div style="display:flex;align-items:center;color:#d9c3ca;font-size:20px;padding:0 6px">→</div>'
+    +   '<div style="flex:1;background:#f6e2e8;border:1px solid #d6a3b3;border-radius:8px;padding:12px 10px;text-align:center">'
+    +     '<div style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#93213f">① Triagem</div>'
+    +     '<div style="font-size:11px;color:#a8798a;margin-top:2px">Claude Haiku</div>'
+    +     '<div style="font-size:22px;font-weight:700;margin-top:6px;color:#551227">' + t_ms + 'ms</div>'
     +   '</div>'
-    +   '<div style="display:flex;align-items:center;color:#d1d5db;font-size:20px;padding:0 6px">→</div>'
+    +   '<div style="display:flex;align-items:center;color:#d9c3ca;font-size:20px;padding:0 6px">→</div>'
     +   '<div style="flex:1;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:12px 10px;text-align:center">'
     +     '<div style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#b45309">② Risco + RAG</div>'
     +     '<div style="font-size:11px;color:#9ca3af;margin-top:2px">Claude Sonnet</div>'
     +     '<div style="font-size:22px;font-weight:700;margin-top:6px;color:#78350f">' + r_ms + 'ms</div>'
     +   '</div>'
-    +   '<div style="display:flex;align-items:center;color:#d1d5db;font-size:20px;padding:0 6px">→</div>'
+    +   '<div style="display:flex;align-items:center;color:#d9c3ca;font-size:20px;padding:0 6px">→</div>'
     +   '<div style="flex:1;background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:12px 10px;text-align:center">'
     +     '<div style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#047857">③ Relatório</div>'
     +     '<div style="font-size:11px;color:#9ca3af;margin-top:2px">Consolidação (sem LLM)</div>'
     +     '<div style="font-size:22px;font-weight:700;margin-top:6px;color:#064e3b">' + rp_ms + 'ms</div>'
     +   '</div>'
-    +   '<div style="display:flex;align-items:center;color:#d1d5db;font-size:20px;padding:0 6px">→</div>'
+    +   '<div style="display:flex;align-items:center;color:#d9c3ca;font-size:20px;padding:0 6px">→</div>'
     +   '<div style="flex:1;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px 10px;text-align:center">'
     +     '<div style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#15803d">✓ Guardrail</div>'
     +     '<div style="font-size:11px;color:#9ca3af;margin-top:2px">Saída</div>'
     +     '<div style="font-size:22px;font-weight:700;margin-top:6px;color:#14532d">' + go_ms + 'ms</div>'
     +   '</div>'
     + '</div>'
-    + ['Guardrail entrada,#4ade80,' + gi_ms, 'Triagem,#818cf8,' + t_ms, 'Risco,#fbbf24,' + r_ms, 'Relatório,#34d399,' + rp_ms, 'Guardrail saída,#4ade80,' + go_ms].map(function(s) {
+    + ['Guardrail entrada,#4ade80,' + gi_ms, 'Triagem,#b02c50,' + t_ms, 'Risco,#fbbf24,' + r_ms, 'Relatório,#34d399,' + rp_ms, 'Guardrail saída,#4ade80,' + go_ms].map(function(s) {
         var p = s.split(','); var label = p[0], color = p[1], ms = parseInt(p[2]);
         return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">'
           + '<span style="font-size:11px;font-weight:600;color:' + color + ';width:72px;text-align:right">' + label + '</span>'
-          + '<div style="flex:1;height:10px;background:#e5e7eb;border-radius:5px;overflow:hidden">'
+          + '<div style="flex:1;height:10px;background:#f0e2e6;border-radius:5px;overflow:hidden">'
           + '<div style="width:' + pct(ms) + ';height:100%;background:' + color + ';border-radius:5px"></div></div>'
-          + '<span style="font-size:12px;color:#6b7280;width:58px">' + ms + 'ms</span></div>';
+          + '<span style="font-size:12px;color:#8a6270;width:58px">' + ms + 'ms</span></div>';
       }).join('')
-    + '<div style="text-align:right;font-size:12px;color:#374151;margin-top:4px">Total: <strong>' + total + 'ms</strong></div>'
+    + '<div style="text-align:right;font-size:12px;color:#5c1330;margin-top:4px">Total: <strong>' + total + 'ms</strong></div>'
     + '<div style="margin-top:12px">'
     + ioRow('① Triagem — Entrada e Saída',
-        [preview, '<span style="color:#6b7280;font-size:12px">' + txt.length + ' caracteres de texto livre</span>'],
+        [preview, '<span style="color:#8a6270;font-size:12px">' + txt.length + ' caracteres de texto livre</span>'],
         ['<strong>categoria:</strong> ' + (triage_obj.category || r.category || '-'),
          '<strong>produto:</strong> '   + (triage_obj.product  || r.product  || '-'),
          '<strong>urgência:</strong> '  + (triage_obj.urgency  || r.urgency  || '-'),
          '<strong>sentimento:</strong> '+ (triage_obj.sentiment|| r.sentiment|| '-'),
-         '<span style="color:#9ca3af;font-size:11px">→ propagada para Risco</span>'])
+         '<span style="color:#a8798a;font-size:11px">→ propagada para Risco</span>'])
     + ioRow('② Risco — Entrada e Saída',
         ['Saída da Triagem +', ragN + ' trecho(s) da Política Interna via RAG (FAISS + Titan Embeddings)'],
         ['<strong>nível de risco:</strong> ' + (risk_obj.risk_level || r.risk_level || '-'),
-         '<span style="color:#9ca3af;font-size:11px">→ propagada para Relatório</span>'])
+         '<span style="color:#a8798a;font-size:11px">→ propagada para Relatório</span>'])
     + ioRow('③ Relatório — Consolidação Determinística',
-        ['9 campos dos agentes anteriores', '<span style="color:#6b7280;font-size:12px">(category, product, sentiment, urgency, summary + risk_level, risk_justification, acoes_recomendadas)</span>'],
-        ['Payload JSON estruturado final + prazo_resposta + area_responsavel', '<span style="color:#6b7280;font-size:12px">Sem chamada LLM — determinístico e de custo zero.</span>'])
+        ['9 campos dos agentes anteriores', '<span style="color:#8a6270;font-size:12px">(category, product, sentiment, urgency, summary + risk_level, risk_justification, acoes_recomendadas)</span>'],
+        ['Payload JSON estruturado final + prazo_resposta + area_responsavel', '<span style="color:#8a6270;font-size:12px">Sem chamada LLM — determinístico e de custo zero.</span>'])
     + '</div>';
 }
 
@@ -241,16 +241,16 @@ function buildSecurity(r) {
   var isOutrosCritico = cat === 'outros' && (risk.startsWith('crít') || risk.startsWith('crit'));
 
   var html = '<h3 style="margin-top:0;font-size:11px;font-weight:700;text-transform:uppercase;'
-    + 'letter-spacing:.08em;color:#6b7280;margin-bottom:12px">Fator de Segurança</h3>';
+    + 'letter-spacing:.08em;color:#8a6270;margin-bottom:12px">Fator de Segurança</h3>';
 
   // Status do guardrail de entrada
   if (isBlocked) {
     html += '<div style="margin-bottom:10px">'
-      + '<span style="background:#fee2e2;color:#991b1b;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700">✗ Bloqueado pelo guardrail de entrada</span>'
+      + '<span style="background:#f6d9de;color:#7a1a2b;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700">✗ Bloqueado pelo guardrail de entrada</span>'
       + '</div>';
     if (r.block_reason) {
       var reasons = r.block_reason.split('; ');
-      html += '<div style="margin-bottom:4px;font-size:12px;color:#6b7280">Motivo:</div>'
+      html += '<div style="margin-bottom:4px;font-size:12px;color:#8a6270">Motivo:</div>'
         + '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px">'
         + reasons.map(function(m) {
             return '<span style="background:#fef2f2;color:#991b1b;border:1px solid #fca5a5;'
@@ -260,14 +260,14 @@ function buildSecurity(r) {
     }
   } else {
     html += '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:10px">'
-      + '<span style="background:#d1fae5;color:#065f46;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700">✓ Passou pelo guardrail</span>'
+      + '<span style="background:#dcefe0;color:#1f5c34;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700">✓ Passou pelo guardrail</span>'
       + '<div style="display:flex;gap:10px">'
-      + '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:5px 12px;text-align:center">'
-      + '<div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">Entrada</div>'
-      + '<div style="font-weight:700;font-size:13px;color:#374151">' + gi_ms + 'ms</div></div>'
-      + '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:5px 12px;text-align:center">'
-      + '<div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">Saída</div>'
-      + '<div style="font-weight:700;font-size:13px;color:#374151">' + go_ms + 'ms</div></div>'
+      + '<div style="background:#fbf1f4;border:1px solid #ecd9df;border-radius:6px;padding:5px 12px;text-align:center">'
+      + '<div style="font-size:10px;color:#a8798a;text-transform:uppercase;letter-spacing:.05em">Entrada</div>'
+      + '<div style="font-weight:700;font-size:13px;color:#5c1330">' + gi_ms + 'ms</div></div>'
+      + '<div style="background:#fbf1f4;border:1px solid #ecd9df;border-radius:6px;padding:5px 12px;text-align:center">'
+      + '<div style="font-size:10px;color:#a8798a;text-transform:uppercase;letter-spacing:.05em">Saída</div>'
+      + '<div style="font-weight:700;font-size:13px;color:#5c1330">' + go_ms + 'ms</div></div>'
       + '</div></div>';
   }
 
@@ -296,8 +296,8 @@ function buildSecurity(r) {
     var hasAny = piiKeys.length > 0 || bdPii.length > 0 || bdContent.length > 0 || bdProfanity;
 
     if (hasAny) {
-      html += '<div style="margin-top:8px;padding:9px 12px;background:#fef9c3;border:1px solid #fcd34d;border-radius:6px;font-size:12px">'
-        + '<div style="font-weight:700;color:#92400e;margin-bottom:5px">⚡ Guardrail de saída — sanitizações aplicadas</div>'
+      html += '<div style="margin-top:8px;padding:9px 12px;background:#faf0cf;border:1px solid #fcd34d;border-radius:6px;font-size:12px">'
+        + '<div style="font-weight:700;color:#7a5f0c;margin-bottom:5px">⚡ Guardrail de saída — sanitizações aplicadas</div>'
         + '<div style="display:flex;flex-wrap:wrap;gap:5px">';
       // PII local (regex)
       piiKeys.forEach(function(k) {
@@ -306,34 +306,34 @@ function buildSecurity(r) {
       });
       // PII detectado pelo Bedrock
       bdPii.forEach(function(t) {
-        html += '<span style="background:#ede9fe;border:1px solid #c4b5fd;color:#5b21b6;padding:2px 9px;border-radius:4px;font-size:12px">'
+        html += '<span style="background:#f6e2e8;border:1px solid #d6a3b3;color:#5c1330;padding:2px 9px;border-radius:4px;font-size:12px">'
           + '🔒 ' + t + '</span>';
       });
       // Conteúdo filtrado pelo Bedrock
       bdContent.forEach(function(t) {
-        html += '<span style="background:#fce7f3;border:1px solid #f9a8d4;color:#9d174d;padding:2px 9px;border-radius:4px;font-size:12px">'
+        html += '<span style="background:#f6d9de;border:1px solid #e7a9b6;color:#7a1a2b;padding:2px 9px;border-radius:4px;font-size:12px">'
           + '⚠ ' + t + '</span>';
       });
       // Profanity pelo Bedrock
       if (bdProfanity) {
-        html += '<span style="background:#fce7f3;border:1px solid #f9a8d4;color:#9d174d;padding:2px 9px;border-radius:4px;font-size:12px">'
+        html += '<span style="background:#f6d9de;border:1px solid #e7a9b6;color:#7a1a2b;padding:2px 9px;border-radius:4px;font-size:12px">'
           + '⚠ Linguagem inapropriada</span>';
       }
       // Profanity pelo filtro local (mask_profanity)
       if (r.profanity_masked) {
-        html += '<span style="background:#fce7f3;border:1px solid #f9a8d4;color:#9d174d;padding:2px 9px;border-radius:4px;font-size:12px">'
+        html += '<span style="background:#f6d9de;border:1px solid #e7a9b6;color:#7a1a2b;padding:2px 9px;border-radius:4px;font-size:12px">'
           + '⚠ Linguagem inapropriada (filtro local)</span>';
       }
       html += '</div></div>';
     } else if (r.profanity_masked) {
-      html += '<div style="margin-top:8px;padding:9px 12px;background:#fef9c3;border:1px solid #fcd34d;border-radius:6px;font-size:12px">'
-        + '<div style="font-weight:700;color:#92400e;margin-bottom:5px">⚡ Guardrail de saída — sanitizações aplicadas</div>'
+      html += '<div style="margin-top:8px;padding:9px 12px;background:#faf0cf;border:1px solid #fcd34d;border-radius:6px;font-size:12px">'
+        + '<div style="font-weight:700;color:#7a5f0c;margin-bottom:5px">⚡ Guardrail de saída — sanitizações aplicadas</div>'
         + '<div style="display:flex;flex-wrap:wrap;gap:5px">'
-        + '<span style="background:#fce7f3;border:1px solid #f9a8d4;color:#9d174d;padding:2px 9px;border-radius:4px;font-size:12px">'
+        + '<span style="background:#f6d9de;border:1px solid #e7a9b6;color:#7a1a2b;padding:2px 9px;border-radius:4px;font-size:12px">'
         + '⚠ Linguagem inapropriada (filtro local)</span>'
         + '</div></div>';
     } else {
-      html += '<div style="margin-top:8px;font-size:12px;color:#6b7280">'
+      html += '<div style="margin-top:8px;font-size:12px;color:#8a6270">'
         + '✓ Guardrail de saída — sem ocorrências detectadas</div>';
     }
   }
@@ -362,11 +362,11 @@ function _headerColor(urgency, risk) {
   }
   var u = score(urgency), r = score(risk);
   // Paradoxo: triagem/guardrail não captaram, Sonnet foi a última barreira
-  if (u === 1 && r === 4) return { bg: '#f87171', border: '#dc2626' };
-  var bg     = ['','','#ecfdf5','#d1fae5','#fef9c3','#fef3c7','#fed7aa','#fee2e2','#fca5a5'];
-  var border = ['','','#a7f3d0','#6ee7b7','#fde68a','#fcd34d','#fdba74','#fca5a5','#f87171'];
+  if (u === 1 && r === 4) return { bg: '#e78a99', border: '#b02c50' };
+  var bg     = ['','','#ecfdf5','#d1fae5','#faf0cf','#f7e3d0','#f7e3d0','#f6d9de','#e7a9b6'];
+  var border = ['','','#a7f3d0','#6ee7b7','#fde68a','#e7c48a','#e7a97e','#e7a9b6','#d6a3b3'];
   var s = u + r;
-  return { bg: bg[s] || '#f9fafb', border: border[s] || '#e5e7eb' };
+  return { bg: bg[s] || '#fbf1f4', border: border[s] || '#ecd9df' };
 }
 
 function _populateModal(r) {
@@ -397,8 +397,8 @@ function _populateModal(r) {
   document.getElementById('m-urgency').innerHTML        = pill(r.urgency);
   document.getElementById('m-summary').textContent      = r.summary || '-';
   document.getElementById('m-risk_level').innerHTML = r.risk_level_original
-    ? '<span style="text-decoration:line-through;color:#9ca3af;margin-right:4px">' + r.risk_level_original + '</span>'
-      + '<span style="color:#6b7280;margin-right:4px">→</span>'
+    ? '<span style="text-decoration:line-through;color:#a8798a;margin-right:4px">' + r.risk_level_original + '</span>'
+      + '<span style="color:#8a6270;margin-right:4px">→</span>'
       + pill(r.risk_level)
     : pill(r.risk_level);
   document.getElementById('m-risk_justification').textContent = r.risk_justification || '-';
@@ -414,7 +414,7 @@ function _populateModal(r) {
   var acoesCard = document.getElementById('m-acoes-card');
   if (acoes.length > 0) {
     acoesCard.style.display = '';
-    acoesCard.innerHTML = '<h3 style="margin-top:0;color:#1e40af;font-size:14px">Ações Recomendadas (POL-SAC-001)</h3>'
+    acoesCard.innerHTML = '<h3 style="margin-top:0;color:#93213f;font-size:14px">Ações Recomendadas (POL-SAC-001)</h3>'
       + '<ol style="margin:0;padding-left:20px">'
       + acoes.map(function(a){ return '<li style="margin-bottom:5px;font-size:13px">' + a + '</li>'; }).join('')
       + '</ol>';
