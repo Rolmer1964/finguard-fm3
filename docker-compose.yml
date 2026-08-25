@@ -9,7 +9,6 @@ services:
       - ./app/src:/app/src
       - ./assets/adr.html:/app/assets/adr.html:ro
       - ./assets/relatorio-tecnico.html:/app/assets/relatorio-tecnico.html:ro
-      - ./assets/hackathon:/app/assets/hackathon:ro
       - ./assets/images:/app/assets/images:ro
       - ./assets/presentation:/app/assets/presentation:ro
       - ./assets/docs:/app/assets/docs:ro  # política interna — somente leitura no container
